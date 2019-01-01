@@ -42,16 +42,25 @@ def make_quotation_for_customer(source_name,target_doc=None):
 		quotation.run_method("set_other_charges")
 
 	def update_quotation(source_doc, target_doc, source_parent):
-		if source_doc.organization_lead==0 and source_doc.transaction_type=='Cash':
-			target_doc.customer=source_doc.lead_name
-		elif source_doc.organization_lead==0 and source_doc.transaction_type=='Cash':
-			target_doc.customer=source_doc.company_name
-		elif source_doc.organization_lead==0 and source_doc.transaction_type=='Bank Funded':
-			target_doc.customer=source_doc.bank_name
-			target_doc.sub_customer=source_doc.lead_name
-		elif source_doc.organization_lead==1 and source_doc.transaction_type=='Bank Funded':
-			target_doc.customer=source_doc.bank_name
-			target_doc.sub_customer=source_doc.company_name
+		# target_doc.quotation_to = "Customer"
+		target_doc.linked_lead=source_doc.name
+		if source_doc.customer:
+			if source_doc.transaction_type=='Bank Funded':
+				target_doc.customer=source_doc.bank_name
+				target_doc.sub_customer=source_doc.customer
+			else:
+				target_doc.customer=source_doc.customer
+		else:
+			if source_doc.organization_lead==0 and source_doc.transaction_type=='Cash':
+				target_doc.customer=source_doc.lead_name
+			elif source_doc.organization_lead==0 and source_doc.transaction_type=='Cash':
+				target_doc.customer=source_doc.company_name
+			elif source_doc.organization_lead==0 and source_doc.transaction_type=='Bank Funded':
+				target_doc.customer=source_doc.bank_name
+				target_doc.sub_customer=source_doc.lead_name
+			elif source_doc.organization_lead==1 and source_doc.transaction_type=='Bank Funded':
+				target_doc.customer=source_doc.bank_name
+				target_doc.sub_customer=source_doc.company_name
 	table_maps={
 			"Lead": 
 			{"doctype": "Quotation",
@@ -73,6 +82,7 @@ def make_quotation_for_customer(source_name,target_doc=None):
 
 	source_lead = frappe.get_doc('Lead', source_name)
 	source_lead.linked_quotation=target_doc.name
+	source_lead.set_status(update=True,status='Quotation')
 	source_lead.save(ignore_permissions=True)
 
 	return target_doc
