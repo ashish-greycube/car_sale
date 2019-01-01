@@ -72,34 +72,38 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 					if(r.message){
 						exist_cust=r.message
 						console.log(exist_cust)
+
+						cur_frm.set_value("lead_name", exist_cust['person_name']);
+						cur_frm.set_value("email_id", exist_cust['email_id']);
+						cur_frm.set_value("source",'Existing Customer')
+						cur_frm.set_value("customer",exist_cust['customer_name'])
+
+						if (exist_cust['default_sales_partner']){
+							cur_frm.set_value("sales_partner", exist_cust['default_sales_partner']);
+						}
+						if (exist_cust['customer_group']){
+							cur_frm.set_value("customer_group", exist_cust['customer_group']);
+
+						}
+
+						cur_frm.set_df_property('lead_name', 'read_only', 1);
+						cur_frm.set_df_property('email_id', 'read_only', 1);
+						cur_frm.set_df_property('source', 'read_only', 1);
+						cur_frm.set_df_property('customer', 'read_only', 1);
+
 						if (exist_cust['customer_type']=='Company'){
 							cur_frm.set_value("organization_lead", 1);
 							cur_frm.set_value("company_name", exist_cust['customer_name']);
-							cur_frm.set_value("lead_name", exist_cust['person_name']);
-							cur_frm.set_value("email_id", exist_cust['email_id']);
-							cur_frm.set_value("source",'Existing Customer')
-							cur_frm.set_value("customer",exist_cust['customer_name'])
 							
 							cur_frm.set_df_property('organization_lead', 'read_only', 1);
 							cur_frm.set_df_property('company_name', 'read_only', 1);
-							cur_frm.set_df_property('lead_name', 'read_only', 1);
-							cur_frm.set_df_property('email_id', 'read_only', 1);
-							cur_frm.set_df_property('source', 'read_only', 1);
-							cur_frm.set_df_property('customer', 'read_only', 1);
+					
 							// frappe.msgprint(__("Existing Company {0}",cur_frm.doc.company_name))
 						}
 						if (exist_cust['customer_type']=='Individual'){
 							cur_frm.set_value("organization_lead", 0);
-							cur_frm.set_value("lead_name", exist_cust['person_name']);
-							cur_frm.set_value("email_id", exist_cust['email_id']);
-							cur_frm.set_value("source",'Existing Customer')
-							cur_frm.set_value("customer",exist_cust['customer_name'])
-
 							cur_frm.set_df_property('organization_lead', 'read_only', 1);
-							cur_frm.set_df_property('lead_name', 'read_only', 1);
-							cur_frm.set_df_property('email_id', 'read_only', 1);
-							cur_frm.set_df_property('source', 'read_only', 1);
-							cur_frm.set_df_property('customer', 'read_only', 1);
+
 							// frappe.msgprint(__("Existing Contact {0}",exist_cust['person_name']))
 						}
 					}

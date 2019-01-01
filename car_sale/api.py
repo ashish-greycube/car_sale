@@ -169,10 +169,10 @@ def get_customer_primary_contact(customer):
 @frappe.whitelist()
 def get_existing_customer(mobile_no):
 	existing_customer= frappe.db.sql("""
-		select 
-			customer_type,
-			customer_name,
-			cont.first_name as person_name,
+		select cust.default_sales_partner,cust.customer_group,
+			cust.customer_type,
+			cust.customer_name,
+			RTRIM(concat(cont.first_name,' ',ifnull(cont.last_name,'')))as person_name,
 			cont.email_id,
 			cont.mobile_no
 		from `tabCustomer` cust 
