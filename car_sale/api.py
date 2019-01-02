@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import (cstr, validate_email_add, cint, comma_and, has_gravatar, now, getdate, nowdate)
+from frappe.utils import (cstr, validate_email_add, cint,flt, comma_and, has_gravatar, now, getdate, nowdate)
 from frappe.model.mapper import get_mapped_doc
 import frappe, json
 from erpnext.controllers.selling_controller import SellingController
@@ -10,6 +10,7 @@ from erpnext.accounts.party import set_taxes
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.accounts.party import get_party_account_currency
 
+# Lead to Quotation
 @frappe.whitelist()
 def make_quotation_for_customer(source_name,target_doc=None):
 
@@ -40,10 +41,11 @@ def make_quotation_for_customer(source_name,target_doc=None):
 		quotation.run_method("set_missing_values")
 		quotation.run_method("calculate_taxes_and_totals")
 		quotation.run_method("set_other_charges")
-
+		
 	def update_quotation(source_doc, target_doc, source_parent):
-		# target_doc.quotation_to = "Customer"
+		target_doc.quotation_to = "Customer"
 		target_doc.linked_lead=source_doc.name
+		
 		if source_doc.customer:
 			if source_doc.transaction_type=='Bank Funded':
 				target_doc.customer=source_doc.bank_name
@@ -53,7 +55,7 @@ def make_quotation_for_customer(source_name,target_doc=None):
 		else:
 			if source_doc.organization_lead==0 and source_doc.transaction_type=='Cash':
 				target_doc.customer=source_doc.lead_name
-			elif source_doc.organization_lead==0 and source_doc.transaction_type=='Cash':
+			elif source_doc.organization_lead==1 and source_doc.transaction_type=='Cash':
 				target_doc.customer=source_doc.company_name
 			elif source_doc.organization_lead==0 and source_doc.transaction_type=='Bank Funded':
 				target_doc.customer=source_doc.bank_name
@@ -70,8 +72,8 @@ def make_quotation_for_customer(source_name,target_doc=None):
 			},
 			"Inquiry Item": 
 			{"doctype": "Quotation Item",
-			"field_map": {"parent": "against_inquiry_item","parenttype": "Lead","uom": "stock_uom"}
-			,"add_if_empty": True
+			"field_map": {"name":"quotation_item","parent": "against_inquiry_item","uom": "stock_uom"},
+			"add_if_empty": True
 			}
 		}
 	target_doc = get_mapped_doc("Lead",source_name,table_maps, target_doc,set_missing_values)
@@ -82,11 +84,12 @@ def make_quotation_for_customer(source_name,target_doc=None):
 
 	source_lead = frappe.get_doc('Lead', source_name)
 	source_lead.linked_quotation=target_doc.name
-	source_lead.set_status(update=True,status='Quotation')
+	# source_lead.set_status(update=True,status='Quotation')
 	source_lead.save(ignore_permissions=True)
 
 	return target_doc
 
+# Lead to Customer
 @frappe.whitelist()
 def make_customer_from_lead(doc):
 	doc=frappe._dict(json.loads(doc))
@@ -95,14 +98,6 @@ def make_customer_from_lead(doc):
 	if contact_name:
 		#existing contact
 		print 'duplicate'
-		# frappe.msgprint(_("Existing contact").format(contact_name), alert=1)
-		# if doc.organization_lead==1:
-		# 	customer_name = frappe.db.get_value('Customer',{'name': doc.company_name}, 'name')
-		# else:
-		# 	customer_name = frappe.db.get_value('Customer',{'name': doc.lead_name}, 'name')
-		# contact=frappe.get_doc("Contact",contact_name)
-		# customer=frappe.get_doc("Customer",customer_name)
-		# leave.db_set('description', new_description)
 	else:
 		#new contact
 		if doc.organization_lead==1:
@@ -196,6 +191,7 @@ def get_existing_customer(mobile_no):
 		frappe.msgprint(_("Existing Contact").format(existing_customer[0]['customer_name']),indicator='green', alert=1)
 	else:
 		frappe.msgprint(_("New Contact"),indicator='red', alert=1)
+
 	return existing_customer[0] if existing_customer else None
 
 @frappe.whitelist()
@@ -229,30 +225,118 @@ def get_sales_partner(user_email):
 	print sales_partner
 	return sales_partner[0] if sales_partner else None
 
-# extra function
-def make_customer(source_name, target_doc=None, ignore_permissions=False):
-	def set_missing_values(source, target):
-		if source.company_name:
-			target.customer_type = "Company"
-			target.customer_name = source.company_name
+# Update status : Lead to Sales Order
+@frappe.whitelist()
+def update_lead_status_from_sales_order(self,method):
+	if self.linked_lead:
+		lead=frappe.get_doc("Lead",self.linked_lead)
+		print 'this is SO change due to lead'
+		print cstr(lead.status)
+		if cstr(lead.status) in ['Lead','Open','Sales Inquiry','Quotation','Converted']:
+		# lead.status='Ordered'
+		# lead.save(ignore_permissions=True)
+			print ('inside if of quo')
+			lead.db_set('status', 'Ordered')
+			print cstr(lead.status)
+	else:
+		get_quotation= frappe.db.sql("""select distinct(soitem.prevdoc_docname) as quotation_name
+	from `tabSales Order` so 
+	inner join `tabSales Order Item` soitem 
+	on so.name=soitem.parent 
+	where soitem.prevdoc_docname is not null
+	and so.name=%s
+	order by soitem.modified desc
+	limit 1""", self.name, as_list=1)
+		print self.name
+		print '-----------------'
+		if get_quotation:
+			quotation_name=get_quotation[0][0]
+			lead_name=frappe.get_value("Quotation",quotation_name,'linked_lead')
+			print lead_name
+			if lead_name:
+				lead=frappe.get_doc("Lead",lead_name)
+				print cstr(lead.status)
+				if cstr(lead.status) in ['Lead','Open','Sales Inquiry','Quotation','Converted']:
+				# lead.status='Ordered'
+				# lead.save(ignore_permissions=True)
+					print ('inside if of quo')
+					lead.db_set('status', 'Ordered')
+					print cstr(lead.status)
+
+# Update Status : Lead to Quotation
+@frappe.whitelist()
+def update_lead_status_from_quotation(self,method):
+	if self.linked_lead:
+		lead=frappe.get_doc("Lead",self.linked_lead)
+		print '--------------inside quot'
+		print lead.status
+		print cstr(lead.status)
+		if cstr(lead.status) in ['Lead','Open','Sales Inquiry','Converted']:
+		# lead.status='Quotation'
+		# lead.save(ignore_permissions=True)
+			print ('inside if of lead')
+			lead.db_set('status', 'Quotation')
+			print cstr(lead.status)
+
+@frappe.whitelist()
+def _make_sales_order(source_name, target_doc=None, ignore_permissions=True):
+	# customer = _make_customer(source_name, ignore_permissions)
+
+	def update_so(source_doc, target_doc, source_parent):
+		#target_doc.quotation_to = "Customer"
+		target_doc.linked_lead=source_doc.name
+		target_doc.delivery_date=source_doc.date
+		if source_doc.customer:
+			if source_doc.transaction_type=='Bank Funded':
+				target_doc.customer=source_doc.bank_name
+				target_doc.sub_customer=source_doc.customer
+			else:
+				target_doc.customer=source_doc.customer
 		else:
-			target.customer_type = "Individual"
-			target.customer_name = source.lead_name
+			if source_doc.organization_lead==0 and source_doc.transaction_type=='Cash':
+				target_doc.customer=source_doc.lead_name
+			elif source_doc.organization_lead==1 and source_doc.transaction_type=='Cash':
+				target_doc.customer=source_doc.company_name
+			elif source_doc.organization_lead==0 and source_doc.transaction_type=='Bank Funded':
+				target_doc.customer=source_doc.bank_name
+				target_doc.sub_customer=source_doc.lead_name
+			elif source_doc.organization_lead==1 and source_doc.transaction_type=='Bank Funded':
+				target_doc.customer=source_doc.bank_name
+				target_doc.sub_customer=source_doc.company_name
 
-		target.customer_group = frappe.db.get_default("Customer Group")
+	def set_missing_values(source, target):
+		# if customer:
+		# 	target.customer = customer.name
+		# 	target.customer_name = customer.customer_name
+		target.ignore_pricing_rule = 1
+		target.flags.ignore_permissions = ignore_permissions
+		target.run_method("set_missing_values")
+		target.run_method("calculate_taxes_and_totals")
+		# target.save(ignore_permissions=True)
 
-	doclist = get_mapped_doc("Lead", source_name,
-		{"Lead": {
-			"doctype": "Customer",
-			"field_map": {
-				"name": "lead_name",
-				"company_name": "customer_name",
-				"contact_no": "phone_1",
-				"fax": "fax_1"
+	def update_item(obj, target, source_parent):
+		target.stock_qty = flt(obj.qty) * flt(obj.conversion_factor)
+		target.delivery_date=source_parent.date
+
+	doclist = get_mapped_doc("Lead", source_name, {
+			"Lead": 
+			{"doctype": "Sales Order",
+			"field_map": 
+			{"name": "lead","customer":"lead_name","delivery_date":"date"},
+			"postprocess": update_so
+			},
+			"Inquiry Item": 
+			{"doctype": "Sales Order Item",
+			"field_map": {"name":"sales_order_item","parent": "against_inquiry_item","uom": "stock_uom"},
+			"postprocess": update_item,
+			"add_if_empty": True
 			}
-		}}, target_doc, set_missing_values, ignore_permissions=ignore_permissions)
-	doclist.save(ignore_permissions=True)
-	# make_quotation(source_name, target_doc=None)
-	return doclist
-	
+		}, target_doc, set_missing_values, ignore_permissions=ignore_permissions)
 
+	# postprocess: fetch shipping address, set missing values
+	doclist.save(ignore_permissions=True)
+	source_lead = frappe.get_doc('Lead', source_name)
+	source_lead.linked_sales_order=doclist.name
+	source_lead.save(ignore_permissions=True)
+
+	return doclist

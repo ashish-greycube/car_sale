@@ -87,6 +87,15 @@ doctype_js = {"Lead" : "public/js/lead.js"}
 #	}
 # }
 
+doc_events = {
+	"Sales Order": {
+		"after_insert": "car_sale.api.update_lead_status_from_sales_order"
+	},
+    "Quotation": {
+		"on_change": "car_sale.api.update_lead_status_from_quotation"
+	}
+}
+
 # Scheduled Tasks
 # ---------------
 

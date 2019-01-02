@@ -30,6 +30,9 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 			})
 
 	},
+	sales_partner:function(){
+
+	},
 	validate: function() {
 		if (cur_frm.doc.customer){
 			cur_frm.set_value("email_id", '');
@@ -43,11 +46,12 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 
 		if(!doc.__islocal && doc.__onload && !doc.__onload.is_customer) {
 			// added custom option
-			this.frm.add_custom_button(__("Car Quotation"), this.make_customer_quotation, __("Make"));
-			// this.frm.add_custom_button(__("Customer"), this.create_customer, __("Make"));
-			// this.frm.add_custom_button(__("Opportunity"), this.create_opportunity, __("Make"));
-			// this.frm.add_custom_button(__("Quotation"), this.make_quotation, __("Make"));
+			if(doc.status !='Ordered' ||doc.status != 'Quotation'|| doc.status !='Converted')
+			{
+			this.frm.add_custom_button(__("Car - Quotation"), this.make_customer_quotation, __("Make"));
+			this.frm.add_custom_button(__("Car - Sales Order"), this.make_customer_sales_order, __("Make"));
 			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
+			}
 		}
 
 		if(!this.frm.doc.__islocal) {
@@ -71,8 +75,6 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 					console.log(r.message)
 					if(r.message){
 						exist_cust=r.message
-						console.log(exist_cust)
-
 						cur_frm.set_value("lead_name", exist_cust['person_name']);
 						cur_frm.set_value("email_id", exist_cust['email_id']);
 						cur_frm.set_value("source",'Existing Customer')
@@ -97,14 +99,10 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 							
 							cur_frm.set_df_property('organization_lead', 'read_only', 1);
 							cur_frm.set_df_property('company_name', 'read_only', 1);
-					
-							// frappe.msgprint(__("Existing Company {0}",cur_frm.doc.company_name))
 						}
 						if (exist_cust['customer_type']=='Individual'){
 							cur_frm.set_value("organization_lead", 0);
 							cur_frm.set_df_property('organization_lead', 'read_only', 1);
-
-							// frappe.msgprint(__("Existing Contact {0}",exist_cust['person_name']))
 						}
 					}
 					else{
@@ -125,13 +123,52 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 						cur_frm.set_df_property('email_id', 'read_only', 0);
 						cur_frm.set_df_property('source', 'read_only', 0);
 						cur_frm.set_df_property('customer', 'read_only',0);
-
-
+						if (!cur_frm.doc.sales_partner){
+							//get sales partenr
+							return frappe.call({
+								method: "car_sale.api.get_sales_partner",
+								args: {"user_email":frappe.session.user_email},
+								callback: function(r) {
+									
+									if(r.message) {
+										sales_partner=r.message[0]
+										cur_frm.set_value('sales_partner',sales_partner);
+									}
+								}
+							})
+	
+			}
 					}
 				}
 			}
 		})
 
+	},
+
+	make_customer_sales_order: function() {
+		if (cur_frm.doc.inquiry_item.length>0){
+		var cur_doc = cur_frm.doc;
+		return frappe.call({
+			type: "POST",
+			method: 'car_sale.api.make_customer_from_lead',
+			args: {doc:cur_frm.doc},			
+			freeze: true,
+			callback: function(r) {
+				if(!r.exc) {
+					if (cur_frm.doc.inquiry_item){
+						frappe.model.open_mapped_doc({
+							method: "car_sale.api._make_sales_order",
+							frm: cur_frm
+						})
+					}
+				}
+			}
+		})
+	}
+	else{
+		cur_frm.set_df_property('inquiry_item', 'reqd', 1);
+		frappe.msgprint(__('Item is empty, sales order cannot be created'));
+	}
 	},
 
 	make_customer_quotation: function() {
