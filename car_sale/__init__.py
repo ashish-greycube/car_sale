@@ -5,16 +5,17 @@ __version__ = '0.0.1'
 
 @frappe.whitelist()
 def carsale_has_customer(self):
-    try:
-        if self:
-            if self.name:
-                if self.inquiry_item:
-                    if self.linked_quotation or self.linked_sales_order:
-                        return None
-                    else:
-                        return frappe.db.get_value("Customer", {"lead_name": self.name})
-    except Exception:
-        frappe.msgprint(Exception)
+    pass
+    # try:
+    #     if self:
+    #         if self.name:
+    #             if self.inquiry_item:
+    #                 if self.linked_quotation or self.linked_sales_order:
+    #                     return None
+    #                 else:
+    #                     return frappe.db.get_value("Customer", {"lead_name": self.name})
+    # except Exception:
+    #     frappe.msgprint(Exception)
         
 from erpnext.crm.doctype.lead.lead import Lead
 Lead.has_customer = carsale_has_customer
