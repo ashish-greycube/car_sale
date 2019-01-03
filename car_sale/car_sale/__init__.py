@@ -1,0 +1,1 @@
+from erpnext.crm.doctype.lead.lead import Lead

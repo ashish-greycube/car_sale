@@ -17,5 +17,5 @@ def carsale_has_customer(self):
     # except Exception:
     #     frappe.msgprint(Exception)
         
-from erpnext.crm.doctype.lead.lead import Lead
-Lead.has_customer = carsale_has_customer
+# from erpnext.crm.doctype.lead.lead import Lead
+# Lead.has_customer = carsale_has_customer
