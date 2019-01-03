@@ -3,9 +3,9 @@ from __future__ import unicode_literals
 import frappe
 __version__ = '0.0.1'
 
-@frappe.whitelist()
-def carsale_has_customer(self):
-    pass
+# @frappe.whitelist()
+# def carsale_has_customer(self):
+#     pass
     # try:
     #     if self:
     #         if self.name:
