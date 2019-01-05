@@ -340,3 +340,39 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=True):
 	source_lead.save(ignore_permissions=True)
 
 	return doclist
+
+
+
+@frappe.whitelist()
+def get_brand_name(doctype, txt, searchfield, start, page_len, filters):
+	print doctype, txt, searchfield, start, page_len, filters
+	print 'brand----------------------------------------'
+	brand=frappe.db.sql("""select distinct(item.variant_of)
+from `tabItem` as item inner join `tabItem Variant Attribute` as att
+on item.name=att.parent 
+where item.variant_of is not null""",as_list=True)
+	print 'brand----------------------------------------'
+	print brand
+	return brand
+
+
+@frappe.whitelist()
+def get_color_name(doctype, txt, searchfield, start, page_len, filters):
+	return frappe.db.sql("""select distinct(att.attribute_value)
+from `tabItem` as item inner join `tabItem Variant Attribute` as att
+on item.name=att.parent 
+where item.variant_of is not null and att.attribute='Color'""",as_list=True)
+
+@frappe.whitelist()
+def get_category_name(doctype, txt, searchfield, start, page_len, filters):
+	return frappe.db.sql("""select distinct(att.attribute_value)
+from `tabItem` as item inner join `tabItem Variant Attribute` as att
+on item.name=att.parent 
+where item.variant_of is not null and att.attribute='Category'""",as_list=True)
+
+@frappe.whitelist()
+def get_model_name(doctype, txt, searchfield, start, page_len, filters):
+	return frappe.db.sql("""select distinct(att.attribute_value)
+from `tabItem` as item inner join `tabItem Variant Attribute` as att
+on item.name=att.parent 
+where item.variant_of is not null and att.attribute='Model'""",as_list=True)
