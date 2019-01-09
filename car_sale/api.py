@@ -9,11 +9,12 @@ from frappe.contacts.address_and_contact import load_address_and_contact
 from erpnext.accounts.party import set_taxes
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.accounts.party import get_party_account_currency
+from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 # Lead to Quotation
+
 @frappe.whitelist()
 def make_quotation_for_customer(source_name,target_doc=None):
-
 	def set_missing_values(source, target):
 		from erpnext.controllers.accounts_controller import get_default_taxes_and_charges
 		quotation = frappe.get_doc(target)
@@ -77,8 +78,6 @@ def make_quotation_for_customer(source_name,target_doc=None):
 			}
 		}
 	target_doc = get_mapped_doc("Lead",source_name,table_maps, target_doc,set_missing_values)
-	print 'target_doc'
-	print target_doc
 	# target_doc.quotation_to = "Lead"
 	target_doc.save(ignore_permissions=True)
 
@@ -123,7 +122,6 @@ def make_customer_from_lead(doc):
 			customer.mobile_no=contact.mobile_no
 			customer.email_id=contact.email_id
 			customer.save(ignore_permissions=True)
-			# frappe.msgprint(_("Company {0} contact is created").format(customer.name), alert=1)
 	
 		else:
 			customer_type='Individual'
@@ -138,12 +136,10 @@ def make_customer_from_lead(doc):
 			customer.default_sales_partner=doc.sales_partner
 			customer.insert(ignore_permissions=True)
 			primary_contact=get_customer_primary_contact(customer.name)
-			print primary_contact
 			customer.customer_primary_contact=primary_contact['name']
 			customer.mobile_no=primary_contact['mobile_no']
 			customer.email_id=primary_contact['email_id']
 			customer.save(ignore_permissions=True)
-			# frappe.msgprint(_("Individual {0} contact is created").format(customer.name), alert=1)
 		return
 
 #Helpler function for creating contact
@@ -221,8 +217,6 @@ def get_sales_partner(user_email):
 	""",{
 			'user_email': user_email
 		},as_list=True)
-	print 'sales_partner'
-	print sales_partner
 	return sales_partner[0] if sales_partner else None
 
 # Update status : Lead to Sales Order
@@ -230,14 +224,8 @@ def get_sales_partner(user_email):
 def update_lead_status_from_sales_order(self,method):
 	if self.linked_lead:
 		lead=frappe.get_doc("Lead",self.linked_lead)
-		print 'this is SO change due to lead'
-		print cstr(lead.status)
 		if cstr(lead.status) in ['Lead','Open','Sales Inquiry','Quotation','Converted']:
-		# lead.status='Ordered'
-		# lead.save(ignore_permissions=True)
-			print ('inside if of quo')
 			lead.db_set('status', 'Ordered')
-			print cstr(lead.status)
 	else:
 		get_quotation= frappe.db.sql("""select distinct(soitem.prevdoc_docname) as quotation_name
 	from `tabSales Order` so 
@@ -247,36 +235,25 @@ def update_lead_status_from_sales_order(self,method):
 	and so.name=%s
 	order by soitem.modified desc
 	limit 1""", self.name, as_list=1)
-		print self.name
-		print '-----------------'
 		if get_quotation:
 			quotation_name=get_quotation[0][0]
 			lead_name=frappe.get_value("Quotation",quotation_name,'linked_lead')
-			print lead_name
 			if lead_name:
 				lead=frappe.get_doc("Lead",lead_name)
-				print cstr(lead.status)
 				if cstr(lead.status) in ['Lead','Open','Sales Inquiry','Quotation','Converted']:
-				# lead.status='Ordered'
-				# lead.save(ignore_permissions=True)
-					print ('inside if of quo')
 					lead.db_set('status', 'Ordered')
-					print cstr(lead.status)
+
+
 
 # Update Status : Lead to Quotation
 @frappe.whitelist()
 def update_lead_status_from_quotation(self,method):
 	if self.linked_lead:
 		lead=frappe.get_doc("Lead",self.linked_lead)
-		print '--------------inside quot'
-		print lead.status
-		print cstr(lead.status)
 		if cstr(lead.status) in ['Lead','Open','Sales Inquiry','Converted']:
 		# lead.status='Quotation'
 		# lead.save(ignore_permissions=True)
-			print ('inside if of lead')
 			lead.db_set('status', 'Quotation')
-			print cstr(lead.status)
 
 @frappe.whitelist()
 def _make_sales_order(source_name, target_doc=None, ignore_permissions=True):
@@ -341,20 +318,97 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=True):
 
 	return doclist
 
+# Serail No: reserve from SO
+@frappe.whitelist()
+def update_serial_no_from_so(self,method):
+	sales_order = None if (self.status not in ('Draft','To Deliver and Bill','To Bill','To Deliver','Completed')) else self.name
+	if sales_order:
+		for item in self.items:
+			# check for empty serial no
+			if not item.serial_no:
+				frappe.throw(_("Row {0}: {1} Serial numbers required for Item {2}. You have provided None.".format(
+					item.idx, item.qty, item.item_code)))
+			# match item qty and serial no count
+			serial_nos = item.serial_no
+			si_serial_nos = set(get_serial_nos(serial_nos))
+			if item.serial_no and cint(item.qty) != len(si_serial_nos):
+				frappe.throw(_("Row {0}: {1} Serial numbers required for Item {2}. You have provided {3}.".format(
+					item.idx, item.qty, item.item_code, len(si_serial_nos))))
 
+			for serial_no in item.serial_no.split("\n"):
+				if serial_no and frappe.db.exists('Serial No', serial_no):
+					#match item_code with serial number-->item_code
+					sno_item_code=frappe.db.get_value("Serial No", serial_no, "item_code")
+					if (cstr(sno_item_code) != cstr(item.item_code)):
+						frappe.throw(_("{0} serial number is not valid for {1} item code").format(serial_no,item.item_code))
+					#check if there is sales invoice against serial no
+					sales_invoice = frappe.db.get_value("Serial No", serial_no, "sales_invoice")
+					if sales_invoice and self.name != sales_invoice:
+						frappe.throw(_("Serial Number: {0} is already referenced in Sales Invoice: {1}".format(
+						serial_no, sales_invoice)))
+	
+					sno = frappe.get_doc('Serial No', serial_no)
+					sno.reservation_status='Reserved'
+					sno.sales_partner=self.sales_partner
+					sno.for_customer=self.customer
+					sno.reserved_by_document = self.name
+					sno.db_update()
+				else:
+					# check for invalid serial number
+					frappe.throw(_("{0} is invalid serial number").format(serial_no))
 
 @frappe.whitelist()
-def get_brand_name(doctype, txt, searchfield, start, page_len, filters):
-	print doctype, txt, searchfield, start, page_len, filters
-	print 'brand----------------------------------------'
+def update_serial_no_from_quotation(self,method):
+	""" update serial no doc with details of Sales Order """
+	quotation = None if (self.reserve_above_items==0 or self.status in ('Lost','Cancelled')) else self.name
+	if quotation:
+		for item in self.items:
+			# check for empty serial no
+			if not item.serial_no:
+				frappe.throw(_("Row {0}: {1} Serial numbers required for Item {2}. You have provided None.".format(
+					item.idx, item.qty, item.item_code)))
+			# match item qty and serial no count
+			serial_nos = item.serial_no
+			si_serial_nos = set(get_serial_nos(serial_nos))
+			if item.serial_no and cint(item.qty) != len(si_serial_nos):
+				frappe.throw(_("Row {0}: {1} Serial numbers required for Item {2}. You have provided {3}.".format(
+					item.idx, item.qty, item.item_code, len(si_serial_nos))))
+
+			for serial_no in item.serial_no.split("\n"):
+				if serial_no and frappe.db.exists('Serial No', serial_no):
+					#match item_code with serial number-->item_code
+					sno_item_code=frappe.db.get_value("Serial No", serial_no, "item_code")
+					if (cstr(sno_item_code) != cstr(item.item_code)):
+						frappe.throw(_("{0} serial number is not valid for {1} item code").format(serial_no,item.item_code))
+					#check if there is sales invoice against serial no
+					sales_invoice = frappe.db.get_value("Serial No", serial_no, "sales_invoice")
+					if sales_invoice and self.name != sales_invoice:
+						frappe.throw(_("Serial Number: {0} is already referenced in Sales Invoice: {1}".format(
+						serial_no, sales_invoice)))
+	
+					sno = frappe.get_doc('Serial No', serial_no)
+					sno.reservation_status='Reserved'
+					sno.sales_partner=self.sales_partner
+					sno.for_customer=self.customer
+					sno.reserved_by_document = self.name
+					sno.db_update()
+				else:
+					# check for invalid serial number
+					frappe.throw(_("{0} is invalid serial number").format(serial_no))
+
+
+# extra : search related
+@frappe.whitelist()
+def get_brand_name(brand=None,color=None,category=None,model=None):
 	brand=frappe.db.sql("""select distinct(item.variant_of)
 from `tabItem` as item inner join `tabItem Variant Attribute` as att
 on item.name=att.parent 
-where item.variant_of is not null""",as_list=True)
-	print 'brand----------------------------------------'
-	print brand
-	return brand
-
+where item.variant_of is not null
+and att.attribute_value in %(color) 
+and 
+and 
+""",as_list=True)
+	return brand[0]
 
 @frappe.whitelist()
 def get_color_name(doctype, txt, searchfield, start, page_len, filters):

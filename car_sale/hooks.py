@@ -26,7 +26,10 @@ app_license = "MIT"
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-doctype_js = {"Lead" : "public/js/lead.js","Sales Order" : "public/js/sales_order.js"}
+doctype_js = {"Lead" : "public/js/lead.js",
+"Sales Order":"public/js/sales_order.js",
+"Quotation":"public/js/quotation.js"
+}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -89,10 +92,12 @@ doctype_js = {"Lead" : "public/js/lead.js","Sales Order" : "public/js/sales_orde
 
 doc_events = {
 	"Sales Order": {
-		"after_insert": "car_sale.api.update_lead_status_from_sales_order"
+		"after_insert": "car_sale.api.update_lead_status_from_sales_order",
+		"validate":"car_sale.api.update_serial_no_from_so"
 	},
     "Quotation": {
-		"on_change": "car_sale.api.update_lead_status_from_quotation"
+		"on_change": "car_sale.api.update_lead_status_from_quotation",
+		"validate":"car_sale.api.update_serial_no_from_quotation"
 	}
 }
 
