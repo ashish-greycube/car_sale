@@ -411,22 +411,122 @@ and
 	return brand[0]
 
 @frappe.whitelist()
-def get_color_name(doctype, txt, searchfield, start, page_len, filters):
+def get_color_name(search_template,search_category,search_model):
 	return frappe.db.sql("""select distinct(att.attribute_value)
-from `tabItem` as item inner join `tabItem Variant Attribute` as att
+from `tabItem` as item 
+inner join 
+`tabItem Variant Attribute` as att
 on item.name=att.parent 
-where item.variant_of is not null and att.attribute='Color'""",as_list=True)
+where att.attribute ='Color'
+and item.name IN
+(select item.name
+from `tabItem` as item 
+inner join 
+`tabItem Variant Attribute` as att
+on item.name=att.parent 
+where att.attribute_value =%s
+and att.attribute ='Model'
+and item.name IN
+(select item.name
+from `tabItem` as item 
+inner join 
+`tabItem Variant Attribute` as att
+on item.name=att.parent 
+where
+item.variant_based_on='Item Attribute'
+and item.has_variants=0
+and item.docstatus < 2
+and att.attribute_value =%s
+and att.attribute ='Category'
+and item.variant_of=(
+select name from `tabItem` 
+where item_name=%s)
+)
+)
+order by att.attribute_value
+""",(search_model,search_category,search_template),as_list=True)
+
+
 
 @frappe.whitelist()
-def get_category_name(doctype, txt, searchfield, start, page_len, filters):
+def get_model_name(search_template,search_category):
 	return frappe.db.sql("""select distinct(att.attribute_value)
-from `tabItem` as item inner join `tabItem Variant Attribute` as att
+from `tabItem` as item 
+inner join 
+`tabItem Variant Attribute` as att
 on item.name=att.parent 
-where item.variant_of is not null and att.attribute='Category'""",as_list=True)
+and att.attribute='Model'
+where item.name IN
+(select item.name
+from `tabItem` as item 
+inner join 
+`tabItem Variant Attribute` as att
+on item.name=att.parent 
+where
+item.variant_based_on='Item Attribute'
+and item.has_variants=0
+and item.docstatus < 2
+and att.attribute_value = %s
+and item.variant_of=(
+select name from `tabItem` 
+where item_name=%s)) order by att.attribute_value desc""",(search_category,search_template),as_list=True)
 
 @frappe.whitelist()
-def get_model_name(doctype, txt, searchfield, start, page_len, filters):
+def get_category_name(search_template):
 	return frappe.db.sql("""select distinct(att.attribute_value)
-from `tabItem` as item inner join `tabItem Variant Attribute` as att
+from `tabItem` as item 
+inner join 
+`tabItem Variant Attribute` as att
 on item.name=att.parent 
-where item.variant_of is not null and att.attribute='Model'""",as_list=True)
+where
+item.variant_based_on='Item Attribute'
+and item.has_variants=0
+and item.docstatus < 2
+and att.attribute='Category'
+and item.variant_of=(
+select name from `tabItem` 
+where item_name=%s) order by att.attribute_value """ ,search_template,as_list=True)
+
+@frappe.whitelist()
+def get_template_name():
+	print 'get_template_name'
+	template_name=frappe.db.sql("""select distinct(item_name) 
+	from `tabItem` where has_variants=1 and docstatus < 2""",as_list=True) 
+	return template_name if template_name else None
+
+
+@frappe.whitelist()
+def get_search_item_name(search_template,search_category,search_model,search_color):
+	return frappe.db.sql("""select item.name
+from `tabItem` as item 
+inner join 
+`tabItem Variant Attribute` as att
+on item.name=att.parent 
+where att.attribute_value =%s
+and att.attribute ='Color'
+and item.name IN
+(select item.name
+from `tabItem` as item 
+inner join 
+`tabItem Variant Attribute` as att
+on item.name=att.parent 
+where att.attribute_value =%s
+and att.attribute ='Model'
+and item.name IN
+(select item.name
+from `tabItem` as item 
+inner join 
+`tabItem Variant Attribute` as att
+on item.name=att.parent 
+where
+item.variant_based_on='Item Attribute'
+and item.has_variants=0
+and item.docstatus < 2
+and att.attribute_value =%s
+and att.attribute ='Category'
+and item.variant_of=(
+select name from `tabItem` 
+where item_name=%s)
+)
+)
+""",(search_color,search_model,search_category,search_template),as_list=True)
