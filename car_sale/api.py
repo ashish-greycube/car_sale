@@ -10,6 +10,7 @@ from erpnext.accounts.party import set_taxes
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.accounts.party import get_party_account_currency
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+import datetime
 
 # Lead to Quotation
 
@@ -350,6 +351,8 @@ def update_serial_no_from_so(self,method):
 					sno = frappe.get_doc('Serial No', serial_no)
 					sno.reservation_status='Reserved'
 					sno.sales_partner=self.sales_partner
+					sno.branch=self.sales_partner_branch
+					sno.sales_partner_phone_no=self.sales_partner_phone_no
 					sno.for_customer=self.customer
 					sno.reserved_by_document = self.name
 					sno.db_update()
@@ -357,10 +360,93 @@ def update_serial_no_from_so(self,method):
 					# check for invalid serial number
 					frappe.throw(_("{0} is invalid serial number").format(serial_no))
 
+
+@frappe.whitelist()
+def unreserve_serial_no_from_so_on_cancel(self,method):
+	sales_order = self.name
+	if sales_order:
+		for item in self.items:
+			# check for empty serial no
+			if not item.serial_no:
+				pass
+			else:
+				for serial_no in item.serial_no.split("\n"):
+					if serial_no and frappe.db.exists('Serial No', serial_no):
+						#match item_code with serial number-->item_code
+						sno_item_code=frappe.db.get_value("Serial No", serial_no, "item_code")
+						if (cstr(sno_item_code) != cstr(item.item_code)):
+							#frappe.throw(_("{0} serial number is not valid for {1} item code").format(serial_no,item.item_code))
+							pass
+						#check if there is sales invoice against serial no
+						sales_invoice = frappe.db.get_value("Serial No", serial_no, "sales_invoice")
+						if sales_invoice and self.name != sales_invoice:
+							pass
+						sno = frappe.get_doc('Serial No', serial_no)
+						if (sno.reserved_by_document == self.name):
+							sno.reservation_status='Available'
+							sno.sales_partner=None
+							sno.sales_partner_phone_no=None
+							sno.branch=None
+							sno.for_customer=None
+							sno.reserved_by_document = None
+							sno.db_update()
+					else:
+						# check for invalid serial number
+						# frappe.throw(_("{0} is invalid serial number").format(serial_no))
+						pass
+@frappe.whitelist()
+def auto_unreserve_serial_no_from_quotation_on_expiry():
+	expired_quotation_list=frappe.get_all('Quotation', filters = [["valid_till", ">", datetime.date(1900, 1, 1)],["valid_till", "<", getdate(nowdate())]], fields=['name'])
+	
+	print expired_quotation_list
+	if expired_quotation_list:
+		for quotation_name in expired_quotation_list:
+			quotation = frappe.get_doc('Quotation', quotation_name)
+			print quotation
+			if quotation:
+				unreserve_serial_no_from_quotation(self=quotation,method=None)
+
+@frappe.whitelist()
+def unreserve_serial_no_from_quotation(self,method):
+	""" update serial no doc with details of Sales Order """
+	quotation = None if (self.reserve_above_items==0 or self.status in ('Lost','Ordered') or self.docstatus in ('Draft')) else self.name
+	if quotation:
+		print 'inside unreserve_serial_no_from_quotation'
+		for item in self.items:
+			# check for empty serial no
+			if not item.serial_no:
+				pass
+			else:
+				# match item qty and serial no count
+				for serial_no in item.serial_no.split("\n"):
+					if serial_no and frappe.db.exists('Serial No', serial_no):
+						#match item_code with serial number-->item_code
+						sno_item_code=frappe.db.get_value("Serial No", serial_no, "item_code")
+						if (cstr(sno_item_code) != cstr(item.item_code)):
+							# frappe.throw(_("{0} serial number is not valid for {1} item code").format(serial_no,item.item_code))
+							pass
+						#check if there is sales invoice against serial no
+						sales_invoice = frappe.db.get_value("Serial No", serial_no, "sales_invoice")
+						if sales_invoice and self.name != sales_invoice:
+							pass
+						sno = frappe.get_doc('Serial No', serial_no)
+						if (sno.reserved_by_document == self.name):
+							sno.reservation_status='Available'
+							sno.sales_partner=None
+							sno.sales_partner_phone_no=None
+							sno.branch=None
+							sno.for_customer=None
+							sno.reserved_by_document = None
+							sno.db_update()
+					else:
+						# check for invalid serial number
+						# frappe.throw(_("{0} is invalid serial number").format(serial_no))
+						pass
+
 @frappe.whitelist()
 def update_serial_no_from_quotation(self,method):
 	""" update serial no doc with details of Sales Order """
-	quotation = None if (self.reserve_above_items==0 or self.status in ('Lost','Cancelled')) else self.name
+	quotation = None if (self.reserve_above_items==0 or self.status in ('Lost','Cancelled') ) else self.name
 	if quotation:
 		for item in self.items:
 			# check for empty serial no
@@ -389,14 +475,14 @@ def update_serial_no_from_quotation(self,method):
 					sno = frappe.get_doc('Serial No', serial_no)
 					sno.reservation_status='Reserved'
 					sno.sales_partner=self.sales_partner
+					sno.branch=self.sales_partner_branch
+					sno.sales_partner_phone_no=self.sales_partner_phone_no
 					sno.for_customer=self.customer
 					sno.reserved_by_document = self.name
 					sno.db_update()
 				else:
 					# check for invalid serial number
 					frappe.throw(_("{0} is invalid serial number").format(serial_no))
-
-
 # extra : search related
 @frappe.whitelist()
 def get_brand_name(brand=None,color=None,category=None,model=None):

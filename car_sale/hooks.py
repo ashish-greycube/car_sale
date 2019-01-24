@@ -94,11 +94,14 @@ doctype_js = {"Lead" : "public/js/lead.js",
 doc_events = {
 	"Sales Order": {
 		"after_insert": "car_sale.api.update_lead_status_from_sales_order",
-		"validate":"car_sale.api.update_serial_no_from_so"
+		"validate":"car_sale.api.update_serial_no_from_so",
+		"on_cancel":"car_sale.api.unreserve_serial_no_from_so_on_cancel"
 	},
     "Quotation": {
 		"on_change": "car_sale.api.update_lead_status_from_quotation",
-		"validate":"car_sale.api.update_serial_no_from_quotation"
+		"on_submit":"car_sale.api.update_serial_no_from_quotation",
+		"on_cancel":"car_sale.api.unreserve_serial_no_from_quotation",
+		"on_update_after_submit":"car_sale.api.unreserve_serial_no_from_quotation"
 	}
 }
 
@@ -122,6 +125,12 @@ doc_events = {
 # 		"car_sale.tasks.monthly"
 # 	]
 # }
+
+scheduler_events = {
+	"daily": [
+		"car_sale.api.auto_unreserve_serial_no_from_quotation_on_expiry"
+	]
+}
 
 # Testing
 # -------
