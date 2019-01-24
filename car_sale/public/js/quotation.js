@@ -1,8 +1,21 @@
-{% include 'erpnext/selling/sales_common.js' %}
-
-frappe.ui.form.on("Quotation", {
-        items_on_form_rendered: function() {
-            console.log('items_on_form_rendered')
-            erpnext.setup_serial_no();
+frappe.ui.form.on('Quotation', {
+    on_submit:function(frm) {
+        if (cur_frm.doc.reserve_above_items==0) {
+            cur_frm.set_df_property("reserve_above_items", "read_only", 1);
         }
-})
+    },
+    sales_partner: function(frm) {
+		frappe.call({
+			method: "car_sale.api.get_branch_of_sales_partner",
+			args: {
+				'sales_partner': cur_frm.doc.sales_partner
+			},
+			callback: function(r) {
+				if(r.message) {
+					cur_frm.set_value('sales_partner_branch',r.message);
+					cur_frm.refresh_fields('sales_partner_branch');
+				}
+			}
+		})
+    },
+});

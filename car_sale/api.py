@@ -198,6 +198,12 @@ where
 docstatus<2 
 and bank_customer=1""",as_list=True)
 
+@frappe.whitelist()
+def get_branch_of_sales_partner(sales_partner):
+	return frappe.db.sql("""select branch from `tabSales Partner`
+where 
+docstatus<2 
+and name=%s""",sales_partner,as_list=True)[0]
 
 @frappe.whitelist()
 def get_item_details(item_code):
@@ -349,6 +355,9 @@ def update_serial_no_from_so(self,method):
 						serial_no, sales_invoice)))
 	
 					sno = frappe.get_doc('Serial No', serial_no)
+					if sno.reservation_status=='Reserved' and (sno.reserved_by_document).startswith("SO-") :
+						if sno.reserved_by_document!=self.name:
+							frappe.throw(_("{0} is already reserved by {1} ,for Customer : {2} against Document No : {3}").format(sno.name,sno.sales_partner,sno.for_customer,sno.reserved_by_document))
 					sno.reservation_status='Reserved'
 					sno.sales_partner=self.sales_partner
 					sno.branch=self.sales_partner_branch
@@ -390,6 +399,7 @@ def unreserve_serial_no_from_so_on_cancel(self,method):
 							sno.for_customer=None
 							sno.reserved_by_document = None
 							sno.db_update()
+							sales_order.db_set('reserve_above_items',0)
 					else:
 						# check for invalid serial number
 						# frappe.throw(_("{0} is invalid serial number").format(serial_no))
@@ -438,6 +448,7 @@ def unreserve_serial_no_from_quotation(self,method):
 							sno.for_customer=None
 							sno.reserved_by_document = None
 							sno.db_update()
+							quotation.db_set('reserve_above_items',0)
 					else:
 						# check for invalid serial number
 						# frappe.throw(_("{0} is invalid serial number").format(serial_no))
@@ -473,6 +484,8 @@ def update_serial_no_from_quotation(self,method):
 						serial_no, sales_invoice)))
 	
 					sno = frappe.get_doc('Serial No', serial_no)
+					if sno.reservation_status=='Reserved' and sno.reserved_by_document!="" :
+						frappe.throw(_("{0} is already reserved by {1} ,for Customer : {2} against Document No : {3}").format(sno.name,sno.sales_partner,sno.for_customer,sno.reserved_by_document))
 					sno.reservation_status='Reserved'
 					sno.sales_partner=self.sales_partner
 					sno.branch=self.sales_partner_branch
@@ -483,18 +496,7 @@ def update_serial_no_from_quotation(self,method):
 				else:
 					# check for invalid serial number
 					frappe.throw(_("{0} is invalid serial number").format(serial_no))
-# extra : search related
-@frappe.whitelist()
-def get_brand_name(brand=None,color=None,category=None,model=None):
-	brand=frappe.db.sql("""select distinct(item.variant_of)
-from `tabItem` as item inner join `tabItem Variant Attribute` as att
-on item.name=att.parent 
-where item.variant_of is not null
-and att.attribute_value in %(color) 
-and 
-and 
-""",as_list=True)
-	return brand[0]
+# search related
 
 @frappe.whitelist()
 def get_color_name(search_template,search_category,search_model):

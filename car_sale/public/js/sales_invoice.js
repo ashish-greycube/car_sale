@@ -76,9 +76,24 @@ frappe.ui.form.on('Sales Invoice', {
              },
             callback: function (r) {
                 console.log(r.message)
-                var child = cur_frm.add_child("items");
-                frappe.model.set_value(child.doctype, child.name, "item_code", r.message[0][0])
-                cur_frm.refresh_field("items")
+                if (r.message[0][0]) {
+                    var tbl = cur_frm.doc.items || [];
+                    var i = tbl.length;
+                    while (i--)
+                    {
+                        if(tbl[i].qty == 0)
+                        {
+                            cur_frm.get_field("items").grid.grid_rows[i].remove();
+                            console.log('del'+tbl[i])
+                        }
+                    }
+                    // cur_frm.doc.items.splice(frm.doc.items[1], 1)
+                    // cur_frm.refresh_field('items')
+                    var child = cur_frm.add_child("items");
+                    frappe.model.set_value(child.doctype, child.name, "item_code", r.message[0][0])
+                    cur_frm.refresh_field("items")
+                }
+
             }
         })
     },
