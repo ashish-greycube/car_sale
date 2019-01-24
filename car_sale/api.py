@@ -399,7 +399,6 @@ def unreserve_serial_no_from_so_on_cancel(self,method):
 							sno.for_customer=None
 							sno.reserved_by_document = None
 							sno.db_update()
-							sales_order.db_set('reserve_above_items',0)
 					else:
 						# check for invalid serial number
 						# frappe.throw(_("{0} is invalid serial number").format(serial_no))
