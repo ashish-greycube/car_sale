@@ -476,7 +476,7 @@ def update_serial_no_from_quotation(self,method):
 					sno.reservation_status='Reserved'
 					sno.sales_partner=self.sales_partner
 					sno.branch=self.sales_partner_branch
-					sno.sales_partner_phone_no=self.sales_partner_phone_no
+					sno.sales_partner_phone_no=self.sales_partner_phone
 					sno.for_customer=self.customer
 					sno.reserved_by_document = self.name
 					sno.db_update()
