@@ -200,10 +200,13 @@ and bank_customer=1""",as_list=True)
 
 @frappe.whitelist()
 def get_branch_of_sales_partner(sales_partner):
-	return frappe.db.sql("""select branch from `tabSales Partner`
+	if sales_partner:
+		return frappe.db.sql("""select branch from `tabSales Partner`
 where 
 docstatus<2 
 and name=%s""",sales_partner,as_list=True)[0]
+	else:
+		return None
 
 @frappe.whitelist()
 def get_item_details(item_code):
