@@ -11,9 +11,11 @@ frappe.ui.form.on('Quotation', {
 				'sales_partner': cur_frm.doc.sales_partner
 			},
 			callback: function(r) {
+
 				if(r.message) {
-					cur_frm.set_value('sales_partner_branch',r.message);
-					cur_frm.refresh_fields('sales_partner_branch');
+					console.log(r.message)
+					cur_frm.set_value('sales_partner_branch',r.message[0]);
+					cur_frm.refresh_field('sales_partner_branch');
 				}
 			}
 		})
