@@ -416,12 +416,18 @@ def auto_unreserve_serial_no_from_quotation_on_expiry():
 			quotation = frappe.get_doc('Quotation', quotation_name)
 			print quotation
 			if quotation:
-				unreserve_serial_no_from_quotation(self=quotation,method=None)
+				unreserve_serial_no_from_quotation(self=quotation,method=None,auto_run=1)
 
 @frappe.whitelist()
-def unreserve_serial_no_from_quotation(self,method):
+def unreserve_serial_no_from_quotation(self,method,auto_run=0):
 	""" update serial no doc with details of Sales Order """
-	quotation = None if (cint(self.reserve_above_items)==0 or self.status in ('Lost','Ordered') or self.docstatus in ('Draft')) else self.name
+	print ('unreserve_serial_no_from_quotation')
+	print cint(self.reserve_above_items)
+	print  self.status
+	print self.docstatus
+	if auto_run==1:
+		self.reserve_above_items=0
+	quotation = None if (cint(self.reserve_above_items)==1 or self.status in ('Lost','Ordered') or self.docstatus ==0) else self.name
 	if quotation:
 		print 'inside unreserve_serial_no_from_quotation'
 		for item in self.items:
@@ -431,6 +437,7 @@ def unreserve_serial_no_from_quotation(self,method):
 			else:
 				# match item qty and serial no count
 				for serial_no in item.serial_no.split("\n"):
+					print serial_no
 					if serial_no and frappe.db.exists('Serial No', serial_no):
 						#match item_code with serial number-->item_code
 						sno_item_code=frappe.db.get_value("Serial No", serial_no, "item_code")
@@ -450,7 +457,7 @@ def unreserve_serial_no_from_quotation(self,method):
 							sno.for_customer=None
 							sno.reserved_by_document = None
 							sno.db_update()
-							quotation.db_set('reserve_above_items',0)
+							self.db_set('reserve_above_items',0)
 					else:
 						# check for invalid serial number
 						# frappe.throw(_("{0} is invalid serial number").format(serial_no))
