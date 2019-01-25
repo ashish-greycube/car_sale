@@ -199,7 +199,7 @@ docstatus<2
 and bank_customer=1""",as_list=True)
 
 @frappe.whitelist()
-def get_branch_of_sales_partner(sales_partner):
+def get_branch_of_sales_partner(sales_partner=None):
 	if sales_partner:
 		return frappe.db.sql("""select branch from `tabSales Partner`
 where 
