@@ -17,7 +17,7 @@ frappe.ui.form.on('Quotation', {
 
 				if(r.message) {
 					console.log(r.message)
-					cur_frm.set_value('sales_partner_branch',r.message[0]);
+					cur_frm.set_value('sales_partner_branch',r.message);
 					cur_frm.refresh_field('sales_partner_branch');
 				}
 			}

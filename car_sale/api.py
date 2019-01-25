@@ -204,7 +204,7 @@ def get_branch_of_sales_partner(sales_partner=None):
 		return frappe.db.sql("""select branch from `tabSales Partner`
 where 
 docstatus<2 
-and name=%s""",sales_partner,as_list=True)[0]
+and name=%s""",sales_partner,as_list=True)[0][0]
 	else:
 		return None
 
@@ -421,7 +421,7 @@ def auto_unreserve_serial_no_from_quotation_on_expiry():
 @frappe.whitelist()
 def unreserve_serial_no_from_quotation(self,method):
 	""" update serial no doc with details of Sales Order """
-	quotation = None if (self.reserve_above_items==0 or self.status in ('Lost','Ordered') or self.docstatus in ('Draft')) else self.name
+	quotation = None if (cint(self.reserve_above_items)==0 or self.status in ('Lost','Ordered') or self.docstatus in ('Draft')) else self.name
 	if quotation:
 		print 'inside unreserve_serial_no_from_quotation'
 		for item in self.items:
@@ -459,7 +459,7 @@ def unreserve_serial_no_from_quotation(self,method):
 @frappe.whitelist()
 def update_serial_no_from_quotation(self,method):
 	""" update serial no doc with details of Sales Order """
-	quotation = None if (self.reserve_above_items==0 or self.status in ('Lost','Cancelled') ) else self.name
+	quotation = None if (cint(self.reserve_above_items)==0 or self.status in ('Lost','Cancelled') ) else self.name
 	if quotation:
 		for item in self.items:
 			# check for empty serial no
