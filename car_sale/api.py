@@ -333,8 +333,8 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=True):
 def update_serial_no_from_so(self,method):
 	sales_order = None if (self.status not in ('Draft','To Deliver and Bill','To Bill','To Deliver','Completed')) else self.name
 	if sales_order:
-		if sales_order.workflow_state:
-			if sales_order.workflow_state=='Cancelled':
+		if self.workflow_state:
+			if self.workflow_state=='Cancelled':
 				unreserve_serial_no_from_so_on_cancel(self,method)
 			else:
 				for item in self.items:
