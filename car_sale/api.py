@@ -333,44 +333,48 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=True):
 def update_serial_no_from_so(self,method):
 	sales_order = None if (self.status not in ('Draft','To Deliver and Bill','To Bill','To Deliver','Completed')) else self.name
 	if sales_order:
-		for item in self.items:
-			# check for empty serial no
-			if not item.serial_no:
-				frappe.throw(_("Row {0}: {1} Serial numbers required for Item {2}. You have provided None.".format(
-					item.idx, item.qty, item.item_code)))
-			# match item qty and serial no count
-			serial_nos = item.serial_no
-			si_serial_nos = set(get_serial_nos(serial_nos))
-			if item.serial_no and cint(item.qty) != len(si_serial_nos):
-				frappe.throw(_("Row {0}: {1} Serial numbers required for Item {2}. You have provided {3}.".format(
-					item.idx, item.qty, item.item_code, len(si_serial_nos))))
+		if sales_order.workflow_state:
+			if sales_order.workflow_state=='Cancelled':
+				unreserve_serial_no_from_so_on_cancel(self,method)
+			else:
+				for item in self.items:
+					# check for empty serial no
+					if not item.serial_no:
+						frappe.throw(_("Row {0}: {1} Serial numbers required for Item {2}. You have provided None.".format(
+							item.idx, item.qty, item.item_code)))
+					# match item qty and serial no count
+					serial_nos = item.serial_no
+					si_serial_nos = set(get_serial_nos(serial_nos))
+					if item.serial_no and cint(item.qty) != len(si_serial_nos):
+						frappe.throw(_("Row {0}: {1} Serial numbers required for Item {2}. You have provided {3}.".format(
+							item.idx, item.qty, item.item_code, len(si_serial_nos))))
 
-			for serial_no in item.serial_no.split("\n"):
-				if serial_no and frappe.db.exists('Serial No', serial_no):
-					#match item_code with serial number-->item_code
-					sno_item_code=frappe.db.get_value("Serial No", serial_no, "item_code")
-					if (cstr(sno_item_code) != cstr(item.item_code)):
-						frappe.throw(_("{0} serial number is not valid for {1} item code").format(serial_no,item.item_code))
-					#check if there is sales invoice against serial no
-					sales_invoice = frappe.db.get_value("Serial No", serial_no, "sales_invoice")
-					if sales_invoice and self.name != sales_invoice:
-						frappe.throw(_("Serial Number: {0} is already referenced in Sales Invoice: {1}".format(
-						serial_no, sales_invoice)))
-	
-					sno = frappe.get_doc('Serial No', serial_no)
-					if sno.reservation_status=='Reserved' and (sno.reserved_by_document).startswith("SO-") :
-						if sno.reserved_by_document!=self.name:
-							frappe.throw(_("{0} is already reserved by {1} ,for Customer : {2} against Document No : {3}").format(sno.name,sno.sales_partner,sno.for_customer,sno.reserved_by_document))
-					sno.reservation_status='Reserved'
-					sno.sales_partner=self.sales_partner
-					sno.branch=self.sales_partner_branch
-					sno.sales_partner_phone_no=self.sales_partner_phone_no
-					sno.for_customer=self.customer
-					sno.reserved_by_document = self.name
-					sno.db_update()
-				else:
-					# check for invalid serial number
-					frappe.throw(_("{0} is invalid serial number").format(serial_no))
+					for serial_no in item.serial_no.split("\n"):
+						if serial_no and frappe.db.exists('Serial No', serial_no):
+							#match item_code with serial number-->item_code
+							sno_item_code=frappe.db.get_value("Serial No", serial_no, "item_code")
+							if (cstr(sno_item_code) != cstr(item.item_code)):
+								frappe.throw(_("{0} serial number is not valid for {1} item code").format(serial_no,item.item_code))
+							#check if there is sales invoice against serial no
+							sales_invoice = frappe.db.get_value("Serial No", serial_no, "sales_invoice")
+							if sales_invoice and self.name != sales_invoice:
+								frappe.throw(_("Serial Number: {0} is already referenced in Sales Invoice: {1}".format(
+								serial_no, sales_invoice)))
+			
+							sno = frappe.get_doc('Serial No', serial_no)
+							if sno.reservation_status=='Reserved' and (sno.reserved_by_document).startswith("SO-") :
+								if sno.reserved_by_document!=self.name:
+									frappe.throw(_("{0} is already reserved by {1} ,for Customer : {2} against Document No : {3}").format(sno.name,sno.sales_partner,sno.for_customer,sno.reserved_by_document))
+							sno.reservation_status='Reserved'
+							sno.sales_partner=self.sales_partner
+							sno.branch=self.sales_partner_branch
+							sno.sales_partner_phone_no=self.sales_partner_phone_no
+							sno.for_customer=self.customer
+							sno.reserved_by_document = self.name
+							sno.db_update()
+						else:
+							# check for invalid serial number
+							frappe.throw(_("{0} is invalid serial number").format(serial_no))
 
 
 @frappe.whitelist()
