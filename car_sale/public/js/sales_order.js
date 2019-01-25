@@ -12,5 +12,8 @@ frappe.ui.form.on('Sales Order', {
 				}
 			}
 		})
-    },
+		},
+		items_on_form_rendered: function() {
+			erpnext.setup_serial_no();
+	}
 });

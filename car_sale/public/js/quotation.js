@@ -3,7 +3,10 @@ frappe.ui.form.on('Quotation', {
         if (cur_frm.doc.reserve_above_items==0) {
             cur_frm.set_df_property("reserve_above_items", "read_only", 1);
         }
-    },
+	},
+	items_on_form_rendered: function() {
+		erpnext.setup_serial_no();
+	},
     sales_partner: function(frm) {
 		frappe.call({
 			method: "car_sale.api.get_branch_of_sales_partner",
