@@ -233,7 +233,14 @@ def get_sales_partner(user_email):
 @frappe.whitelist()
 def update_lead_status_from_sales_order(self,method):
 	if self.linked_lead:
-		lead=frappe.get_doc("Lead",self.linked_lead)
+		name_of_linked_lead=self.linked_lead
+		lead=frappe.get_doc("Lead",name_of_linked_lead)
+
+		if lead.linked_sales_order== None or lead.linked_sales_order=='':
+			print name_of_linked_lead
+			print 'name_of_linked_lead'
+			lead.db_set('linked_sales_order', self.name)
+	
 		if cstr(lead.status) in ['Lead','Open','Sales Inquiry','Quotation','Converted']:
 			lead.db_set('status', 'Ordered')
 	else:
@@ -321,10 +328,8 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=True):
 		}, target_doc, set_missing_values, ignore_permissions=ignore_permissions)
 
 	# postprocess: fetch shipping address, set missing values
-	doclist.save(ignore_permissions=True)
-	source_lead = frappe.get_doc('Lead', source_name)
-	source_lead.linked_sales_order=doclist.name
-	source_lead.save(ignore_permissions=True)
+	#doclist.save(ignore_permissions=True)
+
 
 	return doclist
 
@@ -333,9 +338,9 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=True):
 def update_serial_no_from_so(self,method):
 	sales_order = None if (self.status not in ('Draft','To Deliver and Bill','To Bill','To Deliver','Completed')) else self.name
 	if sales_order:
-		if hasattr(self, 'workflow_state'):
-			if self.workflow_state=='Cancelled':
-				unreserve_serial_no_from_so_on_cancel(self,method)
+			if hasattr(self, 'workflow_state'):
+				if self.workflow_state=='Cancelled':
+					unreserve_serial_no_from_so_on_cancel(self,method)
 			else:
 				for item in self.items:
 					# check for empty serial no
