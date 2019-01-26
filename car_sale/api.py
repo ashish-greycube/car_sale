@@ -333,7 +333,7 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=True):
 def update_serial_no_from_so(self,method):
 	sales_order = None if (self.status not in ('Draft','To Deliver and Bill','To Bill','To Deliver','Completed')) else self.name
 	if sales_order:
-		if self.workflow_state:
+		if hasattr(self, 'workflow_state'):
 			if self.workflow_state=='Cancelled':
 				unreserve_serial_no_from_so_on_cancel(self,method)
 			else:
@@ -598,7 +598,7 @@ def get_template_name():
 
 @frappe.whitelist()
 def get_search_item_name(search_template,search_category,search_model,search_color):
-	return frappe.db.sql("""select item.name
+	get_search_item_name=frappe.db.sql("""select item.name
 from `tabItem` as item 
 inner join 
 `tabItem Variant Attribute` as att
@@ -631,3 +631,4 @@ where item_name=%s)
 )
 )
 """,(search_color,search_model,search_category,search_template),as_list=True)
+	return get_search_item_name[0] if get_search_item_name else None

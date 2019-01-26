@@ -1,22 +1,38 @@
 //item template name
 //--------------------------
-
 frappe.call({
     method: "car_sale.api.get_template_name",
     callback: function (r) {
-        cur_frm.fields_dict.search_template.df.options = r.message;
-        cur_frm.refresh_field("search_template");
+        if (r.message) {
+            cur_frm.fields_dict.search_template.df.options = r.message;
+            cur_frm.set_value('search_template', null);
+            cur_frm.refresh_field("search_template")
+        }
     }
 })
 
 frappe.ui.form.on('Sales Invoice', {
+
 	search_template: function(frm){
         frappe.call({
             method: "car_sale.api.get_category_name",
             args: { search_template: cur_frm.doc.search_template },
             callback: function (r) {
-                cur_frm.fields_dict.search_category.df.options = r.message;
-                cur_frm.refresh_field("search_category");
+                if (r.message) {
+                    cur_frm.fields_dict.search_category.df.options = r.message;
+                    cur_frm.set_value('search_category', null);
+                    cur_frm.refresh_field("search_category");
+
+                    cur_frm.fields_dict.search_model.df.options =''
+                    cur_frm.set_value('search_model', null);
+                    cur_frm.refresh_field("search_model");
+
+                    cur_frm.fields_dict.search_color.df.options=''
+                    cur_frm.set_value('search_color', null);
+                    cur_frm.refresh_field("search_color");
+                    
+                }
+
             }
         })
     },
@@ -27,8 +43,12 @@ frappe.ui.form.on('Sales Invoice', {
                 search_category:cur_frm.doc.search_category
              },
             callback: function (r) {
-                cur_frm.fields_dict.search_model.df.options = r.message;
-                cur_frm.refresh_field("search_model");
+                if (r.message){
+                    cur_frm.fields_dict.search_model.df.options = r.message;
+                    cur_frm.set_value('search_model', null);
+                    cur_frm.refresh_field("search_model");
+                }
+
             }
         })
     },
@@ -40,8 +60,11 @@ frappe.ui.form.on('Sales Invoice', {
                 search_model:cur_frm.doc.search_model
              },
             callback: function (r) {
-                cur_frm.fields_dict.search_color.df.options = r.message;
-                cur_frm.refresh_field("search_color");
+                if (r.message) {
+                    cur_frm.fields_dict.search_color.df.options = r.message;
+                    cur_frm.refresh_field("search_color");                  
+                }
+
             }
         })
     },
@@ -66,7 +89,6 @@ frappe.ui.form.on('Sales Invoice', {
             return;
         } 
 
-       
         frappe.call({
             method: "car_sale.api.get_search_item_name",
             args: { search_template: cur_frm.doc.search_template,
@@ -75,28 +97,35 @@ frappe.ui.form.on('Sales Invoice', {
                 search_color:cur_frm.doc.search_color,
              },
             callback: function (r) {
-                console.log(r.message)
-                if (r.message[0][0]) {
-                    var tbl = cur_frm.doc.items || [];
-                    var i = tbl.length;
-                    while (i--)
-                    {
-                        if(tbl[i].qty == 0)
-                        {
-                            cur_frm.get_field("items").grid.grid_rows[i].remove();
-                            console.log('del'+tbl[i])
-                        }
-                    }
-                    // cur_frm.doc.items.splice(frm.doc.items[1], 1)
-                    // cur_frm.refresh_field('items')
-                    var child = cur_frm.add_child("items");
-                    frappe.model.set_value(child.doctype, child.name, "item_code", r.message[0][0])
-                    cur_frm.refresh_field("items")
-                }
+                if (r.message) {
+                    if (r.message[0]) {
 
+                        if (cur_frm.doc.items[0]) {
+                            if (cur_frm.doc.items[0].item_code==undefined) {
+                                cur_frm.doc.items.splice(cur_frm.doc.items[0], 1)
+                            }
+                        }
+
+                        var child = cur_frm.add_child("items");
+                        frappe.model.set_value(child.doctype, child.name, "item_code", r.message[0])
+                        cur_frm.refresh_field("items")
+
+                        cur_frm.set_value('search_template', null);
+
+                        cur_frm.fields_dict.search_category.df.options = ''
+                        cur_frm.set_value('search_category', null);
+                        cur_frm.refresh_field("search_category");
+
+                        cur_frm.fields_dict.search_model.df.options =''
+                        cur_frm.set_value('search_model', null);
+                        cur_frm.refresh_field("search_model");
+
+                        cur_frm.fields_dict.search_color.df.options=''
+                        cur_frm.set_value('search_color', null);
+                        cur_frm.refresh_field("search_color")
+                    }
+                }
             }
         })
     },
-
-
 });

@@ -40,18 +40,23 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 
 	},
 	refresh: function() {
-		var doc = this.frm.doc;
+		var doc = cur_frm.doc;
 		erpnext.toggle_naming_series();
 		frappe.dynamic_link = {doc: doc, fieldname: 'name', doctype: 'Lead'}
 
 		if(!doc.__islocal && doc.__onload && !doc.__onload.is_customer) {
 			// added custom option
-			if(doc.status !='Ordered' ||doc.status != 'Quotation'|| doc.status !='Converted')
+			console.log('k')
+			if(doc.status =='Ordered' ||doc.status == 'Quotation'|| doc.status =='Converted')
 			{
+
+			}else{
+				console.log(doc.status)
 			this.frm.add_custom_button(__("Car - Quotation"), this.make_customer_quotation, __("Make"));
 			this.frm.add_custom_button(__("Car - Sales Order"), this.make_customer_sales_order, __("Make"));
 			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 			}
+
 		}
 
 		if(!this.frm.doc.__islocal) {
