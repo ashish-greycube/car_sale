@@ -18,37 +18,40 @@ frappe.ui.form.on('Sales Order', {
 	},
 //search
 search_group: function(frm){
-    frappe.call({
-        method: "car_sale.api.get_template_name",
-        args: { search_group: cur_frm.doc.search_group },
-        callback: function (r) {
-            if (r.message) {
-                cur_frm.fields_dict.search_template.df.options = r.message;
-                cur_frm.set_value('search_template', null);
-                cur_frm.refresh_field("search_template");
+    if (cur_frm.doc.search_group) {
+        frappe.call({
+            method: "car_sale.api.get_template_name",
+            args: { search_group: cur_frm.doc.search_group },
+            callback: function (r) {
+                if (r.message) {
+                    cur_frm.fields_dict.search_template.df.options = r.message;
+                    cur_frm.set_value('search_template', null);
+                    cur_frm.refresh_field("search_template");
 
-                
-            }else{
-                cur_frm.fields_dict.search_template.df.options = '';
-                cur_frm.set_value('search_template', null);
-                cur_frm.refresh_field("search_template");
+                    
+                }else{
+                    cur_frm.fields_dict.search_template.df.options = '';
+                    cur_frm.set_value('search_template', null);
+                    cur_frm.refresh_field("search_template");
+
+                }
+
+                cur_frm.fields_dict.search_category.df.options =''
+                cur_frm.set_value('search_category', null);
+                cur_frm.refresh_field("search_category");
+
+                cur_frm.fields_dict.search_model.df.options =''
+                cur_frm.set_value('search_model', null);
+                cur_frm.refresh_field("search_model");
+
+                cur_frm.fields_dict.search_color.df.options=''
+                cur_frm.set_value('search_color', null);
+                cur_frm.refresh_field("search_color");
 
             }
-
-            cur_frm.fields_dict.search_category.df.options =''
-            cur_frm.set_value('search_category', null);
-            cur_frm.refresh_field("search_category");
-
-            cur_frm.fields_dict.search_model.df.options =''
-            cur_frm.set_value('search_model', null);
-            cur_frm.refresh_field("search_model");
-
-            cur_frm.fields_dict.search_color.df.options=''
-            cur_frm.set_value('search_color', null);
-            cur_frm.refresh_field("search_color");
-
-        }
-    })
+        })
+        
+    }
 },
 search_template: function(frm){
     frappe.call({
