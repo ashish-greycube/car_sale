@@ -341,45 +341,45 @@ def update_serial_no_from_so(self,method):
 			if hasattr(self, 'workflow_state'):
 				if self.workflow_state=='Cancelled':
 					unreserve_serial_no_from_so_on_cancel(self,method)
-			else:
-				for item in self.items:
-					# check for empty serial no
-					if not item.serial_no:
-						frappe.throw(_("Row {0}: {1} Serial numbers required for Item {2}. You have provided None.".format(
-							item.idx, item.qty, item.item_code)))
-					# match item qty and serial no count
-					serial_nos = item.serial_no
-					si_serial_nos = set(get_serial_nos(serial_nos))
-					if item.serial_no and cint(item.qty) != len(si_serial_nos):
-						frappe.throw(_("Row {0}: {1} Serial numbers required for Item {2}. You have provided {3}.".format(
-							item.idx, item.qty, item.item_code, len(si_serial_nos))))
+				else:
+					for item in self.items:
+						# check for empty serial no
+						if not item.serial_no:
+							frappe.throw(_("Row {0}: {1} Serial numbers required for Item {2}. You have provided None.".format(
+								item.idx, item.qty, item.item_code)))
+						# match item qty and serial no count
+						serial_nos = item.serial_no
+						si_serial_nos = set(get_serial_nos(serial_nos))
+						if item.serial_no and cint(item.qty) != len(si_serial_nos):
+							frappe.throw(_("Row {0}: {1} Serial numbers required for Item {2}. You have provided {3}.".format(
+								item.idx, item.qty, item.item_code, len(si_serial_nos))))
 
-					for serial_no in item.serial_no.split("\n"):
-						if serial_no and frappe.db.exists('Serial No', serial_no):
-							#match item_code with serial number-->item_code
-							sno_item_code=frappe.db.get_value("Serial No", serial_no, "item_code")
-							if (cstr(sno_item_code) != cstr(item.item_code)):
-								frappe.throw(_("{0} serial number is not valid for {1} item code").format(serial_no,item.item_code))
-							#check if there is sales invoice against serial no
-							sales_invoice = frappe.db.get_value("Serial No", serial_no, "sales_invoice")
-							if sales_invoice and self.name != sales_invoice:
-								frappe.throw(_("Serial Number: {0} is already referenced in Sales Invoice: {1}".format(
-								serial_no, sales_invoice)))
-			
-							sno = frappe.get_doc('Serial No', serial_no)
-							if sno.reservation_status=='Reserved' and (sno.reserved_by_document).startswith("SO-") :
-								if sno.reserved_by_document!=self.name:
-									frappe.throw(_("{0} is already reserved by {1} ,for Customer : {2} against Document No : {3}").format(sno.name,sno.sales_partner,sno.for_customer,sno.reserved_by_document))
-							sno.reservation_status='Reserved'
-							sno.sales_partner=self.sales_partner
-							sno.branch=self.sales_partner_branch
-							sno.sales_partner_phone_no=self.sales_partner_phone_no
-							sno.for_customer=self.customer
-							sno.reserved_by_document = self.name
-							sno.db_update()
-						else:
-							# check for invalid serial number
-							frappe.throw(_("{0} is invalid serial number").format(serial_no))
+						for serial_no in item.serial_no.split("\n"):
+							if serial_no and frappe.db.exists('Serial No', serial_no):
+								#match item_code with serial number-->item_code
+								sno_item_code=frappe.db.get_value("Serial No", serial_no, "item_code")
+								if (cstr(sno_item_code) != cstr(item.item_code)):
+									frappe.throw(_("{0} serial number is not valid for {1} item code").format(serial_no,item.item_code))
+								#check if there is sales invoice against serial no
+								sales_invoice = frappe.db.get_value("Serial No", serial_no, "sales_invoice")
+								if sales_invoice and self.name != sales_invoice:
+									frappe.throw(_("Serial Number: {0} is already referenced in Sales Invoice: {1}".format(
+									serial_no, sales_invoice)))
+				
+								sno = frappe.get_doc('Serial No', serial_no)
+								if sno.reservation_status=='Reserved' and (sno.reserved_by_document).startswith("SO-") :
+									if sno.reserved_by_document!=self.name:
+										frappe.throw(_("{0} is already reserved by {1} ,for Customer : {2} against Document No : {3}").format(sno.name,sno.sales_partner,sno.for_customer,sno.reserved_by_document))
+								sno.reservation_status='Reserved'
+								sno.sales_partner=self.sales_partner
+								sno.branch=self.sales_partner_branch
+								sno.sales_partner_phone_no=self.sales_partner_phone_no
+								sno.for_customer=self.customer
+								sno.reserved_by_document = self.name
+								sno.db_update()
+							else:
+								# check for invalid serial number
+								frappe.throw(_("{0} is invalid serial number").format(serial_no))
 
 
 @frappe.whitelist()
@@ -589,17 +589,37 @@ item.variant_based_on='Item Attribute'
 and item.has_variants=0
 and item.docstatus < 2
 and att.attribute='Category'
-and item.variant_of=(
+and item.variant_of IN (
 select name from `tabItem` 
 where item_name=%s) order by att.attribute_value """ ,search_template,as_list=True)
 
 @frappe.whitelist()
-def get_template_name():
-	print 'get_template_name'
+def get_item_group():
+	item_group=frappe.db.sql("""select name 
+	from `tabItem Group` where is_group=0 and docstatus < 2""",as_list=True) 
+	return item_group if item_group else None
+
+
+@frappe.whitelist()
+def get_template_name(search_group):
+	cond = "1=1"
+	item_groups = []
+	if search_group:
+		item_groups.extend([search_group.name for search_group in get_child_nodes('Item Group', search_group)])
+		cond = "item_group in (%s)"%(', '.join(['%s']*len(item_groups)))
+
+		print 'get_template_name'
+		print item_groups
 	template_name=frappe.db.sql("""select distinct(item_name) 
-	from `tabItem` where has_variants=1 and docstatus < 2""",as_list=True) 
+	from `tabItem` where has_variants=1 and docstatus < 2 and {cond}
+		""".format(cond=cond), tuple(item_groups), as_list=1)
 	return template_name if template_name else None
 
+def get_child_nodes(group_type, root):
+	print (group_type, root)
+	lft, rgt = frappe.db.get_value(group_type, root, ["lft", "rgt"])
+	return frappe.db.sql(""" Select name, lft, rgt from `tab{tab}` where
+			lft >= {lft} and rgt <= {rgt} order by lft""".format(tab=group_type, lft=lft, rgt=rgt), as_dict=1)
 
 @frappe.whitelist()
 def get_search_item_name(search_template,search_category,search_model,search_color):
@@ -632,7 +652,8 @@ and att.attribute_value =%s
 and att.attribute ='Category'
 and item.variant_of=(
 select name from `tabItem` 
-where item_name=%s)
+where item_name=%s
+)
 )
 )
 """,(search_color,search_model,search_category,search_template),as_list=True)

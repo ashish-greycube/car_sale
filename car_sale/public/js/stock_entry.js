@@ -1,18 +1,37 @@
-//item template name
-//--------------------------
-frappe.call({
-    method: "car_sale.api.get_template_name",
-    callback: function (r) {
-        if (r.message) {
-            cur_frm.fields_dict.search_template.df.options = r.message;
-            cur_frm.set_value('search_template', null);
-            cur_frm.refresh_field("search_template")
-        }
-    }
-})
-
 frappe.ui.form.on('Stock Entry', {
+    search_group: function(frm){
+        frappe.call({
+            method: "car_sale.api.get_template_name",
+            args: { search_group: cur_frm.doc.search_group },
+            callback: function (r) {
+                if (r.message) {
+                    cur_frm.fields_dict.search_template.df.options = r.message;
+                    cur_frm.set_value('search_template', null);
+                    cur_frm.refresh_field("search_template");
 
+                    
+                }else{
+                    cur_frm.fields_dict.search_template.df.options = '';
+                    cur_frm.set_value('search_template', null);
+                    cur_frm.refresh_field("search_template");
+
+                }
+
+                cur_frm.fields_dict.search_category.df.options =''
+                cur_frm.set_value('search_category', null);
+                cur_frm.refresh_field("search_category");
+
+                cur_frm.fields_dict.search_model.df.options =''
+                cur_frm.set_value('search_model', null);
+                cur_frm.refresh_field("search_model");
+
+                cur_frm.fields_dict.search_color.df.options=''
+                cur_frm.set_value('search_color', null);
+                cur_frm.refresh_field("search_color");
+
+            }
+        })
+    },
 	search_template: function(frm){
         frappe.call({
             method: "car_sale.api.get_category_name",
@@ -69,7 +88,12 @@ frappe.ui.form.on('Stock Entry', {
         })
     },
     add: function(frm){
-        if (cur_frm.doc.search_template == undefined || cur_frm.doc.search_template == '') 
+        if (cur_frm.doc.search_group == undefined || cur_frm.doc.search_group == '') 
+        {
+            frappe.msgprint(__("Field Group cannot be empty"));
+            return;
+        }
+        else if (cur_frm.doc.search_template == undefined || cur_frm.doc.search_template == '') 
         {
             frappe.msgprint(__("Field Brand cannot be empty"));
             return;
@@ -91,7 +115,8 @@ frappe.ui.form.on('Stock Entry', {
 
         frappe.call({
             method: "car_sale.api.get_search_item_name",
-            args: { search_template: cur_frm.doc.search_template,
+            args: { 
+                search_template: cur_frm.doc.search_template,
                 search_category:cur_frm.doc.search_category,
                 search_model:cur_frm.doc.search_model,
                 search_color:cur_frm.doc.search_color,
@@ -110,7 +135,11 @@ frappe.ui.form.on('Stock Entry', {
                         frappe.model.set_value(child.doctype, child.name, "item_code", r.message[0])
                         cur_frm.refresh_field("items")
 
+                        cur_frm.set_value('search_group', null);
+
+                        cur_frm.fields_dict.search_template.df.options = ''
                         cur_frm.set_value('search_template', null);
+                        cur_frm.refresh_field("search_template");
 
                         cur_frm.fields_dict.search_category.df.options = ''
                         cur_frm.set_value('search_category', null);
