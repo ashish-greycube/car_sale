@@ -1,4 +1,4 @@
-frappe.ui.form.on('Sales Invoice', {
+frappe.ui.form.on(cur_frm.doctype, {
     search_group: function(frm){
         if (cur_frm.doc.search_group) {
             frappe.call({

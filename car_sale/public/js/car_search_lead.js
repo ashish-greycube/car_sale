@@ -1,4 +1,4 @@
-frappe.ui.form.on('Stock Entry', {
+frappe.ui.form.on(cur_frm.doctype, {
     search_group: function(frm){
         if (cur_frm.doc.search_group) {
             frappe.call({
@@ -134,15 +134,15 @@ frappe.ui.form.on('Stock Entry', {
                 if (r.message) {
                     if (r.message[0]) {
 
-                        if (cur_frm.doc.items[0]) {
-                            if (cur_frm.doc.items[0].item_code==undefined) {
-                                cur_frm.doc.items.splice(cur_frm.doc.items[0], 1)
-                            }
-                        }
+                        // if (cur_frm.doc.inquiry_item[0]) {
+                        //     if (cur_frm.doc.inquiry_item[0].item_code==undefined) {
+                        //         cur_frm.doc.inquiry_item.splice(cur_frm.doc.inquiry_item[0], 1)
+                        //     }
+                        // }
 
-                        var child = cur_frm.add_child("items");
+                        var child = cur_frm.add_child("inquiry_item");
                         frappe.model.set_value(child.doctype, child.name, "item_code", r.message[0])
-                        cur_frm.refresh_field("items")
+                        cur_frm.refresh_field("inquiry_item")
 
                         cur_frm.set_value('search_group', null);
 

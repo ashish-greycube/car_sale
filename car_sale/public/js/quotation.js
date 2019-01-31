@@ -1,3 +1,4 @@
+{% include "car_sale/public/js/car_search.js" %}
 frappe.ui.form.on('Quotation', {
     on_submit:function(frm) {
         if (cur_frm.doc.reserve_above_items==0) {

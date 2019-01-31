@@ -3,6 +3,7 @@
 
 frappe.provide("erpnext");
 cur_frm.email_field = "email_id";
+{% include "car_sale/public/js/car_search_lead.js" %}
 
 erpnext.LeadController = frappe.ui.form.Controller.extend({
 	setup: function() {
