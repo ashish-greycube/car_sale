@@ -52,6 +52,12 @@ search_group: function(frm){
         })
         
     }
+    else{
+        cur_frm.fields_dict.search_template.df.options = '';
+        cur_frm.set_value('search_template', null);
+        cur_frm.refresh_field("search_template");
+
+    }
 },
 search_template: function(frm){
     frappe.call({
