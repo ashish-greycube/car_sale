@@ -30,7 +30,7 @@ doctype_js = {
 "Lead" : "public/js/lead.js",
 "Quotation":"public/js/quotation.js",
 "Sales Order":"public/js/sales_order.js",
-"Sales Invoice":"public/js/car_search.js",
+"Sales Invoice":"public/js/sales_invoice.js",
 "Stock Entry":"public/js/car_search.js",
 "Material Request":"public/js/car_search.js",
 "Request for Quotation":"public/js/car_search.js",
