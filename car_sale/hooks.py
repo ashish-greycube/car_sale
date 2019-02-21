@@ -37,7 +37,7 @@ doctype_js = {
 "Supplier Quotation":"public/js/car_search.js",
 "Purchase Order":"public/js/car_search.js",
 "Purchase Invoice":"public/js/car_search.js",
-"Delivery Note":"public/js/car_search.js",
+"Delivery Note":"public/js/delivery_note.js",
 "Stock Reconciliation":"public/js/car_search.js"
 }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
