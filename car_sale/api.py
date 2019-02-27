@@ -514,8 +514,8 @@ def update_serial_no_status_from_sales_invoice(self,method):
 							frappe.throw(_("It is sold out"))					
 						sno.reservation_status='Sold Out'
 						sno.sales_partner=self.sales_partner
-						sno.branch=self.sales_partner_branch
-						sno.sales_partner_phone_no=self.sales_partner_phone
+						#sno.branch=self.sales_partner_branch
+						#sno.sales_partner_phone_no=self.sales_partner_phone
 						sno.for_customer=self.customer
 						sno.reserved_by_document = ''
 						sno.db_update()
@@ -564,8 +564,8 @@ def update_serial_no_status_from_delivery_note(self,method):
 						frappe.throw(_("It is sold out"))					
 					sno.reservation_status='Sold Out'
 					sno.sales_partner=self.sales_partner
-					sno.branch=self.sales_partner_branch
-					sno.sales_partner_phone_no=self.sales_partner_phone
+					#sno.branch=self.sales_partner_branch
+					#sno.sales_partner_phone_no=self.sales_partner_phone
 					sno.for_customer=self.customer
 					sno.reserved_by_document = ''
 					sno.db_update()
