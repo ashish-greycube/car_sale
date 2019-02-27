@@ -1,7 +1,6 @@
 {% include "car_sale/public/js/car_search.js" %}
 frappe.ui.form.on('Sales Order', {
-	
-    sales_partner: function(frm) {
+	    sales_partner: function(frm) {
 		if (cur_frm.doc.sales_partner) {
 			frappe.call({
 				method: "car_sale.api.get_branch_of_sales_partner",
@@ -24,5 +23,13 @@ frappe.ui.form.on('Sales Order', {
 	},
 	items_on_form_rendered: function() {
 			erpnext.setup_serial_no();
+	},
+	
+	
+});
+frappe.ui.form.on('Sales Order Item', {
+	serial_no:function(frm){
+		console.log('inside')
 	}
+
 });

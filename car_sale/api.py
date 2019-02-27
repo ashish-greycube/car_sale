@@ -50,21 +50,35 @@ def make_quotation_for_customer(source_name,target_doc=None):
 		
 		if source_doc.customer:
 			if source_doc.transaction_type=='Bank Funded':
-				target_doc.customer=source_doc.bank_name
-				target_doc.sub_customer=source_doc.customer
+				# target_doc.customer=source_doc.bank_name
+				# target_doc.sub_customer=source_doc.customer
+				target_doc.customer=get_customernamingseries(source_doc.bank_name)
+				target_doc.sub_customer=get_customernamingseries(source_doc.customer)
+				
 			else:
-				target_doc.customer=source_doc.customer
+				# target_doc.customer=source_doc.customer
+				target_doc.customer=get_customernamingseries(source_doc.customer)
 		else:
 			if source_doc.organization_lead==0 and source_doc.transaction_type=='Cash':
-				target_doc.customer=source_doc.lead_name
+				# target_doc.customer=source_doc.lead_name
+				target_doc.customer=get_customernamingseries(source_doc.lead_name)
 			elif source_doc.organization_lead==1 and source_doc.transaction_type=='Cash':
-				target_doc.customer=source_doc.company_name
+				# target_doc.customer=source_doc.company_name
+				target_doc.customer=get_customernamingseries(source_doc.company_name)
 			elif source_doc.organization_lead==0 and source_doc.transaction_type=='Bank Funded':
-				target_doc.customer=source_doc.bank_name
-				target_doc.sub_customer=source_doc.lead_name
+				# target_doc.customer=source_doc.bank_name
+				# target_doc.sub_customer=source_doc.lead_name
+				target_doc.customer=get_customernamingseries(source_doc.bank_name)
+				target_doc.sub_customer=get_customernamingseries(source_doc.lead_name)
 			elif source_doc.organization_lead==1 and source_doc.transaction_type=='Bank Funded':
-				target_doc.customer=source_doc.bank_name
-				target_doc.sub_customer=source_doc.company_name
+				# target_doc.customer=source_doc.bank_name
+				# target_doc.sub_customer=source_doc.company_name
+				target_doc.customer=get_customernamingseries(source_doc.bank_name)
+				target_doc.sub_customer=get_customernamingseries(source_doc.company_name)
+	def update_sales_team(obj, target, source_parent):
+		target.sales_person = source_parent.sales_person
+		target.allocated_percentage= 100
+		target.car_sale_incentives=frappe.get_value('Sales Person', source_parent.sales_person, 'incentive')
 	table_maps={
 			"Lead": 
 			{"doctype": "Quotation",
@@ -75,6 +89,11 @@ def make_quotation_for_customer(source_name,target_doc=None):
 			"Inquiry Item": 
 			{"doctype": "Quotation Item",
 			"field_map": {"name":"quotation_item","parent": "against_inquiry_item","uom": "stock_uom"},
+			"add_if_empty": True
+			},
+			"Sales Team":
+			{"doctype": "Sales Team",
+			"postprocess": update_sales_team,
 			"add_if_empty": True
 			}
 		}
@@ -88,11 +107,18 @@ def make_quotation_for_customer(source_name,target_doc=None):
 	source_lead.save(ignore_permissions=True)
 
 	return target_doc
-
+@frappe.whitelist()
+def get_incentive_of_sales_person(sales_person):
+	incentives=frappe.get_value('Sales Person',sales_person, 'incentive')
+	return incentives if incentives else None
 # Lead to Customer
 @frappe.whitelist()
 def make_customer_from_lead(doc):
 	doc=frappe._dict(json.loads(doc))
+	sales_person=doc.sales_team[0]['sales_person']
+	incentives=doc.sales_team[0]['car_sale_incentives']
+	print incentives
+	print 'incentives'
 	#check existing contact
 	contact_name = frappe.db.get_value('Contact',{'mobile_no': doc.mobile_no}, 'name')
 	if contact_name:
@@ -109,7 +135,8 @@ def make_customer_from_lead(doc):
 			customer.customer_group=doc.customer_group
 			customer.territory=doc.territory
 			customer.customer_name=customer_name
-			customer.default_sales_partner=doc.sales_partner
+			# customer.default_sales_partner=doc.sales_person
+			customer.append('sales_team',{"sales_person":sales_person,"allocated_percentage":100,"car_sale_incentives":incentives})
 			customer.insert(ignore_permissions=True)
 			args={
 				'name':doc.lead_name,
@@ -134,13 +161,18 @@ def make_customer_from_lead(doc):
 			customer.customer_group=doc.customer_group
 			customer.territory=doc.territory
 			customer.customer_name=customer_name
-			customer.default_sales_partner=doc.sales_partner
+			# customer.default_sales_partner=doc.sales_person
+			customer.append('sales_team',{"sales_person":sales_person,"allocated_percentage":100,"car_sale_incentives":incentives})
+			print customer.sales_team[0].sales_person
+			print customer.sales_team[0].allocated_percentage
+			print customer.sales_team[0].car_sale_incentives
 			customer.insert(ignore_permissions=True)
 			primary_contact=get_customer_primary_contact(customer.name)
 			customer.customer_primary_contact=primary_contact['name']
 			customer.mobile_no=primary_contact['mobile_no']
 			customer.email_id=primary_contact['email_id']
 			customer.save(ignore_permissions=True)
+			print customer
 		return
 
 #Helpler function for creating contact
@@ -158,6 +190,8 @@ def make_contact(args, is_primary_contact=1):
 	}).insert()
 	return contact
 
+
+
 def get_customer_primary_contact(customer):
 	return frappe.db.sql("""
 		select `tabContact`.name, `tabContact`.mobile_no, `tabContact`.email_id from `tabContact`, `tabDynamic Link`
@@ -171,16 +205,21 @@ def get_customer_primary_contact(customer):
 @frappe.whitelist()
 def get_existing_customer(mobile_no):
 	existing_customer= frappe.db.sql("""
-		select cust.default_sales_partner,cust.customer_group,
+		select st.sales_person,cust.customer_group,
 			cust.customer_type,
 			cust.customer_name,
+			cust.name,
 			RTRIM(concat(cont.first_name,' ',ifnull(cont.last_name,'')))as person_name,
 			cont.email_id,
 			cont.mobile_no
 		from `tabCustomer` cust 
+        inner join `tabSales Team` st
+        on cust.name=st.parent
 		inner join `tabContact` cont
 		on cust.customer_primary_contact=cont.name
-		where cont.mobile_no= %(mobile_no)s
+		where st.idx=1
+        and st.parenttype='Customer'
+        and cont.mobile_no= %(mobile_no)s
 		""", {
 			'mobile_no': mobile_no
 		},as_dict=True)
@@ -208,6 +247,19 @@ and name=%s""",sales_partner,as_list=True)[0][0]
 	else:
 		return None
 
+
+@frappe.whitelist()
+def get_branch_of_sales_person(sales_person=None):
+	if sales_person:
+		return frappe.db.sql("""select branch from `tabSales Person`
+where 
+docstatus<2 
+and name=%s""",sales_person,as_list=True)[0][0]
+	else:
+		return None
+
+
+
 @frappe.whitelist()
 def get_item_details(item_code):
 	item = frappe.db.sql("""select item_name, stock_uom, image, description, item_group, brand
@@ -222,12 +274,15 @@ def get_item_details(item_code):
 	}
 
 @frappe.whitelist()
-def get_sales_partner(user_email):
-	sales_partner= frappe.db.sql("""select name from `tabSales Partner` where user =%(user_email)s
+def get_sales_person_and_branch(user_email):
+	sales_partner= frappe.db.sql("""select name,branch from `tabSales Person`
+where
+is_group=0
+and user_id=%(user_email)s
 	""",{
 			'user_email': user_email
 		},as_list=True)
-	return sales_partner[0] if sales_partner else None
+	return sales_partner if sales_partner else None
 
 # Update status : Lead to Sales Order
 @frappe.whitelist()
@@ -272,6 +327,21 @@ def update_lead_status_from_quotation(self,method):
 		# lead.save(ignore_permissions=True)
 			lead.db_set('status', 'Quotation')
 
+
+def get_customernamingseries(customer_name):
+	customernamingseries=frappe.db.sql("""select name from `tabCustomer` where customer_name=%s""",customer_name,as_list=True) 
+	print customernamingseries
+	if customernamingseries==None or customernamingseries==[] :
+		customernamingseries=customer_name
+		print customernamingseries
+		print 'customernamingseries'
+		return customernamingseries
+	else:
+		print customer_name
+		print customernamingseries[0][0]
+		print 'customernamingseries[0][0]'
+		return customernamingseries[0][0] if customernamingseries else None
+
 @frappe.whitelist()
 def _make_sales_order(source_name, target_doc=None, ignore_permissions=True):
 	# customer = _make_customer(source_name, ignore_permissions)
@@ -282,21 +352,31 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=True):
 		target_doc.delivery_date=source_doc.date
 		if source_doc.customer:
 			if source_doc.transaction_type=='Bank Funded':
-				target_doc.customer=source_doc.bank_name
-				target_doc.sub_customer=source_doc.customer
+				# target_doc.customer=source_doc.bank_name
+				# target_doc.sub_customer=source_doc.customer
+				target_doc.customer=get_customernamingseries(source_doc.bank_name)
+				target_doc.sub_customer=get_customernamingseries(source_doc.customer)
 			else:
-				target_doc.customer=source_doc.customer
+				# target_doc.customer=source_doc.customer
+				target_doc.customer=get_customernamingseries(source_doc.customer)
 		else:
 			if source_doc.organization_lead==0 and source_doc.transaction_type=='Cash':
-				target_doc.customer=source_doc.lead_name
+				# target_doc.customer=source_doc.lead_name
+				target_doc.customer=get_customernamingseries(source_doc.lead_name)
 			elif source_doc.organization_lead==1 and source_doc.transaction_type=='Cash':
-				target_doc.customer=source_doc.company_name
+				# target_doc.customer=source_doc.company_name
+				target_doc.customer=get_customernamingseries(source_doc.company_name)
 			elif source_doc.organization_lead==0 and source_doc.transaction_type=='Bank Funded':
-				target_doc.customer=source_doc.bank_name
-				target_doc.sub_customer=source_doc.lead_name
+				# target_doc.customer=source_doc.bank_name
+				# target_doc.sub_customer=source_doc.lead_name
+				target_doc.customer=get_customernamingseries(source_doc.bank_name)
+				target_doc.sub_customer=get_customernamingseries(source_doc.lead_name)
+
 			elif source_doc.organization_lead==1 and source_doc.transaction_type=='Bank Funded':
-				target_doc.customer=source_doc.bank_name
-				target_doc.sub_customer=source_doc.company_name
+				# target_doc.customer=source_doc.bank_name
+				# target_doc.sub_customer=source_doc.company_name
+				target_doc.customer=get_customernamingseries(source_doc.bank_name)
+				target_doc.sub_customer=get_customernamingseries(source_doc.company_name)
 
 	def set_missing_values(source, target):
 		# if customer:
@@ -312,6 +392,11 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=True):
 		target.stock_qty = flt(obj.qty) * flt(obj.conversion_factor)
 		target.delivery_date=source_parent.date
 
+	def update_sales_team(obj, target, source_parent):
+		target.sales_person = source_parent.sales_person
+		target.allocated_percentage= 100
+		target.car_sale_incentives=frappe.get_value('Sales Person', source_parent.sales_person, 'incentive')
+
 	doclist = get_mapped_doc("Lead", source_name, {
 			"Lead": 
 			{"doctype": "Sales Order",
@@ -323,6 +408,11 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=True):
 			{"doctype": "Sales Order Item",
 			"field_map": {"name":"sales_order_item","parent": "against_inquiry_item","uom": "stock_uom"},
 			"postprocess": update_item,
+			"add_if_empty": True
+			},
+			"Sales Team":
+			{"doctype": "Sales Team",
+			"postprocess": update_sales_team,
 			"add_if_empty": True
 			}
 		}, target_doc, set_missing_values, ignore_permissions=ignore_permissions)
