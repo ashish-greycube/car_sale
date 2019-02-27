@@ -507,7 +507,7 @@ def update_serial_no_status_from_sales_invoice(self,method):
 						if delivery_document_no and self.name != delivery_document_no:
 							frappe.throw(_("Serial Number: {0} is already referenced in Delivery Document No: {1}".format(
 							serial_no, delivery_document_no)))	
-						# sno = frappe.get_doc('Serial No', serial_no)
+						sno = frappe.get_doc('Serial No', serial_no)
 						# if sno.reservation_status=='Reserved' and sno.reserved_by_document!="" :
 						# 	frappe.throw(_("{0} is already reserved by {1} ,for Customer : {2} against Document No : {3}").format(sno.name,sno.sales_partner,sno.for_customer,sno.reserved_by_document))
 						if sno.reservation_status=='Sold Out':
@@ -557,7 +557,7 @@ def update_serial_no_status_from_delivery_note(self,method):
 					if delivery_document_no and self.name != delivery_document_no:
 						frappe.throw(_("Serial Number: {0} is already referenced in Delivery Document No: {1}".format(
 						serial_no, delivery_document_no)))	
-					# sno = frappe.get_doc('Serial No', serial_no)
+					sno = frappe.get_doc('Serial No', serial_no)
 					# if sno.reservation_status=='Reserved' and sno.reserved_by_document!="" :
 					# 	frappe.throw(_("{0} is already reserved by {1} ,for Customer : {2} against Document No : {3}").format(sno.name,sno.sales_partner,sno.for_customer,sno.reserved_by_document))
 					if sno.reservation_status=='Sold Out':
