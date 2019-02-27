@@ -112,6 +112,12 @@ doc_events = {
 		"on_submit":"car_sale.api.update_serial_no_from_quotation",
 		"on_cancel":"car_sale.api.unreserve_serial_no_from_quotation",
 		"on_update_after_submit":"car_sale.api.unreserve_serial_no_from_quotation"
+	},
+	"Delivery Note":{
+		"on_submit":"car_sale.api.update_serial_no_status_from_delivery_note"
+	},
+	"Sales Invoice":{
+		"on_submit":"car_sale.api.update_serial_no_status_from_sales_invoice"
 	}
 }
 
