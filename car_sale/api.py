@@ -492,16 +492,18 @@ def update_serial_no_status_from_sales_invoice(self,method):
 						item.idx, item.qty, item.item_code, len(si_serial_nos))))
 
 				for serial_no in item.serial_no.split("\n"):
+					print 'serial_no'
+					print serial_no
 					if serial_no and frappe.db.exists('Serial No', serial_no):
 						#match item_code with serial number-->item_code
 						sno_item_code=frappe.db.get_value("Serial No", serial_no, "item_code")
 						if (cstr(sno_item_code) != cstr(item.item_code)):
 							frappe.throw(_("{0} serial number is not valid for {1} item code").format(serial_no,item.item_code))
 						#check if there is sales invoice against serial no
-						sales_invoice = frappe.db.get_value("Serial No", serial_no, "sales_invoice")
-						if sales_invoice and self.name != sales_invoice:
-							frappe.throw(_("Serial Number: {0} is already referenced in Sales Invoice: {1}".format(
-							serial_no, sales_invoice)))
+						# sales_invoice = frappe.db.get_value("Serial No", serial_no, "sales_invoice")
+						# if sales_invoice and self.name != sales_invoice:
+						# 	frappe.throw(_("Serial Number: {0} is already referenced in Sales Invoice: {1}".format(
+						# 	serial_no, sales_invoice)))
 						#check if there is delivery_document_no against serial no
 						delivery_document_no = frappe.db.get_value("Serial No", serial_no, "delivery_document_no")
 						if delivery_document_no and self.name != delivery_document_no:
@@ -548,10 +550,10 @@ def update_serial_no_status_from_delivery_note(self,method):
 					if (cstr(sno_item_code) != cstr(item.item_code)):
 						frappe.throw(_("{0} serial number is not valid for {1} item code").format(serial_no,item.item_code))
 					#check if there is sales invoice against serial no
-					sales_invoice = frappe.db.get_value("Serial No", serial_no, "sales_invoice")
-					if sales_invoice and self.name != sales_invoice:
-						frappe.throw(_("Serial Number: {0} is already referenced in Sales Invoice: {1}".format(
-						serial_no, sales_invoice)))
+					# sales_invoice = frappe.db.get_value("Serial No", serial_no, "sales_invoice")
+					# if sales_invoice and self.name != sales_invoice:
+					# 	frappe.throw(_("Serial Number: {0} is already referenced in Sales Invoice: {1}".format(
+					# 	serial_no, sales_invoice)))
 					#check if there is delivery_document_no against serial no
 					delivery_document_no = frappe.db.get_value("Serial No", serial_no, "delivery_document_no")
 					if delivery_document_no and self.name != delivery_document_no:
