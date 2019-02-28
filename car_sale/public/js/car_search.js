@@ -169,8 +169,9 @@ frappe.ui.form.on(cur_frm.doctype, {
     add_serial_no_item: function(frm){
         if (cur_frm.doc.search_serial_no && (cur_frm.doc.serial_no_item!=undefined || cur_frm.doc.serial_no_item!='') ) {
             if (cur_frm.doc.items[0]) {
-                if (cur_frm.doc.items[0].item_code==undefined) {
+                if (cur_frm.doc.items[0].item_code==undefined || cur_frm.doc.items[0].item_code=='' || cur_frm.doc.items[0].item_code==null) {
                     cur_frm.doc.items.splice(cur_frm.doc.items[0], 1)
+                    // cur_frm.refresh_field("items")
                 }
             }
 

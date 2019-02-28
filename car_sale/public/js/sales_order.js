@@ -27,9 +27,9 @@ frappe.ui.form.on('Sales Order', {
 	
 	
 });
-frappe.ui.form.on('Sales Order Item', {
-	serial_no:function(frm){
-		console.log('inside')
-	}
+// frappe.ui.form.on('Sales Order Item', {
+// 	serial_no:function(frm){
+// 		console.log('inside')
+// 	}
 
-});
+// });
