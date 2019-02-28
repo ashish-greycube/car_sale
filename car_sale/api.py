@@ -519,7 +519,7 @@ def update_serial_no_status_from_sales_invoice(self,method):
 						#sno.branch=self.sales_partner_branch
 						#sno.sales_partner_phone_no=self.sales_partner_phone
 						sno.for_customer=self.customer
-						sno.reserved_by_document = ''
+						# sno.reserved_by_document = ''
 						sno.db_update()
 					else:
 						# check for invalid serial number
@@ -569,7 +569,7 @@ def update_serial_no_status_from_delivery_note(self,method):
 					#sno.branch=self.sales_partner_branch
 					#sno.sales_partner_phone_no=self.sales_partner_phone
 					sno.for_customer=self.customer
-					sno.reserved_by_document = ''
+					# sno.reserved_by_document = ''
 					sno.db_update()
 				else:
 					# check for invalid serial number
