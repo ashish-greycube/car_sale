@@ -473,7 +473,7 @@ def update_serial_no_from_so(self,method):
 									sno.sales_partner_phone_no=self.sales_partner_phone_no
 									sno.for_customer=self.customer
 									sno.reserved_by_document = self.name
-									sno.db_update()
+									sno.save(ignore_permissions=True)
 								else:
 									# check for invalid serial number
 									frappe.throw(_("{0} is invalid serial number").format(serial_no))
