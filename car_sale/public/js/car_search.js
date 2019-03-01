@@ -167,35 +167,24 @@ frappe.ui.form.on(cur_frm.doctype, {
         })
     },
     add_serial_no_item: function(frm){
+        console.log("as per data from serial_no doctype",cur_frm.doc.search_serial_no,cur_frm.doc.serial_no_warehouse)
         if (cur_frm.doc.search_serial_no && (cur_frm.doc.serial_no_item!=undefined || cur_frm.doc.serial_no_item!='') ) {
             if ((cur_frm.doc.items[0]) && (cur_frm.doc.items[0].item_code==undefined || cur_frm.doc.items[0].item_code=='' || cur_frm.doc.items[0].item_code==null)) {
-                cur_frm.doc.items[0].item_code=cur_frm.doc.serial_no_item
-                cur_frm.doc.items[0].serial_no=cur_frm.doc.search_serial_no
-                if (cur_frm.doc.serial_no_warehouse!=null && cur_frm.doc.serial_no_warehouse!=undefined && cur_frm.doc.serial_no_warehouse!='') {
-                   if ( cur_frm.doc.items[0].warehouse!=cur_frm.doc.serial_no_warehouse) {
-                    // cur_frm.doc.items[0].warehouse=cur_frm.doc.serial_no_warehouse
-                   }
-                   
-                 }else{
-                    // cur_frm.doc.items[0].warehouse=undefined
-                 }
+                cur_frm.doc.items.splice(cur_frm.doc.items[0], 1)
             }
-            else{
                 var child = cur_frm.add_child("items");
                 frappe.model.set_value(child.doctype, child.name, "item_code", cur_frm.doc.serial_no_item)
                 frappe.model.set_value(child.doctype, child.name, "serial_no", cur_frm.doc.search_serial_no)
                 if (cur_frm.doc.serial_no_warehouse!=null && cur_frm.doc.serial_no_warehouse!=undefined && cur_frm.doc.serial_no_warehouse!='') {
                     if ( child.warehouse!=cur_frm.doc.serial_no_warehouse) {
                     // frappe.model.set_value(child.doctype, child.name, "warehouse", cur_frm.doc.serial_no_warehouse)
-
                        }
                  }else{
                     // frappe.model.set_value(child.doctype, child.name, "warehouse", undefined)
                  }
-            }
-            cur_frm.refresh_field("items")
+                 cur_frm.refresh_field("items")
 
-            cur_frm.set_value('search_serial_no', undefined);
+                 cur_frm.set_value('search_serial_no', undefined);
             cur_frm.set_value('serial_no_item', undefined);
             cur_frm.set_value('serial_no_warehouse', undefined);
             cur_frm.refresh_field("search_serial_no")
