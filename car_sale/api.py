@@ -462,7 +462,7 @@ def update_serial_no_from_so(self,method):
 										serial_no, sales_invoice)))
 					
 									sno = frappe.get_doc('Serial No', serial_no)
-									if sno.reservation_status=='Reserved' and (sno.reserved_by_document).startswith("SO-") :
+									if sno.reservation_status=='Reserved' and frappe.db.exists("Salary Order", sno.reserved_by_document):
 										if sno.reserved_by_document!=self.name:
 											frappe.throw(_("{0} is already reserved by {1} ,for Customer : {2} against Document No : {3}").format(sno.name,sno.sales_partner,sno.for_customer,sno.reserved_by_document))
 									if sno.reservation_status=='Sold Out':
@@ -502,11 +502,14 @@ def update_serial_no_status_from_sales_invoice(self,method):
 					if item.serial_no and cint(item.qty) != len(si_serial_nos):
 						frappe.throw(_("Row {0}: {1} Serial numbers required for Item {2}. You have provided {3}.".format(
 							item.idx, item.qty, item.item_code, len(si_serial_nos))))
-
+					print 'item.serial_no'
+					print item.serial_no
+					print len(si_serial_nos)
+					print item.serial_no.split("\n")
 					for serial_no in item.serial_no.split("\n"):
-						print 'serial_no'
-						print serial_no
-						if serial_no and frappe.db.exists('Serial No', serial_no):
+						print '1serial_no'
+						print len(serial_no)
+						if serial_no and frappe.db.exists('Serial No', serial_no) :
 							#match item_code with serial number-->item_code
 							sno_item_code=frappe.db.get_value("Serial No", serial_no, "item_code")
 							if (cstr(sno_item_code) != cstr(item.item_code)):
@@ -532,7 +535,9 @@ def update_serial_no_status_from_sales_invoice(self,method):
 							#sno.sales_partner_phone_no=self.sales_partner_phone
 							sno.for_customer=self.customer
 							# sno.reserved_by_document = ''
-							sno.db_update()
+							sno.save(ignore_permissions=True)
+						elif len(serial_no)==0:
+							pass
 						else:
 							# check for invalid serial number
 							frappe.throw(_("{0} is invalid serial number").format(serial_no))
@@ -582,7 +587,7 @@ def update_serial_no_status_from_delivery_note(self,method):
 					#sno.sales_partner_phone_no=self.sales_partner_phone
 					sno.for_customer=self.customer
 					# sno.reserved_by_document = ''
-					sno.db_update()
+					sno.save(ignore_permissions=True)
 				else:
 					# check for invalid serial number
 					frappe.throw(_("{0} is invalid serial number").format(serial_no))
@@ -615,7 +620,7 @@ def unreserve_serial_no_from_so_on_cancel(self,method):
 							sno.branch=None
 							sno.for_customer=None
 							sno.reserved_by_document = None
-							sno.db_update()
+							sno.save(ignore_permissions=True)
 					else:
 						# check for invalid serial number
 						# frappe.throw(_("{0} is invalid serial number").format(serial_no))
@@ -670,7 +675,7 @@ def unreserve_serial_no_from_quotation(self,method,auto_run=0):
 							sno.branch=None
 							sno.for_customer=None
 							sno.reserved_by_document = None
-							sno.db_update()
+							sno.save(ignore_permissions=True)
 							self.db_set('reserve_above_items',0)
 					else:
 						# check for invalid serial number
@@ -717,7 +722,7 @@ def update_serial_no_from_quotation(self,method):
 					sno.sales_partner_phone_no=self.sales_partner_phone
 					sno.for_customer=self.customer
 					sno.reserved_by_document = self.name
-					sno.db_update()
+					sno.save(ignore_permissions=True)
 				else:
 					# check for invalid serial number
 					frappe.throw(_("{0} is invalid serial number").format(serial_no))
