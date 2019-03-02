@@ -462,7 +462,7 @@ def update_serial_no_from_so(self,method):
 										serial_no, sales_invoice)))
 					
 									sno = frappe.get_doc('Serial No', serial_no)
-									if sno.reservation_status=='Reserved' and frappe.db.exists("Salary Order", sno.reserved_by_document):
+									if sno.reservation_status=='Reserved' and frappe.db.exists("Sales Order", sno.reserved_by_document):
 										if sno.reserved_by_document!=self.name:
 											frappe.throw(_("{0} is already reserved by {1} ,for Customer : {2} against Document No : {3}").format(sno.name,sno.sales_partner,sno.for_customer,sno.reserved_by_document))
 									if sno.reservation_status=='Sold Out':
