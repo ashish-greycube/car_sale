@@ -9,3 +9,24 @@ frappe.ui.form.on('Sales Invoice', {
         cur_frm.refresh_field('items');
     }
 });
+frappe.ui.form.on('Sales Invoice Item', {
+    serial_no: function(frm, cdt, cdn) {
+        let row = locals[cdt][cdn];
+        if (row.serial_no.length > 0){
+       return frappe.call({
+            method: "car_sale.api.get_registration_plate_no",
+            args: {"serial_nos":row.serial_no},
+            callback: function(r, rt) {
+                if(r.message) {
+                    let new_registration_plate_no=r.message
+                    row.registration_plate_no=new_registration_plate_no
+                    cur_frm.refresh_field('items')
+                }
+            }
+        })}
+        else{
+            row.registration_plate_no=undefined
+            cur_frm.refresh_field('items')
+        }
+    }
+});
