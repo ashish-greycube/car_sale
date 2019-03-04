@@ -238,6 +238,24 @@ docstatus<2
 and bank_customer=1""",as_list=True)
 
 @frappe.whitelist()
+def get_non_bank_customer(doctype, txt, searchfield, start, page_len, filters):
+    return frappe.db.sql("""select name from `tabCustomer`
+where 
+docstatus<2 
+and bank_customer=0""",as_list=True)
+
+@frappe.whitelist()
+def is_customer_a_bank(customer=None):
+    if customer:
+        return frappe.db.sql("""select bank_customer from `tabCustomer`
+where 
+docstatus<2 
+and name=%s""",customer,as_list=True)[0][0]
+    else:
+        return None
+
+
+@frappe.whitelist()
 def get_branch_of_sales_partner(sales_partner=None):
     if sales_partner:
         return frappe.db.sql("""select branch from `tabSales Partner`
