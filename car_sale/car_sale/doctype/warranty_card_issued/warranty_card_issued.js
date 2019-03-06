@@ -14,5 +14,13 @@ frappe.ui.form.on('Warranty Card Issued', {
 					}
 				}
 			})
+	},
+	validate: function(frm) {
+		if (frm.doc.sales_invoice==undefined) {
+			frappe.throw(__("Sales Invoice not found  for serial no: {0}",[frm.doc.serial_no]));
+			return false;
+			
+		}
+
 	}
 });

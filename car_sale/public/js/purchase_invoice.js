@@ -16,22 +16,30 @@ frappe.ui.form.on('Purchase Invoice', {
                             console.log(r)
                             if (r.message) {
                                 let warranty_item = r.message
+
                                 warranty_item.forEach(fill_item_child);
                                 function fill_item_child(value, index) {
-                                    if ((cur_frm.doc.items[0]) && (cur_frm.doc.items[0].item_code == undefined || cur_frm.doc.items[0].item_code == '' || cur_frm.doc.items[0].item_code == null)) {
-                                        cur_frm.doc.items.splice(cur_frm.doc.items[0], 1)
+                                    
+                                    if ((cur_frm.doc.items.length>0)) {
+                                       cur_frm.doc.items.splice(cur_frm.doc.items[0],cur_frm.doc.items.length)
                                     }
                                     var child = cur_frm.add_child("items");
                                     frappe.model.set_value(child.doctype, child.name, "item_code", value.warranty_card_item)
                                     frappe.model.set_value(child.doctype, child.name, "qty", value.qty)
+                                    frappe.msgprint(__(" {0} - warranty cards found for '{1}'.",[value.qty,value.warranty_card_item]));
+
                                 }
                                 setTimeout(() => {
                                     warranty_item.forEach((value, idx) => {
                                         let child = cur_frm.doc.items[idx];
                                         frappe.model.set_value(child.doctype, child.name, "description", value.description)
+                                        var df = frappe.meta.get_docfield("Purchase Invoice Item","description", cur_frm.doc.name);
+                                        df.read_only = 1;
                                     });
                                 }, 500);
+                                
                                 cur_frm.refresh_field("items")
+
                             }
                         }
                     })
