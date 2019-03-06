@@ -238,6 +238,13 @@ docstatus<2
 and bank_customer=1""",as_list=True)
 
 @frappe.whitelist()
+def get_warranty_card_item(doctype, txt, searchfield, start, page_len, filters):
+    return frappe.db.sql("""select name from `tabItem`
+where 
+docstatus<2 
+and item_group=1""",as_list=True)
+
+@frappe.whitelist()
 def get_non_bank_customer(doctype, txt, searchfield, start, page_len, filters):
     return frappe.db.sql("""select name from `tabCustomer`
 where 
@@ -276,7 +283,20 @@ and name=%s""",sales_person,as_list=True)[0][0]
     else:
         return None
 
-
+@frappe.whitelist()
+def get_waranty_card_items_for_PI(supplier,posting_date):
+    warranty_item = frappe.db.sql("""select 
+-- group_concat('card::',warranty_card_number,',serial--',serial_no SEPARATOR '|') as description,
+group_concat(warranty_card_number SEPARATOR '|') as description,
+count(warranty_card_number) as qty,
+warranty_card_item
+from `tabWarranty Card Issued`
+where purchase_invoice is null
+and sales_invoice is not null
+and supplier = %s
+and issued_date <= %s
+group by warranty_card_item""",(supplier,posting_date), as_dict=1)
+    return warranty_item if warranty_item else None
 
 @frappe.whitelist()
 def get_item_details(item_code):
@@ -301,6 +321,30 @@ and user_id=%(user_email)s
             'user_email': user_email
         },as_list=True)
     return sales_partner if sales_partner else None
+@frappe.whitelist()
+def update_warranty_card_issued(self,method):
+    if self.docstatus==1:
+    # submitted
+        for item in self.items:
+            # check for empty serial no
+            if item.description:
+                description=item.description
+                warranty_card_number=description.split("|")
+                for card_no in warranty_card_number:
+                    doc = frappe.get_doc('Warranty Card Issued', card_no)
+                    doc.purchase_invoice=self.name
+                    doc.save(ignore_permissions=True)
+    elif self.docstatus==2:
+    # cancelled
+        for item in self.items:
+            # check for empty serial no
+            if item.description:
+                description=item.description
+                warranty_card_number=description.split("|")
+                for card_no in warranty_card_number:
+                    doc = frappe.get_doc('Warranty Card Issued', card_no)
+                    doc.purchase_invoice=None
+                    doc.save(ignore_permissions=True)
 
 # Update status : Lead to Sales Order
 @frappe.whitelist()

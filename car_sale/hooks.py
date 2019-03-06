@@ -36,7 +36,7 @@ doctype_js = {
 "Request for Quotation":"public/js/car_search.js",
 "Supplier Quotation":"public/js/car_search.js",
 "Purchase Order":"public/js/car_search.js",
-"Purchase Invoice":"public/js/car_search.js",
+"Purchase Invoice":"public/js/purchase_invoice.js",
 "Delivery Note":"public/js/delivery_note.js",
 "Stock Reconciliation":"public/js/car_search.js"
 }
@@ -119,6 +119,10 @@ doc_events = {
 	},
 	"Sales Invoice":{
 		"on_submit":"car_sale.api.update_serial_no_status_from_sales_invoice"
+	},
+	"Purchase Invoice":{
+		"on_submit":"car_sale.api.update_warranty_card_issued",
+		"on_cancel":"car_sale.api.update_warranty_card_issued",
 	}
 }
 
@@ -148,7 +152,14 @@ scheduler_events = {
 		"car_sale.api.auto_unreserve_serial_no_from_quotation_on_expiry"
 	]
 }
-
+fixtures = [
+	    	{
+		"dt":'Property Setter',
+		"filters":[
+			["field_name", "in", ["naming_series"]],
+		]
+	},	
+	]
 # Testing
 # -------
 
