@@ -293,6 +293,7 @@ warranty_card_item
 from `tabWarranty Card Issued`
 where purchase_invoice is null
 and sales_invoice is not null
+and docstatus=1
 and supplier = %s
 and issued_date <= %s
 group by warranty_card_item""",(supplier,posting_date), as_dict=1)
