@@ -24,20 +24,21 @@ frappe.ui.form.on('Purchase Invoice', {
                                     var child = cur_frm.add_child("items");
                                     frappe.model.set_value(child.doctype, child.name, "item_code", value.warranty_card_item)
                                     frappe.model.set_value(child.doctype, child.name, "qty", value.qty)
-                                    frappe.msgprint(__(" {0} - warranty cards found for '{1}'.",[value.qty,value.warranty_card_item]));
+                                    // frappe.msgprint(__(" {0} - warranty cards found for '{1}'.",[value.qty,value.warranty_card_item]));
 
                                 }
                                 setTimeout(() => {
                                     warranty_item.forEach((value, idx) => {
                                         let child = cur_frm.doc.items[idx];
+                                        console.log(idx)
+                                        console.log(value.description)
                                         frappe.model.set_value(child.doctype, child.name, "description", value.description)
                                         var df = frappe.meta.get_docfield("Purchase Invoice Item","description", cur_frm.doc.name);
                                         df.read_only = 1;
+                                        frappe.msgprint(__(" {0} - warranty cards found for '{1}'.",[value.qty,value.warranty_card_item]));
                                     });
-                                }, 500);
-                                
+                                }, 1000);
                                 cur_frm.refresh_field("items")
-
                             }
                         }
                     })
