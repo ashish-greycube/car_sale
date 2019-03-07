@@ -16,13 +16,11 @@ frappe.ui.form.on('Purchase Invoice', {
                             console.log(r)
                             if (r.message) {
                                 let warranty_item = r.message
-
+                                if ((cur_frm.doc.items.length>0)) {
+                                    cur_frm.doc.items.splice(cur_frm.doc.items[0],cur_frm.doc.items.length)
+                                 }
                                 warranty_item.forEach(fill_item_child);
                                 function fill_item_child(value, index) {
-                                    
-                                    if ((cur_frm.doc.items.length>0)) {
-                                       cur_frm.doc.items.splice(cur_frm.doc.items[0],cur_frm.doc.items.length)
-                                    }
                                     var child = cur_frm.add_child("items");
                                     frappe.model.set_value(child.doctype, child.name, "item_code", value.warranty_card_item)
                                     frappe.model.set_value(child.doctype, child.name, "qty", value.qty)

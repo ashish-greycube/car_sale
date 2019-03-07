@@ -156,6 +156,7 @@ fixtures = [
 	    	{
 		"dt":'Property Setter',
 		"filters":[
+			["doc_type", "in", ["Sales Invoice"]],
 			["field_name", "in", ["naming_series"]],
 		]
 	},	
