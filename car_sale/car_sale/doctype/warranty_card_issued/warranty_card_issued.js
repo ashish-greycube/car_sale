@@ -21,6 +21,12 @@ frappe.ui.form.on('Warranty Card Issued', {
 			return false;
 			
 		}
-
-	}
+	},
+	before_cancel: function(frm) {
+		if(frm.doc.purchase_invoice!=undefined ||frm.doc.purchase_invoice!=''){
+		frappe.throw(__('Purchase Invoice Reference is not empty. Please cancel {0} .',
+		['<a href="#Form/Purchase Invoice/'+frm.doc.purchase_invoice+'">' + frm.doc.purchase_invoice+ '</a>']
+		));
+		return false;
+	}}
 });
