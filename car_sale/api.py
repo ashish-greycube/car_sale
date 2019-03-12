@@ -328,24 +328,31 @@ def update_warranty_card_issued(self,method):
     # submitted
         for item in self.items:
             # check for empty serial no
+            print(item)
             if item.description:
-                description=item.description
-                warranty_card_number=description.split("|")
-                for card_no in warranty_card_number:
-                    doc = frappe.get_doc('Warranty Card Issued', card_no)
-                    doc.purchase_invoice=self.name
-                    doc.save(ignore_permissions=True)
+                item_group=frappe.get_value('Item', item.item_code, 'item_group')
+                print(item_group)
+                if item_group=='Warranty Card Group':
+                    description=item.description
+                    warranty_card_number=description.split("|")
+                    for card_no in warranty_card_number:
+                        doc = frappe.get_doc('Warranty Card Issued', card_no)
+                        doc.purchase_invoice=self.name
+                        doc.save(ignore_permissions=True)
     elif self.docstatus==2:
     # cancelled
         for item in self.items:
             # check for empty serial no
             if item.description:
-                description=item.description
-                warranty_card_number=description.split("|")
-                for card_no in warranty_card_number:
-                    doc = frappe.get_doc('Warranty Card Issued', card_no)
-                    doc.purchase_invoice=None
-                    doc.save(ignore_permissions=True)
+                item_group=frappe.get_value('Item', item.item_code, 'item_group')
+                print(item_group)
+                if item_group=='Warranty Card Group':
+                    description=item.description
+                    warranty_card_number=description.split("|")
+                    for card_no in warranty_card_number:
+                        doc = frappe.get_doc('Warranty Card Issued', card_no)
+                        doc.purchase_invoice=None
+                        doc.save(ignore_permissions=True)
 
 # Update status : Lead to Sales Order
 @frappe.whitelist()
@@ -531,8 +538,10 @@ def update_serial_no_from_so(self,method):
                                     if sno.reservation_status=='Sold Out':
                                         frappe.throw(_("It is sold out"))
                                     sno.reservation_status='Reserved'
-                                    sno.sales_partner=self.sales_partner
-                                    sno.branch=self.sales_partner_branch
+                                    if self.sales_team:
+                                        if len(self.sales_team)>0:
+                                            sno.sales_partner=self.sales_team[0].sales_person
+                                            sno.branch=self.sales_partner_branch
                                     sno.sales_partner_phone_no=self.sales_partner_phone_no
                                     sno.for_customer=self.customer
                                     sno.reserved_by_document = self.name

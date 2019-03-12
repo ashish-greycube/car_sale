@@ -1,4 +1,4 @@
-{% include "car_sale/public/js/car_search_lead.js" %}
+{% include "car_sale/public/js/car_search.js" %}
 frappe.ui.form.on('Purchase Invoice', {
     refresh: function (frm) {
         if (cur_frm.doc.docstatus === 0) {
