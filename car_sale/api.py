@@ -328,10 +328,8 @@ def update_warranty_card_issued(self,method):
     # submitted
         for item in self.items:
             # check for empty serial no
-            print(item)
             if item.description:
                 item_group=frappe.get_value('Item', item.item_code, 'item_group')
-                print(item_group)
                 if item_group=='Warranty Card Group':
                     description=item.description
                     warranty_card_number=description.split("|")
@@ -345,7 +343,6 @@ def update_warranty_card_issued(self,method):
             # check for empty serial no
             if item.description:
                 item_group=frappe.get_value('Item', item.item_code, 'item_group')
-                print(item_group)
                 if item_group=='Warranty Card Group':
                     description=item.description
                     warranty_card_number=description.split("|")
