@@ -130,6 +130,8 @@ def make_customer_from_lead(doc):
             customer_type='Company'
             customer_name=doc.company_name
             customer = frappe.new_doc("Customer")
+            customer.is_internal_customer=0
+            customer.represents_company=''
             customer.customer_type=customer_type
             customer.lead_name=doc.name
             customer.customer_group=doc.customer_group
@@ -156,6 +158,9 @@ def make_customer_from_lead(doc):
             customer_name=doc.lead_name
         # create contact and customer
             customer = frappe.new_doc("Customer")
+            print customer.represents_company
+            customer.is_internal_customer=0
+            customer.represents_company=''
             customer.customer_type=customer_type
             customer.lead_name=doc.name
             customer.customer_group=doc.customer_group
@@ -166,7 +171,9 @@ def make_customer_from_lead(doc):
             print customer.sales_team[0].sales_person
             print customer.sales_team[0].allocated_percentage
             print customer.sales_team[0].car_sale_incentives
-            customer.insert(ignore_permissions=True)
+            print customer.is_internal_customer
+            print customer.represents_company
+            customer.save(ignore_permissions=True)
             primary_contact=get_customer_primary_contact(customer.name)
             customer.customer_primary_contact=primary_contact['name']
             customer.mobile_no=primary_contact['mobile_no']
