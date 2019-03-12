@@ -535,10 +535,10 @@ def update_serial_no_from_so(self,method):
                                     if sno.reservation_status=='Sold Out':
                                         frappe.throw(_("It is sold out"))
                                     sno.reservation_status='Reserved'
-                                    if self.sales_team:
-                                        if len(self.sales_team)>0:
-                                            sno.sales_partner=self.sales_team[0].sales_person
-                                            sno.branch=self.sales_partner_branch
+                                    # if self.sales_team:
+                                    #     if len(self.sales_team)>0:
+                                    #         sno.sales_partner=self.sales_team[0].sales_person
+                                    #         sno.branch=self.sales_partner_branch
                                     sno.sales_partner_phone_no=self.sales_partner_phone_no
                                     sno.for_customer=self.customer
                                     sno.reserved_by_document = self.name
