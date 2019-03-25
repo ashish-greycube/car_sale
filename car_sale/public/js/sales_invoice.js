@@ -1,14 +1,6 @@
 {% include "car_sale/public/js/car_search.js" %}
 
 frappe.ui.form.on('Sales Invoice', {
-    // validate: function (frm) {
-
-    //     $.each(cur_frm.doc.items || [], function (i, v) {
-    //         if (v.against_sales_order && !v.cost_center){
-
-    //         }
-    //     })
-    // },
     onload: function (frm) {
 
         //get customer of non bank type

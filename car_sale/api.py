@@ -321,14 +321,14 @@ def get_item_details(item_code):
 
 @frappe.whitelist()
 def get_sales_person_and_branch(user_email):
-    sales_partner= frappe.db.sql("""select name,branch,incentive from `tabSales Person`
+    sales_person= frappe.db.sql("""select name,branch,incentive from `tabSales Person`
 where
 is_group=0
 and user_id=%(user_email)s
     """,{
             'user_email': user_email
         },as_list=True)
-    return sales_partner if sales_partner else None
+    return sales_person if sales_person else None
 
 @frappe.whitelist()
 def get_sales_person_and_branch_and_costcenter(user_email):
@@ -569,17 +569,18 @@ def update_serial_no_from_so(self,method):
                                     sno = frappe.get_doc('Serial No', serial_no)
                                     if sno.reservation_status=='Reserved' and frappe.db.exists("Sales Order", sno.reserved_by_document):
                                         if sno.reserved_by_document!=self.name:
-                                            frappe.throw(_("{0} is already reserved by {1} ,for Customer : {2} against Document No : {3}").format(sno.name,sno.sales_partner,sno.for_customer,sno.reserved_by_document))
+                                            frappe.throw(_("{0} is already reserved by {1} ,for Customer : {2} against Document No : {3}").format(sno.name,sno.sales_person,sno.for_customer,sno.reserved_by_document))
                                     if sno.reservation_status=='Sold Out':
                                         frappe.throw(_("It is sold out"))
-                                    sno.reservation_status='Reserved'
-                                    if self.sales_person:
-                                        sno.sales_person=self.sales_person
-                                        sno.sales_person_phone_no=frappe.get_value('Sales Person', sno.sales_person, 'phone_no')
-                                        sno.branch=self.sales_person_branch
-                                    sno.for_customer=self.customer
-                                    sno.reserved_by_document = self.name
-                                    sno.save(ignore_permissions=True)
+                                    if sno.reservation_status=='Available':
+                                        sno.reservation_status='Reserved'
+                                        if self.sales_person:
+                                            sno.sales_person=self.sales_person
+                                            sno.sales_person_phone_no=frappe.get_value('Sales Person', sno.sales_person, 'phone_no')
+                                            sno.branch=self.sales_person_branch
+                                        sno.for_customer=self.customer
+                                        sno.reserved_by_document = self.name
+                                        sno.save(ignore_permissions=True)
                                 else:
                                     # check for invalid serial number
                                     frappe.throw(_("{0} is invalid serial number").format(serial_no))
@@ -589,7 +590,9 @@ def update_serial_no_status_from_sales_invoice(self,method):
     """ update serial no doc with details of Sales Order """
     sales_invoice_doc = self.name
     if sales_invoice_doc:
-        if self.update_stock==1:
+        if self.is_return== 1 and self.update_stock == 1:
+            unreserve_serial_no_from_sales_invoice(self,method)
+        elif self.is_return== 0 and self.update_stock == 1 :
             for item in self.items:
                 # check for empty serial no
                 if not item.serial_no:
@@ -632,9 +635,9 @@ def update_serial_no_status_from_sales_invoice(self,method):
                                 serial_no, delivery_document_no)))	
                             sno = frappe.get_doc('Serial No', serial_no)
                             # if sno.reservation_status=='Reserved' and sno.reserved_by_document!="" :
-                            # 	frappe.throw(_("{0} is already reserved by {1} ,for Customer : {2} against Document No : {3}").format(sno.name,sno.sales_partner,sno.for_customer,sno.reserved_by_document))
+                            # 	frappe.throw(_("{0} is already reserved by {1} ,for Customer : {2} against Document No : {3}").format(sno.name,sno.sales_person,sno.for_customer,sno.reserved_by_document))
                             if sno.reservation_status=='Sold Out':
-                                frappe.throw(_("It is sold out"))					
+                                frappe.throw(_("It is sold out"))
                             sno.reservation_status='Sold Out'
                             if self.sales_team:
                                 if len(self.sales_team)>0:
@@ -686,7 +689,7 @@ def update_serial_no_status_from_delivery_note(self,method):
                         serial_no, delivery_document_no)))	
                     sno = frappe.get_doc('Serial No', serial_no)
                     # if sno.reservation_status=='Reserved' and sno.reserved_by_document!="" :
-                    # 	frappe.throw(_("{0} is already reserved by {1} ,for Customer : {2} against Document No : {3}").format(sno.name,sno.sales_partner,sno.for_customer,sno.reserved_by_document))
+                    # 	frappe.throw(_("{0} is already reserved by {1} ,for Customer : {2} against Document No : {3}").format(sno.name,sno.sales_person,sno.for_customer,sno.reserved_by_document))
                     if sno.reservation_status=='Sold Out':
                         frappe.throw(_("It is sold out"))					
                     sno.reservation_status='Sold Out'
@@ -701,6 +704,21 @@ def update_serial_no_status_from_delivery_note(self,method):
                 else:
                     # check for invalid serial number
                     frappe.throw(_("{0} is invalid serial number").format(serial_no))
+
+@frappe.whitelist()
+def calculate_sales_person_total_commission(self,method):
+    sales_invoice = self.name
+    if sales_invoice:
+        if self.sales_person:
+            commission_per_car=self.commission_per_car
+            sales_person_total_commission=0
+            for item in self.items:
+                is_stock_item=frappe.db.get_value("Item", item.item_code, "is_stock_item")
+                is_sales_item=frappe.db.get_value("Item", item.item_code, "is_sales_item")
+                has_serial_no=frappe.db.get_value("Item", item.item_code, "has_serial_no")
+                if is_stock_item==1 and is_sales_item==1 and has_serial_no==1:
+                    sales_person_total_commission+=item.qty*commission_per_car
+            self.sales_person_total_commission=sales_person_total_commission
 
 @frappe.whitelist()
 def unreserve_serial_no_from_so_on_cancel(self,method):
@@ -735,6 +753,70 @@ def unreserve_serial_no_from_so_on_cancel(self,method):
                         # check for invalid serial number
                         # frappe.throw(_("{0} is invalid serial number").format(serial_no))
                         pass
+
+@frappe.whitelist()
+def unreserve_serial_no_from_sales_invoice(self,method):
+    sales_invoice_doc = self.name
+    if sales_invoice_doc and self.update_stock==1:
+        for item in self.items:
+            # check for empty serial no
+            if not item.serial_no:
+                pass
+            else:
+                for serial_no in item.serial_no.split("\n"):
+                    if serial_no and frappe.db.exists('Serial No', serial_no):
+                        #match item_code with serial number-->item_code
+                        sno_item_code=frappe.db.get_value("Serial No", serial_no, "item_code")
+                        if (cstr(sno_item_code) != cstr(item.item_code)):
+                            #frappe.throw(_("{0} serial number is not valid for {1} item code").format(serial_no,item.item_code))
+                            pass
+                        sno = frappe.get_doc('Serial No', serial_no)
+                        if (self.docstatus == 1 and sno.reserved_by_document == self.name and sno.reservation_status=='Sold Out'):
+                            sno.reservation_status='Available'
+                            sno.sales_person=None
+                            sno.sales_person_phone_no=None
+                            sno.branch=None
+                            sno.for_customer=None
+                            sno.reserved_by_document = None
+                            sno.save(ignore_permissions=True)
+                    else:
+                        # check for invalid serial number
+                        # frappe.throw(_("{0} is invalid serial number").format(serial_no))
+                        pass
+
+@frappe.whitelist()
+def unreserve_serial_no_from_delivery_note(self,method):
+    delivery_note = self.name
+    if delivery_note and self.docstatus==1:
+        for item in self.items:
+            # check for empty serial no
+            if not item.serial_no:
+                pass
+            else:
+                for serial_no in item.serial_no.split("\n"):
+                    if serial_no and frappe.db.exists('Serial No', serial_no):
+                        #match item_code with serial number-->item_code
+                        sno_item_code=frappe.db.get_value("Serial No", serial_no, "item_code")
+                        if (cstr(sno_item_code) != cstr(item.item_code)):
+                            #frappe.throw(_("{0} serial number is not valid for {1} item code").format(serial_no,item.item_code))
+                            pass
+                        sno = frappe.get_doc('Serial No', serial_no)
+                        if (sno.reserved_by_document == self.name and sno.reservation_status=='Sold Out'):
+                            sno.reservation_status='Available'
+                            sno.sales_person=None
+                            sno.sales_person_phone_no=None
+                            sno.branch=None
+                            sno.for_customer=None
+                            sno.reserved_by_document = None
+                            sno.save(ignore_permissions=True)
+                    else:
+                        # check for invalid serial number
+                        # frappe.throw(_("{0} is invalid serial number").format(serial_no))
+                        pass
+
+
+
+
 @frappe.whitelist()
 def auto_unreserve_serial_no_from_quotation_on_expiry():
     expired_quotation_list=frappe.get_all('Quotation', filters = [["valid_till", ">", datetime.date(1900, 1, 1)],["valid_till", "<", getdate(nowdate())]], fields=['name'])
@@ -754,8 +836,8 @@ def unreserve_serial_no_from_quotation(self,method,auto_run=0):
     print cint(self.reserve_above_items)
     print  self.status
     print self.docstatus
-    if auto_run==1:
-        self.reserve_above_items=0
+    # if auto_run==1:
+    #     self.reserve_above_items=0
     quotation = None if (cint(self.reserve_above_items)==1 or self.status in ('Lost','Ordered') or self.docstatus ==0) else self.name
     if quotation and self.docstatus ==1:
         print 'inside unreserve_serial_no_from_quotation'
@@ -823,17 +905,18 @@ def update_serial_no_from_quotation(self,method):
     
                     sno = frappe.get_doc('Serial No', serial_no)
                     if sno.reservation_status=='Reserved' and sno.reserved_by_document!="" :
-                        frappe.throw(_("{0} is already reserved by {1} ,for Customer : {2} against Document No : {3}").format(sno.name,sno.sales_partner,sno.for_customer,sno.reserved_by_document))
+                        frappe.throw(_("{0} is already reserved by {1} ,for Customer : {2} against Document No : {3}").format(sno.name,sno.sales_person,sno.for_customer,sno.reserved_by_document))
                     if sno.reservation_status=='Sold Out':
                         frappe.throw(_("It is sold out"))
-                    sno.reservation_status='Reserved'
-                    if self.sales_person:
-                        sno.sales_person=self.sales_person
-                        sno.sales_person_phone_no=frappe.get_value('Sales Person', sno.sales_person, 'phone_no')
-                        sno.branch=self.sales_person_branch
-                    sno.for_customer=self.customer
-                    sno.reserved_by_document = self.name
-                    sno.save(ignore_permissions=True)
+                    if sno.reservation_status=='Available':
+                        sno.reservation_status='Reserved'
+                        if self.sales_person:
+                            sno.sales_person=self.sales_person
+                            sno.sales_person_phone_no=frappe.get_value('Sales Person', sno.sales_person, 'phone_no')
+                            sno.branch=self.sales_person_branch
+                        sno.for_customer=self.customer
+                        sno.reserved_by_document = self.name
+                        sno.save(ignore_permissions=True)
                 else:
                     # check for invalid serial number
                     frappe.throw(_("{0} is invalid serial number").format(serial_no))

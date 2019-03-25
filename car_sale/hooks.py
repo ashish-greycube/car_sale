@@ -119,6 +119,7 @@ doc_events = {
 		"on_cancel":"car_sale.api.unreserve_serial_no_from_delivery_note",
 	},
 	"Sales Invoice":{
+		"validate":"car_sale.api.calculate_sales_person_total_commission",
 		"on_submit":"car_sale.api.update_serial_no_status_from_sales_invoice",
 		"on_cancel":"car_sale.api.unreserve_serial_no_from_sales_invoice",
 	},
