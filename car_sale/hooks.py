@@ -104,7 +104,8 @@ doc_events = {
 	"Sales Order": {
 		"after_insert": "car_sale.api.update_lead_status_from_sales_order",
 		"validate":"car_sale.api.update_serial_no_from_so",
-		"on_cancel":"car_sale.api.unreserve_serial_no_from_so_on_cancel"
+		"on_cancel":"car_sale.api.unreserve_serial_no_from_so_on_cancel",
+		"after_delete":"car_sale.api.unreserve_serial_no_from_so_on_cancel"
 		
 	},
     "Quotation": {
@@ -118,7 +119,8 @@ doc_events = {
 		"on_cancel":"car_sale.api.unreserve_serial_no_from_delivery_note",
 	},
 	"Sales Invoice":{
-		"on_submit":"car_sale.api.update_serial_no_status_from_sales_invoice"
+		"on_submit":"car_sale.api.update_serial_no_status_from_sales_invoice",
+		"on_cancel":"car_sale.api.unreserve_serial_no_from_sales_invoice",
 	},
 	"Purchase Invoice":{
 		"on_submit":"car_sale.api.update_warranty_card_issued",

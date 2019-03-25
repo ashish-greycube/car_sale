@@ -239,7 +239,7 @@ def get_existing_customer(mobile_no):
 
 @frappe.whitelist()
 def get_bank_name(doctype, txt, searchfield, start, page_len, filters):
-    return frappe.db.sql("""select name from `tabCustomer`
+    return frappe.db.sql("""select name,customer_name from `tabCustomer`
 where 
 docstatus<2 
 and bank_customer=1""",as_list=True)
@@ -321,7 +321,7 @@ def get_item_details(item_code):
 
 @frappe.whitelist()
 def get_sales_person_and_branch(user_email):
-    sales_partner= frappe.db.sql("""select name,branch from `tabSales Person`
+    sales_partner= frappe.db.sql("""select name,branch,incentive from `tabSales Person`
 where
 is_group=0
 and user_id=%(user_email)s
@@ -329,6 +329,37 @@ and user_id=%(user_email)s
             'user_email': user_email
         },as_list=True)
     return sales_partner if sales_partner else None
+
+@frappe.whitelist()
+def get_sales_person_and_branch_and_costcenter(user_email):
+    sales_person= frappe.db.sql("""select sp.name,sp.branch, sp.incentive, b.cost_center 
+from `tabSales Person` as sp
+inner join `tabBranch` as b
+on sp.branch=b.name
+where
+sp.is_group=0
+and sp.user_id=%(user_email)s
+    """,{
+            'user_email': user_email
+        },as_list=True)
+    return sales_person if sales_person else None
+
+
+@frappe.whitelist()
+def get_branch_and_costcenter(name):
+    sales_person= frappe.db.sql("""select sp.branch, sp.incentive, b.cost_center 
+from `tabSales Person` as sp
+inner join `tabBranch` as b
+on sp.branch=b.name
+where
+sp.is_group=0
+and sp.name=%(name)s
+    """,{
+            'name': name
+        },as_list=True)
+    return sales_person if sales_person else None
+
+
 @frappe.whitelist()
 def update_warranty_card_issued(self,method):
     if self.docstatus==1:
@@ -542,11 +573,10 @@ def update_serial_no_from_so(self,method):
                                     if sno.reservation_status=='Sold Out':
                                         frappe.throw(_("It is sold out"))
                                     sno.reservation_status='Reserved'
-                                    # if self.sales_team:
-                                    #     if len(self.sales_team)>0:
-                                    #         sno.sales_partner=self.sales_team[0].sales_person
-                                    #         sno.branch=self.sales_partner_branch
-                                    sno.sales_partner_phone_no=self.sales_partner_phone_no
+                                    if self.sales_person:
+                                        sno.sales_person=self.sales_person
+                                        sno.sales_person_phone_no=frappe.get_value('Sales Person', sno.sales_person, 'phone_no')
+                                        sno.branch=self.sales_person_branch
                                     sno.for_customer=self.customer
                                     sno.reserved_by_document = self.name
                                     sno.save(ignore_permissions=True)
@@ -606,9 +636,11 @@ def update_serial_no_status_from_sales_invoice(self,method):
                             if sno.reservation_status=='Sold Out':
                                 frappe.throw(_("It is sold out"))					
                             sno.reservation_status='Sold Out'
-                            sno.sales_partner=self.sales_partner
-                            #sno.branch=self.sales_partner_branch
-                            #sno.sales_partner_phone_no=self.sales_partner_phone
+                            if self.sales_team:
+                                if len(self.sales_team)>0:
+                                    sno.sales_person=self.sales_team[0].sales_person
+                                    sno.sales_person_phone_no=frappe.get_value('Sales Person', sno.sales_person, 'phone_no')
+                                    sno.branch=frappe.get_value('Sales Person', sno.sales_person, 'branch')
                             sno.for_customer=self.customer
                             # sno.reserved_by_document = ''
                             sno.save(ignore_permissions=True)
@@ -658,9 +690,11 @@ def update_serial_no_status_from_delivery_note(self,method):
                     if sno.reservation_status=='Sold Out':
                         frappe.throw(_("It is sold out"))					
                     sno.reservation_status='Sold Out'
-                    sno.sales_partner=self.sales_partner
-                    #sno.branch=self.sales_partner_branch
-                    #sno.sales_partner_phone_no=self.sales_partner_phone
+                    if self.sales_team:
+                        if len(self.sales_team)>0:
+                            sno.sales_person=self.sales_team[0].sales_person
+                            sno.sales_person_phone_no=frappe.get_value('Sales Person', sno.sales_person, 'phone_no')
+                            sno.branch=frappe.get_value('Sales Person', sno.sales_person, 'branch')
                     sno.for_customer=self.customer
                     # sno.reserved_by_document = ''
                     sno.save(ignore_permissions=True)
@@ -689,10 +723,10 @@ def unreserve_serial_no_from_so_on_cancel(self,method):
                         if sales_invoice and self.name != sales_invoice:
                             pass
                         sno = frappe.get_doc('Serial No', serial_no)
-                        if (sno.reserved_by_document == self.name):
+                        if ((self.docstatus == 0 or self.docstatus == 1) and sno.reserved_by_document == self.name and sno.reservation_status=='Reserved'):
                             sno.reservation_status='Available'
-                            sno.sales_partner=None
-                            sno.sales_partner_phone_no=None
+                            sno.sales_person=None
+                            sno.sales_person_phone_no=None
                             sno.branch=None
                             sno.for_customer=None
                             sno.reserved_by_document = None
@@ -723,7 +757,7 @@ def unreserve_serial_no_from_quotation(self,method,auto_run=0):
     if auto_run==1:
         self.reserve_above_items=0
     quotation = None if (cint(self.reserve_above_items)==1 or self.status in ('Lost','Ordered') or self.docstatus ==0) else self.name
-    if quotation:
+    if quotation and self.docstatus ==1:
         print 'inside unreserve_serial_no_from_quotation'
         for item in self.items:
             # check for empty serial no
@@ -744,10 +778,10 @@ def unreserve_serial_no_from_quotation(self,method,auto_run=0):
                         if sales_invoice and self.name != sales_invoice:
                             pass
                         sno = frappe.get_doc('Serial No', serial_no)
-                        if (sno.reserved_by_document == self.name):
+                        if (sno.reserved_by_document == self.name and sno.reservation_status=='Reserved'):
                             sno.reservation_status='Available'
-                            sno.sales_partner=None
-                            sno.sales_partner_phone_no=None
+                            sno.sales_person=None
+                            sno.sales_person_phone_no=None
                             sno.branch=None
                             sno.for_customer=None
                             sno.reserved_by_document = None
@@ -793,9 +827,10 @@ def update_serial_no_from_quotation(self,method):
                     if sno.reservation_status=='Sold Out':
                         frappe.throw(_("It is sold out"))
                     sno.reservation_status='Reserved'
-                    sno.sales_partner=self.sales_partner
-                    sno.branch=self.sales_partner_branch
-                    sno.sales_partner_phone_no=self.sales_partner_phone
+                    if self.sales_person:
+                        sno.sales_person=self.sales_person
+                        sno.sales_person_phone_no=frappe.get_value('Sales Person', sno.sales_person, 'phone_no')
+                        sno.branch=self.sales_person_branch
                     sno.for_customer=self.customer
                     sno.reserved_by_document = self.name
                     sno.save(ignore_permissions=True)

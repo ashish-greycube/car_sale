@@ -1,6 +1,14 @@
 {% include "car_sale/public/js/car_search.js" %}
 
 frappe.ui.form.on('Sales Invoice', {
+    // validate: function (frm) {
+
+    //     $.each(cur_frm.doc.items || [], function (i, v) {
+    //         if (v.against_sales_order && !v.cost_center){
+
+    //         }
+    //     })
+    // },
     onload: function (frm) {
 
         //get customer of non bank type
@@ -11,10 +19,32 @@ frappe.ui.form.on('Sales Invoice', {
         });
 
         $.each(cur_frm.doc.items || [], function (i, v) {
-            if (v.against_sales_order && !v.cost_center)
+            if (v.against_sales_order && !v.cost_center){
                 frappe.model.set_value(v.doctype, v.name, "cost_center", locals["Sales Order"][v.against_sales_order].branch_cost_center)
+            }
         })
         cur_frm.refresh_field('items');
+
+                //get sales partenr
+        if (cur_frm.doc.sales_person==undefined || cur_frm.doc.sales_person=='' ) {
+            return frappe.call({
+                method: "car_sale.api.get_sales_person_and_branch",
+                args: {"user_email":frappe.session.user_email},
+                callback: function(r) {
+                    if(r.message) {
+                        let sales_person=r.message[0][0]
+                        let branch=r.message[0][1]
+                        let incentive=r.message[0][2]
+                        cur_frm.set_value('sales_person',sales_person);
+                        cur_frm.set_value('sales_person_branch',branch);
+                        cur_frm.set_value('commission_per_car',incentive);
+                        cur_frm.refresh_field('sales_person')
+                        cur_frm.refresh_field('commission_per_car')
+                        cur_frm.refresh_field('sales_person_branch')
+                    }
+                }
+            })				
+        }
     },
     customer: function (frm){
         console.log(frm.doc.customer)

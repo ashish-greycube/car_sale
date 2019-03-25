@@ -1,4 +1,5 @@
 {% include "car_sale/public/js/car_search.js" %}
+{% include "car_sale/public/js/sales_person.js" %}
 frappe.ui.form.on('Quotation', {
     on_submit:function(frm) {
         if (cur_frm.doc.reserve_above_items==0) {
@@ -8,20 +9,7 @@ frappe.ui.form.on('Quotation', {
 	items_on_form_rendered: function() {
 		erpnext.setup_serial_no();
 	},
-    sales_partner: function(frm) {
-		frappe.call({
-			method: "car_sale.api.get_branch_of_sales_partner",
-			args: {
-				'sales_partner': cur_frm.doc.sales_partner
-			},
-			callback: function(r) {
+	setup:function(frm){
 
-				if(r.message) {
-					console.log(r.message)
-					cur_frm.set_value('sales_partner_branch',r.message);
-					cur_frm.refresh_field('sales_partner_branch');
-				}
-			}
-		})
-    },
+	}
 });

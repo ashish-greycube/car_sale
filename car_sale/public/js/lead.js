@@ -4,6 +4,7 @@
 frappe.provide("erpnext");
 cur_frm.email_field = "email_id";
 {% include "car_sale/public/js/car_search_lead.js" %}
+{% include "car_sale/public/js/sales_person.js" %}
 
 erpnext.LeadController = frappe.ui.form.Controller.extend({
 	onload: function() {
@@ -16,35 +17,12 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 					query: "car_sale.api.get_bank_name"
 				}
 			})
-			//get sales partenr
-			if (cur_frm.doc.sales_person==undefined || cur_frm.doc.sales_person=='' ) {
-				return frappe.call({
-					method: "car_sale.api.get_sales_person_and_branch",
-					args: {"user_email":frappe.session.user_email},
-					callback: function(r) {
-						if(r.message) {
-							let sales_person=r.message[0][0]
-							let branch=r.message[0][1]
-							cur_frm.set_value('sales_person',sales_person);
-							cur_frm.set_value('branch',branch);
-							cur_frm.refresh_field('branch')
-							cur_frm.refresh_field('sales_person')
-
-						}
-					}
-				})				
-			}
-	},
-	sales_person:function(){
-		get_incentive_of_sales_person()
 
 	},
 	validate: function() {
 		if (cur_frm.doc.customer){
 			cur_frm.set_value("email_id", '');
 		}
-		empty_child_table()
-		child_table_add_row()
 	},
 	refresh: function() {
 		var doc = cur_frm.doc;
@@ -145,8 +123,8 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 										let sales_person=r.message[0][0]
 										let branch=r.message[0][1]
 										cur_frm.set_value('sales_person',sales_person);
-										cur_frm.set_value('branch',branch);
-										cur_frm.refresh_field('branch')
+										cur_frm.set_value('sales_person_branch',branch);
+										cur_frm.refresh_field('sales_person_branch')
 										cur_frm.refresh_field('sales_person')
 
 									}
@@ -249,42 +227,4 @@ cur_frm.cscript.item_code = function(doc, cdt, cdn) {
 			}
 		})
 	}
-}
-
-
-function child_table_add_row(){
-	// cur_frm.refresh_field("incentive")
-	var child = cur_frm.add_child("sales_team");
-	frappe.model.set_value(child.doctype, child.name, "sales_person", cur_frm.doc.sales_person)
-	frappe.model.set_value(child.doctype, child.name, "allocated_percentage", 100)
-	frappe.model.set_value(child.doctype, child.name, "car_sale_incentives", cur_frm.doc.incentive)
-	//cur_frm.refresh_field("sales_team")
-}
-
-
-function empty_child_table() {
-	var tbl = cur_frm.doc.sales_team || [];
-	var i = tbl.length;
-		while (i--) {
-	console.log(i)
-	// if (i > 1) {
-		cur_frm.get_field('sales_team').grid.grid_rows[i].remove();
-		
-	// }
-				
-		}		
-		cur_frm.refresh_field("sales_team")
-}
-
-function get_incentive_of_sales_person() {
-	frappe.call({
-		method: "car_sale.api.get_incentive_of_sales_person",
-		args: {"sales_person":cur_frm.doc.sales_person},
-		callback: function(r, rt) {
-			if(r.message) {
-				let incentive=r.message
-				cur_frm.set_value('incentive',incentive);
-			}
-		}
-	})
 }
