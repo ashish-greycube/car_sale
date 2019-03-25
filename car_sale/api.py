@@ -115,10 +115,6 @@ def get_incentive_of_sales_person(sales_person):
 @frappe.whitelist()
 def make_customer_from_lead(doc):
     doc=frappe._dict(json.loads(doc))
-    sales_person=doc.sales_team[0]['sales_person']
-    incentives=doc.sales_team[0]['car_sale_incentives']
-    print incentives
-    print 'incentives'
     #check existing contact
     contact_name = frappe.db.get_value('Contact',{'mobile_no': doc.mobile_no}, 'name')
     if contact_name:
@@ -138,7 +134,6 @@ def make_customer_from_lead(doc):
             customer.territory=doc.territory
             customer.customer_name=customer_name
             # customer.default_sales_partner=doc.sales_person
-            customer.append('sales_team',{"sales_person":sales_person,"allocated_percentage":100,"car_sale_incentives":incentives})
             customer.insert(ignore_permissions=True)
             args={
                 'name':doc.lead_name,
@@ -167,12 +162,6 @@ def make_customer_from_lead(doc):
             customer.territory=doc.territory
             customer.customer_name=customer_name
             # customer.default_sales_partner=doc.sales_person
-            customer.append('sales_team',{"sales_person":sales_person,"allocated_percentage":100,"car_sale_incentives":incentives})
-            print customer.sales_team[0].sales_person
-            print customer.sales_team[0].allocated_percentage
-            print customer.sales_team[0].car_sale_incentives
-            print customer.is_internal_customer
-            print customer.represents_company
             customer.save(ignore_permissions=True)
             primary_contact=get_customer_primary_contact(customer.name)
             customer.customer_primary_contact=primary_contact['name']
@@ -639,11 +628,10 @@ def update_serial_no_status_from_sales_invoice(self,method):
                             if sno.reservation_status=='Sold Out':
                                 frappe.throw(_("It is sold out"))
                             sno.reservation_status='Sold Out'
-                            if self.sales_team:
-                                if len(self.sales_team)>0:
-                                    sno.sales_person=self.sales_team[0].sales_person
-                                    sno.sales_person_phone_no=frappe.get_value('Sales Person', sno.sales_person, 'phone_no')
-                                    sno.branch=frappe.get_value('Sales Person', sno.sales_person, 'branch')
+                            if self.sales_person:
+                                sno.sales_person=self.sales_person
+                                sno.sales_person_phone_no=frappe.get_value('Sales Person', sno.sales_person, 'phone_no')
+                                sno.branch=self.sales_person_branch                       
                             sno.for_customer=self.customer
                             # sno.reserved_by_document = ''
                             sno.save(ignore_permissions=True)
@@ -693,11 +681,10 @@ def update_serial_no_status_from_delivery_note(self,method):
                     if sno.reservation_status=='Sold Out':
                         frappe.throw(_("It is sold out"))					
                     sno.reservation_status='Sold Out'
-                    if self.sales_team:
-                        if len(self.sales_team)>0:
-                            sno.sales_person=self.sales_team[0].sales_person
-                            sno.sales_person_phone_no=frappe.get_value('Sales Person', sno.sales_person, 'phone_no')
-                            sno.branch=frappe.get_value('Sales Person', sno.sales_person, 'branch')
+                    if self.sales_person:
+                        sno.sales_person=self.sales_person
+                        sno.sales_person_phone_no=frappe.get_value('Sales Person', sno.sales_person, 'phone_no')
+                        sno.branch=self.sales_person_branch
                     sno.for_customer=self.customer
                     # sno.reserved_by_document = ''
                     sno.save(ignore_permissions=True)
