@@ -1,4 +1,5 @@
 {% include "car_sale/public/js/car_search.js" %}
+{% include "car_sale/public/js/sales_person.js" %}
 
 frappe.ui.form.on('Delivery Note', {
     onload: function (frm) {

@@ -745,6 +745,9 @@ def unreserve_serial_no_from_so_on_cancel(self,method):
 
 @frappe.whitelist()
 def unlink_so_from_other_doctype(self,method):
+    lead=frappe.get_doc("Lead",self.linked_lead)
+    if cstr(lead.status) in ['Ordered']:
+        lead.db_set('status', 'Sales Inquiry')
     frappe.db.sql("""update `tabSales Order` set sub_customer='',linked_lead='',sales_person='',sales_person_branch='' where name=%s""",self.name)
 
 
@@ -833,7 +836,7 @@ def unreserve_serial_no_from_quotation(self,method,auto_run=0):
     # if auto_run==1:
     #     self.reserve_above_items=0
     quotation = None if (cint(self.reserve_above_items)==0 or self.status in ('Lost','Ordered') or self.docstatus ==0) else self.name
-    if quotation and self.docstatus ==1:
+    if quotation and (self.docstatus ==1 or self.docstatus ==2 ):
         print 'inside unreserve_serial_no_from_quotation'
         for item in self.items:
             # check for empty serial no
