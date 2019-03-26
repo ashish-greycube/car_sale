@@ -70,9 +70,9 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 						cur_frm.set_value("source",'Existing Customer')
 						// cur_frm.set_value("customer",exist_cust['customer_name'])
 						cur_frm.set_value("customer",exist_cust['name'])
-						if (exist_cust['sales_person']){
-							cur_frm.set_value("sales_person", exist_cust['sales_person']);
-						}
+						// if (exist_cust['sales_person']){
+						// 	cur_frm.set_value("sales_person", exist_cust['sales_person']);
+						// }
 						if (exist_cust['customer_group']){
 							cur_frm.set_value("customer_group", exist_cust['customer_group']);
 

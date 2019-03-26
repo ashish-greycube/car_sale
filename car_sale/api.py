@@ -201,7 +201,7 @@ def get_customer_primary_contact(customer):
 @frappe.whitelist()
 def get_existing_customer(mobile_no):
     existing_customer= frappe.db.sql("""
-        select st.sales_person,cust.customer_group,
+        select cust.customer_group,
             cust.customer_type,
             cust.customer_name,
             cust.name,
@@ -209,13 +209,10 @@ def get_existing_customer(mobile_no):
             cont.email_id,
             cont.mobile_no
         from `tabCustomer` cust 
-        inner join `tabSales Team` st
-        on cust.name=st.parent
         inner join `tabContact` cont
         on cust.customer_primary_contact=cont.name
-        where st.idx=1
-        and st.parenttype='Customer'
-        and cont.mobile_no= %(mobile_no)s
+        where 
+        cont.mobile_no=%(mobile_no)s
         """, {
             'mobile_no': mobile_no
         },as_dict=True)
