@@ -579,7 +579,7 @@ def update_serial_no_status_from_sales_invoice(self,method):
     """ update serial no doc with details of Sales Order """
     sales_invoice_doc = self.name
     if sales_invoice_doc:
-        if self.is_return== 1 and self.update_stock == 1:
+        if self.is_return == 1 and self.update_stock == 1:
             unreserve_serial_no_from_sales_invoice(self,method)
         elif self.is_return== 0 and self.update_stock == 1 :
             for item in self.items:
@@ -728,7 +728,7 @@ def unreserve_serial_no_from_so_on_cancel(self,method):
                         if sales_invoice and self.name != sales_invoice:
                             pass
                         sno = frappe.get_doc('Serial No', serial_no)
-                        if ((self.docstatus == 0 or self.docstatus == 1) and sno.reserved_by_document == self.name and sno.reservation_status=='Reserved'):
+                        if ((self.docstatus == 0 or self.docstatus == 1 or self.docstatus == 2) and sno.reserved_by_document == self.name and sno.reservation_status=='Reserved'):
                             sno.reservation_status='Available'
                             sno.sales_person=None
                             sno.sales_person_phone_no=None
@@ -740,6 +740,13 @@ def unreserve_serial_no_from_so_on_cancel(self,method):
                         # check for invalid serial number
                         # frappe.throw(_("{0} is invalid serial number").format(serial_no))
                         pass
+
+
+
+@frappe.whitelist()
+def unlink_so_from_other_doctype(self,method):
+    frappe.db.sql("""update `tabSales Order` set sub_customer='',linked_lead='',sales_person='',sales_person_branch='' where name=%s""",self.name)
+
 
 @frappe.whitelist()
 def unreserve_serial_no_from_sales_invoice(self,method):
@@ -758,7 +765,7 @@ def unreserve_serial_no_from_sales_invoice(self,method):
                             #frappe.throw(_("{0} serial number is not valid for {1} item code").format(serial_no,item.item_code))
                             pass
                         sno = frappe.get_doc('Serial No', serial_no)
-                        if (self.docstatus == 1 and sno.reserved_by_document == self.name and sno.reservation_status=='Sold Out'):
+                        if ((self.docstatus == 1 or self.docstatus == 2) and (sno.reserved_by_document == self.name or sno.reserved_by_document == self.return_against)and sno.reservation_status=='Sold Out'):
                             sno.reservation_status='Available'
                             sno.sales_person=None
                             sno.sales_person_phone_no=None
@@ -825,7 +832,7 @@ def unreserve_serial_no_from_quotation(self,method,auto_run=0):
     print self.docstatus
     # if auto_run==1:
     #     self.reserve_above_items=0
-    quotation = None if (cint(self.reserve_above_items)==1 or self.status in ('Lost','Ordered') or self.docstatus ==0) else self.name
+    quotation = None if (cint(self.reserve_above_items)==0 or self.status in ('Lost','Ordered') or self.docstatus ==0) else self.name
     if quotation and self.docstatus ==1:
         print 'inside unreserve_serial_no_from_quotation'
         for item in self.items:

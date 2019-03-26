@@ -105,7 +105,8 @@ doc_events = {
 		"after_insert": "car_sale.api.update_lead_status_from_sales_order",
 		"validate":"car_sale.api.update_serial_no_from_so",
 		"on_cancel":"car_sale.api.unreserve_serial_no_from_so_on_cancel",
-		"after_delete":"car_sale.api.unreserve_serial_no_from_so_on_cancel"
+		"after_delete":"car_sale.api.unreserve_serial_no_from_so_on_cancel",
+		"on_trash":"car_sale.api.unlink_so_from_other_doctype",
 		
 	},
     "Quotation": {
