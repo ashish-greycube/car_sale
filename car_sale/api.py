@@ -742,11 +742,10 @@ def unreserve_serial_no_from_so_on_cancel(self,method):
 
 @frappe.whitelist()
 def unlink_so_from_other_doctype(self,method):
-    lead=frappe.get_doc("Lead",self.linked_lead)
-    if cstr(lead.status) in ['Ordered']:
-        lead.db_set('status', 'Sales Inquiry')
+    print ('in------------------------------')
+    print self.linked_lead
     frappe.db.sql("""update `tabSales Order` set sub_customer='',linked_lead='',sales_person='',sales_person_branch='' where name=%s""",self.name)
-
+    frappe.db.sql("""update `tabLead` set status='Sales Inquiry',linked_sales_order='' where name=%s""",self.linked_lead)
 
 @frappe.whitelist()
 def unreserve_serial_no_from_sales_invoice(self,method):
