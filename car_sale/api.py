@@ -1077,3 +1077,10 @@ def get_registration_plate_no(serial_nos=None):
             for n in nos:
                 if n[0]==d: data.append(n[1]) 
     return "\n".join(data)
+
+
+@frappe.whitelist()
+def get_distinct_attributes_values():
+    return frappe.db.sql("""select distinct attribute as attribute ,attribute_value as attribute_value from `tabItem Variant Attribute`
+where attribute_value is not null
+group by attribute,attribute_value""",as_dict=True)
