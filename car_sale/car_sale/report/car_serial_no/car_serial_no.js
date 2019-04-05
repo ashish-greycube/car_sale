@@ -3,46 +3,54 @@ frappe.query_reports["Car Serial No"] = {
             "fieldname": "supplier",
             "label": __("Supplier"),
             "fieldtype": "Link",
-            "options": "Supplier"
+            "options": "Supplier",
+            "reqd": 1
         },
         {
             "fieldname": "warehouse",
             "label": __("Warehouse"),
             "fieldtype": "Link",
-            "options": "Warehouse"
+            "options": "Warehouse",
+            "reqd": 1
         },
         {
             "fieldname": "serialno",
             "label": __("Serial No"),
             "fieldtype": "Link",
-            "options": "Serial No"
+            "options": "Serial No",
+            "reqd": 1
         },
         {
             "fieldname": "Status",
             "label": __("Status"),
             "fieldtype": "Select",
-            "options": ['Available', 'Reserved', 'Sold']
+            "options": ['Available', 'Reserved', 'Sold'],
+            "reqd": 1
         },
 
         {
             "fieldname": "Brand",
             "label": __("Brand"),
-            "fieldtype": "Select"
+            "fieldtype": "Select",
+            "reqd": 1
         },
         {
             "fieldname": "Category",
             "label": __("Category"),
-            "fieldtype": "Select"
+            "fieldtype": "Select",
+            "reqd": 1
         },
         {
-            "fieldname": "Model",
+            "fieldname": "model",
             "label": __("Model"),
-            "fieldtype": "Select"
+            "fieldtype": "Select",
+            "reqd": 1
         },
         {
             "fieldname": "Color",
             "label": __("Color"),
-            "fieldtype": "Select"
+            "fieldtype": "Select",
+            "reqd": 1
         }
     ],
     "onload": function () {
@@ -83,7 +91,7 @@ frappe.query_reports["Car Serial No"] = {
                     set_value_in_dropdown(attribute_name, data)
                     attribute_name = 'Category'
                     set_value_in_dropdown(attribute_name, data)
-                    attribute_name = 'Model'
+                    attribute_name = 'model'
                     set_value_in_dropdown(attribute_name, data)
                     return frappe.call({
                         method: "car_sale.api.get_template_name",
