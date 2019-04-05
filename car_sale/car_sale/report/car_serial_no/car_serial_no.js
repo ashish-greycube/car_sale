@@ -3,57 +3,49 @@ frappe.query_reports["Car Serial No"] = {
             "fieldname": "supplier",
             "label": __("Supplier"),
             "fieldtype": "Link",
-            "options": "Supplier",
-            "reqd": 1
+            "options": "Supplier"
         },
         {
             "fieldname": "warehouse",
             "label": __("Warehouse"),
             "fieldtype": "Link",
-            "options": "Warehouse",
-            "reqd": 1
+            "options": "Warehouse"
         },
         {
             "fieldname": "serialno",
             "label": __("Serial No"),
             "fieldtype": "Link",
-            "options": "Serial No",
-            "reqd": 1
+            "options": "Serial No"
         },
         {
-            "fieldname": "Status",
+            "fieldname": "status",
             "label": __("Status"),
             "fieldtype": "Select",
-            "options": ['Available', 'Reserved', 'Sold'],
-            "reqd": 1
+            "options": ['Available', 'Reserved', 'Sold Out']
         },
 
         {
             "fieldname": "Brand",
             "label": __("Brand"),
-            "fieldtype": "Select",
-            "reqd": 1
+            "fieldtype": "Select"
         },
         {
             "fieldname": "Category",
             "label": __("Category"),
-            "fieldtype": "Select",
-            "reqd": 1
+            "fieldtype": "Select"
         },
         {
             "fieldname": "model",
             "label": __("Model"),
-            "fieldtype": "Select",
-            "reqd": 1
+            "fieldtype": "Select"
         },
         {
             "fieldname": "Color",
             "label": __("Color"),
-            "fieldtype": "Select",
-            "reqd": 1
+            "fieldtype": "Select"
         }
     ],
-    "onload": function () {
+    "onload": function (report) {
 
         function filtered(data, attribute_name) {
             let filtered = [];
@@ -79,6 +71,17 @@ frappe.query_reports["Car Serial No"] = {
             attribute.df.options = data;
             attribute.refresh();
         }
+        function clear_filter(filtername){
+            console.log(filtername)
+            var filter = frappe.query_report.get_filter(filtername);
+            frappe.query_report.set_filter_value(filtername,'')
+            filter.refresh()
+        }
+        report.page.add_inner_button(__("Clear Filters"), function() {
+            list_of_filters=['supplier','warehouse','serialno','status','Brand','Category','model','Color']
+            list_of_filters.forEach(clear_filter)
+
+		});
         return frappe.call({
             method: "car_sale.api.get_distinct_attributes_values",
             args: {},
