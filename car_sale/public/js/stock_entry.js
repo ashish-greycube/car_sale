@@ -1,0 +1,1 @@
+{% include "car_sale/public/js/car_search.js" %}

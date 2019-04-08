@@ -31,7 +31,7 @@ def get_car_serial_no(filters):
 	print filters.get("supplier")
 	print filters.get("serialno")
 	if filters=={}:
-		filters.update({"supplier": filters.get("supplier"),"warehouse":filters.get("warehouse"),"serialno":filters.get("serialno"),"Status":filters.get("Status"),"Color":filters.get("Color"),"model":filters.get("model"),"Category":filters.get("Category"),"Brand":filters.get("Brand")})
+		filters.update({"supplier": filters.get("supplier"),"warehouse":filters.get("warehouse"),"serialno":filters.get("serialno"),"status":filters.get("status"),"Color":filters.get("Color"),"model":filters.get("model"),"Category":filters.get("Category"),"Brand":filters.get("Brand")})
 	else:
 		if filters.get("supplier")==None:
 			filters.update({"supplier": filters.get("supplier")})
@@ -39,8 +39,8 @@ def get_car_serial_no(filters):
 			filters.update({"warehouse": filters.get("warehouse")})
 		if filters.get("serialno")==None:
 			filters.update({"serialno": filters.get("serialno")})
-		if filters.get("Status")==None:
-			filters.update({"Status": filters.get("Status")})
+		if filters.get("status")==None:
+			filters.update({"status": filters.get("status")})
 		if filters.get("Color")==None:
 			filters.update({"Color": filters.get("Color")})
 		if filters.get("model")==None:
@@ -99,7 +99,7 @@ WHERE
 1 = case when %(supplier)s IS NULL THEN 1 when ( T.Supplier = %(supplier)s ) then 1 ELSE 0 END
 AND 1 = case when %(warehouse)s IS NULL THEN 1 when ( T.Warehouse = %(warehouse)s ) then 1 ELSE 0 END
 AND 1 = case when %(serialno)s IS NULL THEN 1 when ( T.SerialNo= %(serialno)s ) then 1 ELSE 0 END
-AND 1 = case when %(Status)s  IS NULL THEN 1 when ( T.Status = %(Status)s ) then 1 ELSE 0 END
+AND 1 = case when %(status)s  IS NULL THEN 1 when ( T.Status = %(status)s ) then 1 ELSE 0 END
 AND 1 = case when %(Color)s  IS NULL THEN 1 when ( T.Color = %(Color)s ) then 1 ELSE 0 END
 AND 1= case when %(model)s IS NULL THEN 1 when ( T.Model = %(model)s )then 1 else 0 end
 AND 1= case when %(Category)s IS NULL then 1 when ( T.Category= %(Category)s) then 1 else 0 end
