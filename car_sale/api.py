@@ -313,11 +313,8 @@ SE.transfer_purchase_invoice is null
 and SE.docstatus=1
 and SE.transferred_by_supplier = %s
 and SE.posting_date <= %s
-group by SED.item_name""",(supplier,posting_date), as_dict=1)
-    print supplier
-    print posting_date
-    print '------------------'
-    print transferred_item
+group by SE.name,SED.item_name
+order by SE.name""",(supplier,posting_date), as_dict=1)
     return transferred_item if transferred_item else None
 
 
