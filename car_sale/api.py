@@ -5,6 +5,7 @@ from frappe.utils import (cstr, validate_email_add, cint,flt, comma_and, has_gra
 from frappe.model.mapper import get_mapped_doc
 import frappe, json
 from erpnext.controllers.selling_controller import SellingController
+from erpnext import get_default_company
 from frappe.contacts.address_and_contact import load_address_and_contact
 from erpnext.accounts.party import set_taxes
 from erpnext.setup.utils import get_exchange_rate
@@ -292,6 +293,34 @@ and issued_date <= %s
 group by warranty_card_item""",(supplier,posting_date), as_dict=1)
     return warranty_item if warranty_item else None
 
+
+@frappe.whitelist()
+def car_transferred_items_for_PI(supplier,posting_date):
+    transferred_item = frappe.db.sql("""select  
+group_concat(SED.serial_no SEPARATOR '|') as description,
+(select default_item_for_car_transfer from `tabCompany`
+where name = (select value from `tabSingles` where doctype='Global Defaults' and field='default_company'))
+as default_item_for_car_transfer,
+sum(SED.qty) as qty,
+SE.transfer_cost as transfer_cost,
+SED.item_name,
+SE.name as stock_entry
+from `tabStock Entry` SE
+inner join `tabStock Entry Detail` SED
+on SE.name=SED.parent
+where 
+SE.transfer_purchase_invoice is null
+and SE.docstatus=1
+and SE.transferred_by_supplier = %s
+and SE.posting_date <= %s
+group by SED.item_name""",(supplier,posting_date), as_dict=1)
+    print supplier
+    print posting_date
+    print '------------------'
+    print transferred_item
+    return transferred_item if transferred_item else None
+
+
 @frappe.whitelist()
 def get_item_details(item_code):
     item = frappe.db.sql("""select item_name, stock_uom, image, description, item_group, brand
@@ -348,6 +377,8 @@ and sp.name=%(name)s
 
 @frappe.whitelist()
 def update_warranty_card_issued(self,method):
+    company = get_default_company()
+    default_item_for_car_transfer=frappe.get_value('Company', company, 'default_item_for_car_transfer')
     if self.docstatus==1:
     # submitted
         for item in self.items:
@@ -361,6 +392,13 @@ def update_warranty_card_issued(self,method):
                         doc = frappe.get_doc('Warranty Card Issued', card_no)
                         doc.purchase_invoice=self.name
                         doc.save(ignore_permissions=True)
+                elif item.item_code==default_item_for_car_transfer:
+                    description=item.description
+                    serial_no_list=description.split("|")
+                    for serial_no in serial_no_list:
+                        doc = frappe.get_doc('Stock Entry', item.stock_entry_for_car_transfer)
+                        doc.transfer_purchase_invoice=self.name
+                        doc.save(ignore_permissions=True)              
     elif self.docstatus==2:
     # cancelled
         for item in self.items:
@@ -374,6 +412,13 @@ def update_warranty_card_issued(self,method):
                         doc = frappe.get_doc('Warranty Card Issued', card_no)
                         doc.purchase_invoice=None
                         doc.save(ignore_permissions=True)
+                elif item.item_code==default_item_for_car_transfer:
+                    description=item.description
+                    serial_no_list=description.split("|")
+                    for serial_no in serial_no_list:
+                        doc = frappe.get_doc('Stock Entry', item.stock_entry_for_car_transfer)
+                        doc.transfer_purchase_invoice=None
+                        doc.save(ignore_permissions=True) 
 
 # Update status : Lead to Sales Order
 @frappe.whitelist()
