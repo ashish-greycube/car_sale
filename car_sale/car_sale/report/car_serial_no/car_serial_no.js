@@ -36,7 +36,7 @@ frappe.query_reports["Car Serial No"] = {
             "fieldtype": "Select"
         },
         {
-            "fieldname": "Model",
+            "fieldname": "model",
             "label": __("Model"),
             "fieldtype": "Select"
         },
@@ -89,7 +89,7 @@ frappe.query_reports["Car Serial No"] = {
             frappe.query_report.set_filter_value('Status','Select Status..')
             frappe.query_report.set_filter_value('Brand','Select Brand..')
             frappe.query_report.set_filter_value('Category','Select Category..')
-            frappe.query_report.set_filter_value('Model','Select Model..')
+            frappe.query_report.set_filter_value('model','Select Model..')
             frappe.query_report.set_filter_value('Color','Select Color..')
         });
         
@@ -105,7 +105,7 @@ frappe.query_reports["Car Serial No"] = {
                     set_value_in_dropdown(attribute_name, data)
                     attribute_name = 'Category'
                     set_value_in_dropdown(attribute_name, data)
-                    attribute_name = 'Model'
+                    attribute_name = 'model'
                     set_value_in_dropdown(attribute_name, data)
                     return frappe.call({
                         method: "car_sale.api.get_template_name",

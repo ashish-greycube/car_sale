@@ -28,7 +28,7 @@ def get_column():
 
 def get_car_serial_no(filters):
 	if filters=={}:
-		filters.update({"supplier": filters.get("supplier"),"warehouse":filters.get("warehouse"),"serialno":filters.get("serialno"),"Status":filters.get("Status"),"Color":filters.get("Color"),"Model":filters.get("Model"),"Category":filters.get("Category"),"Brand":filters.get("Brand")})
+		filters.update({"supplier": filters.get("supplier"),"warehouse":filters.get("warehouse"),"serialno":filters.get("serialno"),"Status":filters.get("Status"),"Color":filters.get("Color"),"model":filters.get("model"),"Category":filters.get("Category"),"Brand":filters.get("Brand")})
 	else:
 		if filters.get("supplier")==None:
 			filters.update({"supplier": filters.get("supplier")})
@@ -40,25 +40,25 @@ def get_car_serial_no(filters):
 			filters.update({"Status": filters.get("Status")})
 		if filters.get("Color")=='Select Color..':
 			filters.update({"Color": filters.get("Color")})
-		if filters.get("Model")=='Select Model..':
-			filters.update({"Model": filters.get("Model")})
+		if filters.get("model")=='Select Model..':
+			filters.update({"model": filters.get("model")})
 		if filters.get("Category")=='Select Category..':
 			filters.update({"Category": filters.get("Category")})
 		if filters.get("Brand")=='Select Brand..':
 			filters.update({"Brand": filters.get("Brand")})
 
-	return frappe.db.sql(""" 
+	return frappe.db.sql("""
 SELECT 
 ItemName,
- SerialNo,
- Status,
+SerialNo,
+Status,
 PurchaseRate,
- Warehouse,
+Warehouse,
 Supplier,
 PINV_STE,
- DateOfPurchase , 
- BookReference,
- SalesPerson FROM ( SELECT 
+DateOfPurchase , 
+BookReference,
+SalesPerson FROM (SELECT 
 TS.item_name as ItemName,
 serial_no as SerialNo,
 reservation_status as Status,
@@ -72,7 +72,7 @@ sales_partner as SalesPerson,
 TI.variant_of AS Brand,
 TI.item_group AS ItemGroup,
 MAX(IF (TVA.attribute ='Color',TVA.attribute_value,'')) AS Color,
-MAX(IF (TVA.attribute ='model',TVA.attribute_value,'')) AS Model,
+MAX(IF (TVA.attribute ='model',TVA.attribute_value,'')) AS model,
 MAX(IF (TVA.attribute ='Category',TVA.attribute_value,'')) AS Category
 FROM `tabSerial No` AS TS inner join 
 tabItem AS TI ON 
@@ -97,7 +97,7 @@ AND 1 = case when %(warehouse)s IS NULL THEN 1 when ( T.Warehouse = %(warehouse)
 AND 1 = case when %(serialno)s IS NULL THEN 1 when ( T.SerialNo= %(serialno)s ) then 1 ELSE 0 END
 AND 1 = case when %(Status)s  ='Select Status..' THEN 1 when ( T.Status = %(Status)s ) then 1 ELSE 0 END
 AND 1 = case when %(Color)s  ='Select Color..' THEN 1 when ( T.Color = %(Color)s ) then 1 ELSE 0 END
-AND 1= case when %(Model)s ='Select Model..' THEN 1 when ( T.Model = %(Model)s )then 1 else 0 end
+AND 1= case when %(model)s ='Select Model..' THEN 1 when ( T.model = %(model)s )then 1 else 0 end
 AND 1= case when %(Category)s ='Select Category..' then 1 when ( T.Category= %(Category)s) then 1 else 0 end
 AND 1= case when %(Brand)s ='Select Brand..' then 1 when ( T.Brand = %(Brand)s) then 1 else 0 end
 	""", filters, as_list=1)
