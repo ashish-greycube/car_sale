@@ -27,8 +27,6 @@ def get_column():
 
 
 def get_car_serial_no(filters):
-	print 'before'
-	print filters
 	if filters=={}:
 		filters.update({"supplier": filters.get("supplier"),"warehouse":filters.get("warehouse"),"serialno":filters.get("serialno"),"Status":filters.get("Status"),"Color":filters.get("Color"),"Model":filters.get("Model"),"Category":filters.get("Category"),"Brand":filters.get("Brand")})
 	else:
@@ -48,8 +46,6 @@ def get_car_serial_no(filters):
 			filters.update({"Category": filters.get("Category")})
 		if filters.get("Brand")=='Select Brand..':
 			filters.update({"Brand": filters.get("Brand")})
-	print 'after'
-	print filters
 
 	return frappe.db.sql(""" 
 SELECT 
@@ -76,7 +72,7 @@ sales_partner as SalesPerson,
 TI.variant_of AS Brand,
 TI.item_group AS ItemGroup,
 MAX(IF (TVA.attribute ='Color',TVA.attribute_value,'')) AS Color,
-MAX(IF (TVA.attribute ='Model',TVA.attribute_value,'')) AS Model,
+MAX(IF (TVA.attribute ='model',TVA.attribute_value,'')) AS Model,
 MAX(IF (TVA.attribute ='Category',TVA.attribute_value,'')) AS Category
 FROM `tabSerial No` AS TS inner join 
 tabItem AS TI ON 

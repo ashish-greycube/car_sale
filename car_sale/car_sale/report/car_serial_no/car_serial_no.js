@@ -72,16 +72,13 @@ frappe.query_reports["Car Serial No"] = {
         }
         function set_value_in_brand(attribute_name,data) {
             var attribute = frappe.query_report.get_filter(attribute_name);
-            console.log(data)
             data.unshift('Select Brand..')
             attribute.df.options = data;
-            console.log(data[0])
             attribute.df.default = data[0];
             attribute.refresh();
             attribute.set_input(attribute.df.default);
         }
         function clear_filter(filtername){
-            console.log(filtername)
             var filter = frappe.query_report.get_filter(filtername);
             frappe.query_report.set_filter_value(filtername,'')
             filter.refresh()
@@ -99,12 +96,11 @@ frappe.query_reports["Car Serial No"] = {
         return frappe.call({
             method: "car_sale.api.get_distinct_attributes_values",
             args: {},
-            async:false,
+            async:true,
             callback: function (r) {
                 if (r.message) {
                     let data = [];
                     data = r.message
-                    console.log(r.message)
                     attribute_name = 'Color'
                     set_value_in_dropdown(attribute_name, data)
                     attribute_name = 'Category'
