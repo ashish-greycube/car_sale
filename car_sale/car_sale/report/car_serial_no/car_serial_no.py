@@ -40,7 +40,7 @@ def get_car_serial_no(filters):
 			filters.update({"Status": filters.get("Status")})
 		if filters.get("Color")=='Select Color..':
 			filters.update({"Color": filters.get("Color")})
-		if filters.get("model")=='Select Model..':
+		if filters.get("model")=='Select model..':
 			filters.update({"model": filters.get("model")})
 		if filters.get("Category")=='Select Category..':
 			filters.update({"Category": filters.get("Category")})
@@ -97,7 +97,7 @@ AND 1 = case when %(warehouse)s IS NULL THEN 1 when ( T.Warehouse = %(warehouse)
 AND 1 = case when %(serialno)s IS NULL THEN 1 when ( T.SerialNo= %(serialno)s ) then 1 ELSE 0 END
 AND 1 = case when %(Status)s  ='Select Status..' THEN 1 when ( T.Status = %(Status)s ) then 1 ELSE 0 END
 AND 1 = case when %(Color)s  ='Select Color..' THEN 1 when ( T.Color = %(Color)s ) then 1 ELSE 0 END
-AND 1= case when %(model)s ='Select Model..' THEN 1 when ( T.model = %(model)s )then 1 else 0 end
+AND 1= case when %(model)s ='Select model..' THEN 1 when ( T.model = %(model)s )then 1 else 0 end
 AND 1= case when %(Category)s ='Select Category..' then 1 when ( T.Category= %(Category)s) then 1 else 0 end
 AND 1= case when %(Brand)s ='Select Brand..' then 1 when ( T.Brand = %(Brand)s) then 1 else 0 end
 	""", filters, as_list=1)

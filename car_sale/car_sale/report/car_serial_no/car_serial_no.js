@@ -89,7 +89,7 @@ frappe.query_reports["Car Serial No"] = {
             frappe.query_report.set_filter_value('Status','Select Status..')
             frappe.query_report.set_filter_value('Brand','Select Brand..')
             frappe.query_report.set_filter_value('Category','Select Category..')
-            frappe.query_report.set_filter_value('model','Select Model..')
+            frappe.query_report.set_filter_value('model','Select model..')
             frappe.query_report.set_filter_value('Color','Select Color..')
         });
         
