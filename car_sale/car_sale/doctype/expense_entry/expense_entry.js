@@ -27,14 +27,14 @@ frappe.ui.form.on('Expense Entry', {
 	},
 	refresh: function(frm) {
 		if(frm.doc.docstatus == 1) {
-			frm.add_custom_button(__('Accounting Ledger'), function() {
+			frm.add_custom_button(__('View Accounting Ledger'), function() {
 				frappe.route_options = {
 					voucher_no: frm.doc.name,
 					company: frm.doc.company,
 					group_by_voucher: false
 				};
 				frappe.set_route("query-report", "General Ledger");
-			}, __("View"));
+			});
 		}
 	},
 	company: function (frm) {

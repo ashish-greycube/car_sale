@@ -12,23 +12,23 @@ from erpnext.controllers.accounts_controller import AccountsController
 
 class ExpenseEntry(AccountsController):
 	def validate(self):
-		self.set_status()
 		self.validate_empty_accounts_table()
+		self.calculate_total_amount()
+		self.set_status()
 		if not self.title:
 			self.title = self.get_title()
+
+	def calculate_total_amount(self):
+		self.total_amount = 0
+		for d in self.get('expenses_entry_detail'):
+			self.total_amount += flt(d.amount)
 
 	def set_status(self):
 		self.status = {
 			"0": "Draft",
-			"1": "Submitted",
+			"1": "Paid",
 			"2": "Cancelled"
 		}[cstr(self.docstatus or 0)]
-
-		if self.status == "Draft":
-			self.status = "Draft"
-		else:
-			self.status = "Paid"
-			
 
 	def on_submit(self):
 		self.make_gl_entries()
@@ -96,7 +96,7 @@ class ExpenseEntry(AccountsController):
 					"remarks":gl_expense_remarks
 				})
 			)
-			payable_amount+=data.amount
+		payable_amount=self.total_amount
 
 		if payable_amount and self.paid_from_account:
 		# payment entry
