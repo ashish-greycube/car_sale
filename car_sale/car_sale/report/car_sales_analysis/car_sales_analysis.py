@@ -220,7 +220,7 @@ AND 1= case when %(cost_center)s IS NULL then 1 when ( SI.cost_center= %(cost_ce
 
 AND 1= case when %(sales_person)s IS NULL then 1 when ( SI.sales_person= %(sales_person)s) then 1 else 0 end
 
-AND 1= case when %(customer_name)s IS NULL then 1 when ( SI.customer_name = %(customer_name)s) then 1 else 0 end
+AND 1= case when %(customer_name)s IS NULL then 1 when ( SI.customer = %(customer_name)s) then 1 else 0 end
 
 AND 1= case when %(item_group)s ='Select Group..' then 1 when ( TI.item_group= %(item_group)s) then 1 else 0 end
 

@@ -8,14 +8,14 @@ frappe.query_reports["Car Sales Analysis"] = {
 			"fieldname":"from_date",
 			"label": __("From Date"),
 			"fieldtype": "Date",
-			"default": frappe.datetime.get_today(),
+			"default": frappe.datetime.add_days(frappe.datetime.get_today(), -30),
 			"reqd": 1
 		},
 		{
 			"fieldname":"to_date",
 			"label": __("To Date"),
 			"fieldtype": "Date",
-			"default": frappe.datetime.add_days(frappe.datetime.get_today(), 30),
+			"default": frappe.datetime.get_today(),
 			"reqd": 1
 		},
         {
@@ -107,8 +107,10 @@ frappe.query_reports["Car Sales Analysis"] = {
             filter.refresh()
         }
         report.page.add_inner_button(__("Clear Filters"), function() {
-            list_of_filters=['from_date','to_date','serial_no','cost_center','sales_person','customer_name']
+            list_of_filters=['serial_no','cost_center','sales_person','customer_name']
             list_of_filters.forEach(clear_filter)
+            frappe.query_report.set_filter_value('to_date',frappe.datetime.get_today())
+            frappe.query_report.set_filter_value('from_date',frappe.datetime.add_days(frappe.datetime.get_today(), -30))
             frappe.query_report.set_filter_value('item_group','Select Group..')
             frappe.query_report.set_filter_value('brand','Select Brand..')
             frappe.query_report.set_filter_value('Category','Select Category..')
