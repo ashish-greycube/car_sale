@@ -8,7 +8,7 @@ frappe.ui.form.on('Expense Entry', {
 		frm.set_query("expense_account", "expenses_entry_detail", function () {
 			return {
 				filters: {
-					'account_type': 'Expense Account',
+					'account_type': ["in",['Expense Account','Cost of Goods Sold','Expenses Included in Valuation']],
 					'company': frm.doc.company,
 					'is_group': 0
 				}
