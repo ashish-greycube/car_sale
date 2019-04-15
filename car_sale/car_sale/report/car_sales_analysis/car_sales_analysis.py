@@ -134,7 +134,7 @@ C.GaureenteeCardCost,
 
 D.ServiceCost ,
 
-A.TotalSelling - (IFNULL(B.TransferCost,0)+ IFNULL(C.GaureenteeCardCost,0)+IFNULL( D.ServiceCost,0)) as Net,
+A.TotalSelling - (IFNULL(A.PurchaseRate,0) + IFNULL(B.TransferCost,0)+ IFNULL(C.GaureenteeCardCost,0)+IFNULL( D.ServiceCost,0)) as Net,
 
 A.SalesPerson,
 
@@ -300,7 +300,7 @@ TI.item_group
 
                      INNER JOIN `tabExpense Entry` as EE
 
-                     ON EE.parent = EED.name and EE.docstatus = 1
+                     ON EE.name = EED.parent and EE.docstatus = 1
 
                      group by EED.serial_no) D
 
