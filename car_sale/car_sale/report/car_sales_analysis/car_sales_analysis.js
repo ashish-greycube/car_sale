@@ -82,12 +82,12 @@ frappe.query_reports["Car Sales Analysis"] = {
             }
             return only_attribute_value
         }
-        function set_value_in_dropdown(attribute_name, data) {
+        function set_value_in_dropdown(attribute_name, data,default_value) {
 			filtered_attribute = filtered(data, attribute_name)
             let only_attribute_value = []
 			only_attribute_value = get_only_attribute_value(filtered_attribute, only_attribute_value)
             var attribute = frappe.query_report.get_filter(attribute_name);
-            let default_value='Select '+ attribute_name.charAt(0).toUpperCase() + attribute_name.slice(1)+'..'
+            // let default_value='Select '+ attribute_name.charAt(0).toUpperCase() + attribute_name.slice(1)+'..'
             only_attribute_value.unshift(__(default_value))
 			attribute.df.options = only_attribute_value;
             attribute.df.default = only_attribute_value[0];
@@ -112,15 +112,15 @@ frappe.query_reports["Car Sales Analysis"] = {
             list_of_filters.forEach(clear_filter)
             frappe.query_report.set_filter_value('to_date',frappe.datetime.get_today())
             frappe.query_report.set_filter_value('from_date',frappe.datetime.add_days(frappe.datetime.get_today(), -30))
-            frappe.query_report.set_filter_value('item_group',__("Select Group.."))
+            frappe.query_report.set_filter_value('item_group','اختر المجموعة')
             
-            frappe.query_report.set_filter_value('brand',__("Select Brand.."))
+            frappe.query_report.set_filter_value('brand','اختر النوع')
             
-            frappe.query_report.set_filter_value('Category', __("Select Category.."))
+            frappe.query_report.set_filter_value('Category', 'اختر الفئة')
            
-            frappe.query_report.set_filter_value('Color', __("Select Color.."))
+            frappe.query_report.set_filter_value('Color', 'اختر اللون')
            
-            frappe.query_report.set_filter_value('model',__("Select Model.."))
+            frappe.query_report.set_filter_value('model','اختر الموديل')
             
         });
         
@@ -133,11 +133,14 @@ frappe.query_reports["Car Sales Analysis"] = {
                     let data = [];
                     data = r.message
                     attribute_name = 'Color'
-                    set_value_in_dropdown(attribute_name, data)
+                    default_value='اختر اللون'
+                    set_value_in_dropdown(attribute_name, data,default_value)
                     attribute_name = 'Category'
-                    set_value_in_dropdown(attribute_name, data)
+                    default_value='اختر الفئة'
+                    set_value_in_dropdown(attribute_name, data,default_value)
                     attribute_name = 'model'
-                    set_value_in_dropdown(attribute_name, data)
+                    default_value='اختر الموديل'
+                    set_value_in_dropdown(attribute_name, data,default_value)
                     return frappe.call({
                         method: "car_sale.api.get_template_name",
                         args: {
@@ -149,7 +152,7 @@ frappe.query_reports["Car Sales Analysis"] = {
                                 let data = [];
                                 data = r.message;
 								let attribute_name = 'brand'
-								let default_value=__("Select Brand..")
+								let default_value='اختر النوع'
 								set_value_in_brand(attribute_name, data,default_value)
 								return frappe.call({
 									method: "car_sale.api.get_item_group",
@@ -162,7 +165,7 @@ frappe.query_reports["Car Sales Analysis"] = {
 											let data = [];
 											data = r.message;
 											let attribute_name = 'item_group'
-											let default_value=__("Select Group..")
+											let default_value='اختر المجموعة'
 											set_value_in_brand(attribute_name, data,default_value)
 										}
 									}

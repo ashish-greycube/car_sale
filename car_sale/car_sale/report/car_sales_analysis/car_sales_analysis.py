@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 # Copyright (c) 2013, GreyCube Technologies and contributors
 # For license information, please see license.txt
 
@@ -91,15 +92,15 @@ def get_car_sales_analysis(filters):
 		if filters.get("customer_name")==None:
 			filters.update({"customer_name": filters.get("customer_name")})
 		if filters.get("item_group")==None:
-			filters.update({"item_group": _("Select Group..")})
+			filters.update({"item_group": _("اختر المجموعة")})
 		if filters.get("brand")==None:
-			filters.update({"brand": _("Select Brand..")})
+			filters.update({"brand": _("اختر النوع")})
 		if filters.get("Category")==None:
-			filters.update({"Category": _("Select Category..")})
+			filters.update({"Category": _("اختر الفئة")})
 		if filters.get("Color")==None:
-			filters.update({"Color": _("Select Color..")})
+			filters.update({"Color": _("اختر اللون")})
 		if filters.get("model")==None:
-			filters.update({"model": _("Select Model..")})
+			filters.update({"model": _("اختر الموديل")})
 
 	print '-----------------'
 	print filters
@@ -222,9 +223,9 @@ AND 1= case when %(sales_person)s IS NULL then 1 when ( SI.sales_person= %(sales
 
 AND 1= case when %(customer_name)s IS NULL then 1 when ( SI.customer = %(customer_name)s) then 1 else 0 end
 
-AND 1= case when %(item_group)s ='Select Group..' then 1 when ( TI.item_group= %(item_group)s) then 1 else 0 end
+AND 1= case when %(item_group)s ='اختر المجموعة' then 1 when ( TI.item_group= %(item_group)s) then 1 else 0 end
 
-AND 1= case when %(brand)s ='Select Brand..' then 1 when ( TI.variant_of= %(brand)s) then 1 else 0 end
+AND 1= case when %(brand)s ='اختر النوع' then 1 when ( TI.variant_of= %(brand)s) then 1 else 0 end
 
 group by
 
@@ -310,11 +311,11 @@ TI.item_group
 
        having
 
-       1 = case when %(Color)s ='Select Color..' THEN 1 when ( A.Color = %(Color)s ) then 1 ELSE 0 END
+       1 = case when %(Color)s ='اختر اللون' THEN 1 when ( A.Color = %(Color)s ) then 1 ELSE 0 END
 
-       AND 1= case when %(model)s ='Select Model..' THEN 1 when ( A.Model = %(model)s )then 1 else 0 end
+       AND 1= case when %(model)s ='اختر الموديل' THEN 1 when ( A.Model = %(model)s )then 1 else 0 end
 
-       AND 1= case when %(Category)s ='Select Category..' then 1 when ( A.Category= %(Category)s) then 1 else 0 end""", filters, as_list=1)
+       AND 1= case when %(Category)s ='اختر الفئة' then 1 when ( A.Category= %(Category)s) then 1 else 0 end""", filters, as_list=1)
 
 
 	print car_sales

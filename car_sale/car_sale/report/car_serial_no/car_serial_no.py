@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 # Copyright (c) 2013, GreyCube Technologies and contributors
 # For license information, please see license.txt
 
@@ -51,13 +52,13 @@ def get_car_serial_no(filters):
 			filters.update({"serialno": filters.get("serialno")})
 		if filters.get("Status")==_("Select Status.."):
 			filters.update({"Status": filters.get("Status")})
-		if filters.get("Color")==_("Select Color.."):
+		if filters.get("Color")==_("اختر اللون"):
 			filters.update({"Color": filters.get("Color")})
-		if filters.get("model")==_("Select model.."):
+		if filters.get("model")==_("اختر الموديل"):
 			filters.update({"model": filters.get("model")})
-		if filters.get("Category")==_("Select Category.."):
+		if filters.get("Category")==_("اختر الفئة"):
 			filters.update({"Category": filters.get("Category")})
-		if filters.get("Brand")==_("Select Brand.."):
+		if filters.get("Brand")==_("اختر النوع"):
 			filters.update({"Brand": filters.get("Brand")})
 
 	return frappe.db.sql("""
@@ -109,8 +110,8 @@ WHERE
 AND 1 = case when %(warehouse)s IS NULL THEN 1 when ( T.Warehouse = %(warehouse)s ) then 1 ELSE 0 END
 AND 1 = case when %(serialno)s IS NULL THEN 1 when ( T.SerialNo= %(serialno)s ) then 1 ELSE 0 END
 AND 1 = case when %(Status)s  ='Select Status..' THEN 1 when ( T.Status = %(Status)s ) then 1 ELSE 0 END
-AND 1 = case when %(Color)s  ='Select Color..' THEN 1 when ( T.Color = %(Color)s ) then 1 ELSE 0 END
-AND 1= case when %(model)s ='Select model..' THEN 1 when ( T.model = %(model)s )then 1 else 0 end
-AND 1= case when %(Category)s ='Select Category..' then 1 when ( T.Category= %(Category)s) then 1 else 0 end
-AND 1= case when %(Brand)s ='Select Brand..' then 1 when ( T.Brand = %(Brand)s) then 1 else 0 end
+AND 1 = case when %(Color)s  ='اختر اللون' THEN 1 when ( T.Color = %(Color)s ) then 1 ELSE 0 END
+AND 1= case when %(model)s ='اختر الموديل' THEN 1 when ( T.model = %(model)s )then 1 else 0 end
+AND 1= case when %(Category)s ='اختر الفئة' then 1 when ( T.Category= %(Category)s) then 1 else 0 end
+AND 1= case when %(Brand)s ='اختر النوع' then 1 when ( T.Brand = %(Brand)s) then 1 else 0 end
 	""", filters, as_list=1)

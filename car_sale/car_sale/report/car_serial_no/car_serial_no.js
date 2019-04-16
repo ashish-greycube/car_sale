@@ -59,21 +59,21 @@ frappe.query_reports["Car Serial No"] = {
             }
             return only_attribute_value
         }
-        function set_value_in_dropdown(attribute_name, data) {
+        function set_value_in_dropdown(attribute_name, data,default_value) {
             filtered_attribute = filtered(data, attribute_name)
             let only_attribute_value = []
             only_attribute_value = get_only_attribute_value(filtered_attribute, only_attribute_value)
             var attribute = frappe.query_report.get_filter(attribute_name);
-            default_value='Select '+ attribute_name+'..'
+            // default_value='Select '+ attribute_name+'..'
             only_attribute_value.unshift(__(default_value))
             attribute.df.options = only_attribute_value;
             attribute.df.default = only_attribute_value[0];
             attribute.refresh();
             attribute.set_input(attribute.df.default);
         }
-        function set_value_in_brand(attribute_name,data) {
+        function set_value_in_brand(attribute_name,data,default_value) {
             var attribute = frappe.query_report.get_filter(attribute_name);
-            let default_value=__("Select Brand..")
+            // let default_value=__("Select Brand..")
             data.unshift(default_value)
             attribute.df.options = data;
             attribute.df.default = data[0];
@@ -90,9 +90,14 @@ frappe.query_reports["Car Serial No"] = {
             list_of_filters.forEach(clear_filter)
            
             frappe.query_report.set_filter_value('Status',__("Select Status.."))
-            frappe.query_report.set_filter_value('Category', __("Select Category.."))
-            frappe.query_report.set_filter_value('Color', __("Select Color.."))
-            frappe.query_report.set_filter_value('model',__("Select model.."))        
+            // frappe.query_report.set_filter_value('Category', __("Select Category.."))
+            // frappe.query_report.set_filter_value('Color', __("Select Color.."))
+            // frappe.query_report.set_filter_value('model',__("Select model..")) 
+            
+            frappe.query_report.set_filter_value('Brand','اختر النوع')
+            frappe.query_report.set_filter_value('Category', 'اختر الفئة')
+            frappe.query_report.set_filter_value('Color', 'اختر اللون')
+            frappe.query_report.set_filter_value('model','اختر الموديل')
 
         });
         
@@ -105,11 +110,14 @@ frappe.query_reports["Car Serial No"] = {
                     let data = [];
                     data = r.message
                     attribute_name = 'Color'
-                    set_value_in_dropdown(attribute_name, data)
+                    default_value='اختر اللون'
+                    set_value_in_dropdown(attribute_name, data,default_value)
                     attribute_name = 'Category'
-                    set_value_in_dropdown(attribute_name, data)
+                    default_value='اختر الفئة'
+                    set_value_in_dropdown(attribute_name, data,default_value)
                     attribute_name = 'model'
-                    set_value_in_dropdown(attribute_name, data)
+                    default_value='اختر الموديل'
+                    set_value_in_dropdown(attribute_name, data,default_value)
                     return frappe.call({
                         method: "car_sale.api.get_template_name",
                         args: {
@@ -121,7 +129,8 @@ frappe.query_reports["Car Serial No"] = {
                                 let data = [];
                                 data = r.message;
                                 attribute_name = 'Brand'
-                                set_value_in_brand(attribute_name, data)
+                                default_value='اختر النوع'
+                                set_value_in_brand(attribute_name, data,default_value)
                             }
                         }
                     });
