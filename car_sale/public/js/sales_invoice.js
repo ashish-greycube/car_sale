@@ -4,11 +4,18 @@ frappe.ui.form.on('Sales Invoice', {
     onload: function (frm) {
         $('[data-fieldname="customer_name_in_arabic"]').hide()
         //get customer of non bank type
-        cur_frm.set_query('sub_customer', function(doc) {
-            return {
-                query: "car_sale.api.get_all_customer"
-            }
-        });
+        // cur_frm.set_query('sub_customer', function(doc) {
+        //     return {
+        //         query: "car_sale.api.get_all_customer"
+        //     }
+        // });
+		cur_frm.set_query("sub_customer", function() {
+			return {
+				filters: [
+					["bank_customer", "=", 0]
+				]
+			}
+		});
 
         $.each(cur_frm.doc.items || [], function (i, v) {
             if (v.against_sales_order && !v.cost_center){

@@ -245,11 +245,6 @@ where
 docstatus<2 
 and bank_customer=0""",as_list=True)
 
-@frappe.whitelist()
-def get_all_customer(doctype, txt, searchfield, start, page_len, filters):
-    return frappe.db.sql("""select name from `tabCustomer`
-where 
-docstatus<2 """,as_list=True)
 
 
 
