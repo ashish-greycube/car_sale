@@ -87,7 +87,8 @@ frappe.query_reports["Car Sales Analysis"] = {
             let only_attribute_value = []
 			only_attribute_value = get_only_attribute_value(filtered_attribute, only_attribute_value)
             var attribute = frappe.query_report.get_filter(attribute_name);
-            only_attribute_value.unshift('Select '+ attribute_name.charAt(0).toUpperCase() + attribute_name.slice(1)+'..')
+            let default_value='Select '+ attribute_name.charAt(0).toUpperCase() + attribute_name.slice(1)+'..'
+            only_attribute_value.unshift(__(default_value))
 			attribute.df.options = only_attribute_value;
             attribute.df.default = only_attribute_value[0];
             attribute.refresh();
@@ -111,11 +112,16 @@ frappe.query_reports["Car Sales Analysis"] = {
             list_of_filters.forEach(clear_filter)
             frappe.query_report.set_filter_value('to_date',frappe.datetime.get_today())
             frappe.query_report.set_filter_value('from_date',frappe.datetime.add_days(frappe.datetime.get_today(), -30))
-            frappe.query_report.set_filter_value('item_group','Select Group..')
-            frappe.query_report.set_filter_value('brand','Select Brand..')
-            frappe.query_report.set_filter_value('Category','Select Category..')
-            frappe.query_report.set_filter_value('Color','Select Color..')
-			// frappe.query_report.set_filter_value('model','Select Model..')
+            frappe.query_report.set_filter_value('item_group',__("Select Group.."))
+            
+            frappe.query_report.set_filter_value('brand',__("Select Brand.."))
+            
+            frappe.query_report.set_filter_value('Category', __("Select Category.."))
+           
+            frappe.query_report.set_filter_value('Color', __("Select Color.."))
+           
+            frappe.query_report.set_filter_value('model',__("Select Model.."))
+            
         });
         
         return frappe.call({
@@ -142,8 +148,8 @@ frappe.query_reports["Car Sales Analysis"] = {
                             if (r.message) {
                                 let data = [];
                                 data = r.message;
-								attribute_name = 'brand'
-								default_value='Select Brand..'
+								let attribute_name = 'brand'
+								let default_value=__("Select Brand..")
 								set_value_in_brand(attribute_name, data,default_value)
 								return frappe.call({
 									method: "car_sale.api.get_item_group",
@@ -155,8 +161,8 @@ frappe.query_reports["Car Sales Analysis"] = {
 										if (r.message) {
 											let data = [];
 											data = r.message;
-											attribute_name = 'item_group'
-											default_value='Select Group..'
+											let attribute_name = 'item_group'
+											let default_value=__("Select Group..")
 											set_value_in_brand(attribute_name, data,default_value)
 										}
 									}

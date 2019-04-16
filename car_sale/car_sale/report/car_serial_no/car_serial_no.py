@@ -4,11 +4,15 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from frappe.utils import cstr
 
 def execute(filters=None):
 	columns, data = [], []
 	columns=get_column()
 	data = get_car_serial_no(filters)
+	if data:
+		total_row=get_count_of_serial_no(data,columns)
+		data.append(total_row)
 	return columns, data
 
 def get_column():
@@ -25,6 +29,15 @@ def get_column():
 		_("SalesPerson") + ":Link/Sales Person:90"
 	]
 
+def get_count_of_serial_no(data,columns):
+	total_row = ['']*len(columns)
+	count=0
+	for d in data:
+			if d[1]:
+				count=+count+1
+	total_row[1] = cstr(count)
+	total_row[0] = '<b>TOTAL :</b>'
+	return total_row
 
 def get_car_serial_no(filters):
 	if filters=={}:
@@ -36,15 +49,15 @@ def get_car_serial_no(filters):
 			filters.update({"warehouse": filters.get("warehouse")})
 		if filters.get("serialno")==None:
 			filters.update({"serialno": filters.get("serialno")})
-		if filters.get("Status")=='Select Status..':
+		if filters.get("Status")==_("Select Status.."):
 			filters.update({"Status": filters.get("Status")})
-		if filters.get("Color")=='Select Color..':
+		if filters.get("Color")==_("Select Color.."):
 			filters.update({"Color": filters.get("Color")})
-		if filters.get("model")=='Select model..':
+		if filters.get("model")==_("Select model.."):
 			filters.update({"model": filters.get("model")})
-		if filters.get("Category")=='Select Category..':
+		if filters.get("Category")==_("Select Category.."):
 			filters.update({"Category": filters.get("Category")})
-		if filters.get("Brand")=='Select Brand..':
+		if filters.get("Brand")==_("Select Brand.."):
 			filters.update({"Brand": filters.get("Brand")})
 
 	return frappe.db.sql("""

@@ -64,7 +64,8 @@ frappe.query_reports["Car Serial No"] = {
             let only_attribute_value = []
             only_attribute_value = get_only_attribute_value(filtered_attribute, only_attribute_value)
             var attribute = frappe.query_report.get_filter(attribute_name);
-            only_attribute_value.unshift('Select '+ attribute_name+'..')
+            default_value='Select '+ attribute_name+'..'
+            only_attribute_value.unshift(__(default_value))
             attribute.df.options = only_attribute_value;
             attribute.df.default = only_attribute_value[0];
             attribute.refresh();
@@ -72,7 +73,8 @@ frappe.query_reports["Car Serial No"] = {
         }
         function set_value_in_brand(attribute_name,data) {
             var attribute = frappe.query_report.get_filter(attribute_name);
-            data.unshift('Select Brand..')
+            let default_value=__("Select Brand..")
+            data.unshift(default_value)
             attribute.df.options = data;
             attribute.df.default = data[0];
             attribute.refresh();
@@ -86,11 +88,12 @@ frappe.query_reports["Car Serial No"] = {
         report.page.add_inner_button(__("Clear Filters"), function() {
             list_of_filters=['supplier','warehouse','serialno']
             list_of_filters.forEach(clear_filter)
-            frappe.query_report.set_filter_value('Status','Select Status..')
-            frappe.query_report.set_filter_value('Brand','Select Brand..')
-            frappe.query_report.set_filter_value('Category','Select Category..')
-            frappe.query_report.set_filter_value('model','Select model..')
-            frappe.query_report.set_filter_value('Color','Select Color..')
+           
+            frappe.query_report.set_filter_value('Status',__("Select Status.."))
+            frappe.query_report.set_filter_value('Category', __("Select Category.."))
+            frappe.query_report.set_filter_value('Color', __("Select Color.."))
+            frappe.query_report.set_filter_value('model',__("Select model.."))        
+
         });
         
         return frappe.call({

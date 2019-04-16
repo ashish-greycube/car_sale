@@ -91,15 +91,15 @@ def get_car_sales_analysis(filters):
 		if filters.get("customer_name")==None:
 			filters.update({"customer_name": filters.get("customer_name")})
 		if filters.get("item_group")==None:
-			filters.update({"item_group": 'Select Group..'})
+			filters.update({"item_group": _("Select Group..")})
 		if filters.get("brand")==None:
-			filters.update({"brand": 'Select Brand..'})
+			filters.update({"brand": _("Select Brand..")})
 		if filters.get("Category")==None:
-			filters.update({"Category": 'Select Category..'})
+			filters.update({"Category": _("Select Category..")})
 		if filters.get("Color")==None:
-			filters.update({"Color": 'Select Color..'})
+			filters.update({"Color": _("Select Color..")})
 		if filters.get("model")==None:
-			filters.update({"model": 'Select Model..'})
+			filters.update({"model": _("Select Model..")})
 
 	print '-----------------'
 	print filters
@@ -134,7 +134,7 @@ C.GaureenteeCardCost,
 
 D.ServiceCost ,
 
-A.TotalSelling - (IFNULL(A.PurchaseRate,0) + IFNULL(B.TransferCost,0)+ IFNULL(C.GaureenteeCardCost,0)+IFNULL( D.ServiceCost,0)) as Net,
+A.TotalSelling - (IFNULL(A.PurchaseRate,0)  + IFNULL(A.PlateCost,0) + IFNULL(B.TransferCost,0)+ IFNULL(C.GaureenteeCardCost,0)+IFNULL( D.ServiceCost,0)) as Net,
 
 A.SalesPerson,
 
@@ -196,7 +196,7 @@ from `tabSales Invoice` AS SI
 
 INNER join `tabSales Invoice Item` as SIT
 
-              ON     SIT.parent = SI.name
+              ON     SIT.parent = SI.name  and SI.docstatus = 1
 
 INNER JOIN `tabItem` TI 
 

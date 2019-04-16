@@ -5,6 +5,7 @@ frappe.ui.form.on('Sales Order', {
 			erpnext.setup_serial_no();
 	},
 	onload: function (cur_frm) {
+		$('[data-fieldname="customer_name_in_arabic"]').hide()
 		//get sales partenr
 		if (cur_frm.doc.sales_person==undefined || cur_frm.doc.sales_person=='' ) {
 			return frappe.call({

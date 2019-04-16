@@ -2,11 +2,11 @@
 
 frappe.ui.form.on('Sales Invoice', {
     onload: function (frm) {
-
+        $('[data-fieldname="customer_name_in_arabic"]').hide()
         //get customer of non bank type
         cur_frm.set_query('sub_customer', function(doc) {
             return {
-                query: "car_sale.api.get_non_bank_customer"
+                query: "car_sale.api.get_all_customer"
             }
         });
 
