@@ -21,8 +21,8 @@ frappe.query_reports["Car Serial No"] = {
             "fieldname": "Status",
             "label": __("Status"),
             "fieldtype": "Select",
-            "options": ['Select Status..','Available', 'Reserved', 'Sold Out'],
-            "default":'Select Status..'
+            "options": ['اختر الحالة','Available', 'Reserved', 'Sold Out'],
+            "default":'اختر الحالة'
         },
 
         {
@@ -89,11 +89,11 @@ frappe.query_reports["Car Serial No"] = {
             list_of_filters=['supplier','warehouse','serialno']
             list_of_filters.forEach(clear_filter)
            
-            frappe.query_report.set_filter_value('Status',__("Select Status.."))
+            // frappe.query_report.set_filter_value('Status',__("Select Status.."))
             // frappe.query_report.set_filter_value('Category', __("Select Category.."))
             // frappe.query_report.set_filter_value('Color', __("Select Color.."))
             // frappe.query_report.set_filter_value('model',__("Select model..")) 
-            
+            frappe.query_report.set_filter_value('Status','اختر الحالة')
             frappe.query_report.set_filter_value('Brand','اختر النوع')
             frappe.query_report.set_filter_value('Category', 'اختر الفئة')
             frappe.query_report.set_filter_value('Color', 'اختر اللون')
