@@ -26,7 +26,6 @@ def get_column():
 		_("CustomerID") + ":Link/Customer:120",
 		_("CustomerName") + ":Data:90",
 		_("PurchaseRate") + ":Currency:90",
-		_("SellingRate") + ":Currency:90",
 		_("PlateCost") + ":Currency:90",
 		_("TotalSelling") + ":Currency:90",
 		_("TransferCost") + ":Currency:90",
@@ -123,8 +122,6 @@ A.CustomerName,
 
 A.PurchaseRate,
 
-A.SellingRate,
-
 A.PlateCost,
 
 A.TotalSelling,
@@ -172,8 +169,6 @@ SI.customer as CustomerID,
 SI.customer_name as CustomerName,
 
 SN.purchase_rate as PurchaseRate,
-
-SIT.base_rate as SellingRate,
 
 SN.plate_cost AS PlateCost,
 
@@ -244,8 +239,6 @@ SI.customer,
 SI.customer_name,
 
 SN.purchase_rate,
-
-SIT.base_rate,
 
 SN.plate_cost,
 
