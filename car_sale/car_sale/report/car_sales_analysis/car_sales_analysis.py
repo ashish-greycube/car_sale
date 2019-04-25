@@ -120,11 +120,11 @@ A.CustomerID,
 
 A.CustomerName,
 
+A.TotalSelling,
+
 A.PurchaseRate,
 
 A.PlateCost,
-
-A.TotalSelling,
 
 B.TransferCost,
 
