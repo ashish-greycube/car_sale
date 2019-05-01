@@ -15,9 +15,9 @@ def execute(filters=None):
 
 def get_column():
 	return [
-		_("Car Name") + ":Link/Item:300",
-		_("Warehouse") + ":Link/Warehouse:150",
-		_("Quantity") + ":Int:80",
+		_("Car Name") + ":Link/Item:200",
+		_("Warehouse") + ":Link/Warehouse:100",
+		_("Quantity") + ":Int:40",
 		_("Selling Rate") + ":Currency:100"
 	]
 
