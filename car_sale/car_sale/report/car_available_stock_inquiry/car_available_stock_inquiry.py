@@ -17,7 +17,7 @@ def get_column():
 	return [
 		_("Car Name") + ":Link/Item:200",
 		_("Warehouse") + ":Link/Warehouse:100",
-		_("Quantity") + ":Int:40",
+		_("Qty") + ":Int:40",
 		_("Selling Rate") + ":Currency:100"
 	]
 
