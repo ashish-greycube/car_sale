@@ -158,7 +158,7 @@ SI.name as ID,
 
 SI.posting_date as Date,
 
-SIT.serial_no as SerialNo,
+REPLACE(SIT.serial_no, '\n', '' ) as SerialNo,
 
 SIT.item_code as ItemCode,
 
@@ -194,9 +194,9 @@ INNER join `tabSales Invoice Item` as SIT
 
               ON     SIT.parent = SI.name  and SI.docstatus = 1
 
-INNER JOIN `tabItem` TI 
+INNER JOIN `tabItem` TI
 
-              ON TI.item_code = SIT.item_code
+               ON TI.item_code = SIT.item_code
 
 INNER JOIN  `tabItem Variant Attribute` AS TVA
 
@@ -204,7 +204,7 @@ INNER JOIN  `tabItem Variant Attribute` AS TVA
 
 INNER JOIN `tabSerial No` AS SN
 
-              ON SN.serial_no = SIT.serial_no
+              ON SN.serial_no = REPLACE(SIT.serial_no, '\n', '' ) 
 
 WHERE
 
@@ -260,7 +260,7 @@ TI.item_group
 
        ON SE.name = SED.parent AND SE.with_transfer_cost = 1 and SE.docstatus = 1 group by SED.serial_no) B
 
-       ON A.SerialNo = B.serial_no 
+       ON A.SerialNo = B.serial_no
 
        LEFT  JOIN (select
 
@@ -280,7 +280,7 @@ TI.item_group
 
        ) C
 
-       ON A.SerialNo = C.serial_no     
+       ON A.SerialNo = C.serial_no    
 
        LEFT  JOIN
 
@@ -298,13 +298,13 @@ TI.item_group
 
                      group by EED.serial_no) D
 
-       ON A.SerialNo = D.serial_no     
+       ON A.SerialNo = D.serial_no    
 
-       group by A.SerialNo
+       group by A.SerialNo 
 
-       having
+        having
 
-       1 = case when %(Color)s ='اختر اللون' THEN 1 when ( A.Color = %(Color)s ) then 1 ELSE 0 END
+1 = case when %(Color)s ='اختر اللون' THEN 1 when ( A.Color = %(Color)s ) then 1 ELSE 0 END
 
        AND 1= case when %(model)s ='اختر الموديل' THEN 1 when ( A.Model = %(model)s )then 1 else 0 end
 
