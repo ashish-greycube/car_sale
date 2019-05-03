@@ -24,7 +24,7 @@ def get_column():
         {"label": _("Car Name"), 'width': 200, "fieldname": "CarName", 'fieldtype': 'Link/Item'},
 		{"label":_("Warehouse"), 'width': 100, "fieldname": "Warehouse", 'fieldtype': 'Link/Warehouse'},
 		{"label": _("Qty"), 'width': 40, "fieldname": "Quantity", 'fieldtype': 'Int'},
-        {"label": _("Selling Rate"), "fieldname": "SellingRate", 'fieldtype': 'Float', 'width': 100, 'precision': 1}
+        {"label": _("Selling Rate"), "fieldname": "SellingRate", 'fieldtype': 'Int'}
     ]
 
 def get_car_available_stock_inquiry(filters):
@@ -81,7 +81,7 @@ FROM
 
        TS.serial_no,
 
-       IFNULL(TIP.price_list_rate,0.00) AS SellingRate,
+       IFNULL(TIP.price_list_rate,0) AS SellingRate,
 
        TI.variant_of,
 
