@@ -115,9 +115,9 @@ WHERE
 
        and TS.warehouse is not null
 
-       and 1= case when %(brand)s ='اختر النوع' then 1 when ( TI.variant_of= %(brand)s) then 1 else 0 end
+       and 1= case when %(brand)s ='اختر النوع' then 0 when ( TI.variant_of= %(brand)s) then 1 else 0 end
 
-       and 1= case when %(item_group)s ='اختر المجموعة' then 1 when ( TI.item_group= %(item_group)s) then 1 else 0 end
+       and 1= case when %(item_group)s ='اختر المجموعة' then 0 when ( TI.item_group= %(item_group)s) then 1 else 0 end
 
 group by
 
@@ -135,11 +135,11 @@ group by
 
  WHERE
 
-       1 = case when %(Color)s ='اختر اللون' THEN 1 when ( T.Color = %(Color)s ) then 1 ELSE 0 END
+       1 = case when %(Color)s ='اختر اللون' THEN 0 when ( T.Color = %(Color)s ) then 1 ELSE 0 END
 
-       AND 1= case when %(model)s ='اختر الموديل' THEN 1 when ( T.Model = %(model)s )then 1 else 0 end
+       AND 1= case when %(model)s ='اختر الموديل' THEN 0 when ( T.Model = %(model)s )then 1 else 0 end
 
-       AND 1= case when %(Category)s ='اختر الفئة' then 1 when ( T.Category= %(Category)s) then 1 else 0 end
+       AND 1= case when %(Category)s ='اختر الفئة' then 0 when ( T.Category= %(Category)s) then 1 else 0 end
 
 group by
 

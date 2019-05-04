@@ -7,26 +7,219 @@ frappe.query_reports["Car Available Stock Inquiry"] = {
 		{
             "fieldname": "item_group",
             "label": __("Group"),
-            "fieldtype": "Select"
+            "fieldtype": "Select",
+			on_change: () => {
+				var item_group = frappe.query_report.get_filter_value('item_group');
+				if (item_group!='اختر المجموعة') {
+                    frappe.call({
+                        method: "car_sale.api.get_template_name",
+                        args: {
+                            search_group: item_group
+                        },
+                        async:false,
+                        callback: function (r) {
+                            if (r.message) {
+								let attribute_name = 'brand'
+                                let default_value='اختر النوع'
+                                data=r.message
+                                var attribute = frappe.query_report.get_filter(attribute_name);
+                                data.unshift(default_value)
+                                attribute.df.options = data;
+                                attribute.df.default = data[0];
+                                attribute.refresh();
+                                attribute.set_input(attribute.df.default);
+                               
+                                //reset fields
+                                all_dropdown_fields=[['Category','اختر الفئة'],['Color','اختر اللون'],['model','اختر الموديل']]
+                                all_dropdown_fields.forEach(field => {
+                                    let attribute_name = field[0]
+                                    let default_value=field[1]
+                                    var attribute = frappe.query_report.get_filter(attribute_name);
+                                    attribute.df.options = default_value;
+                                    attribute.df.default =default_value;
+                                    attribute.refresh();
+                                    attribute.set_input(attribute.df.default);
+                                });
+                            }
+                            else{
+                                //reset fields
+                                all_dropdown_fields=[['brand','اختر النوع'],['Category','اختر الفئة'],['Color','اختر اللون'],['model','اختر الموديل']]
+                                all_dropdown_fields.forEach(field => {
+                                    let attribute_name = field[0]
+                                    let default_value=field[1]
+                                    var attribute = frappe.query_report.get_filter(attribute_name);
+                                    attribute.df.options = default_value;
+                                    attribute.df.default =default_value;
+                                    attribute.refresh();
+                                    attribute.set_input(attribute.df.default);
+                                });
+
+                            }
+                        }
+				
+				}); 
+        }}
         },
         {
             "fieldname": "brand",
             "label": __("Brand"),
-            "fieldtype": "Select"
+            "fieldtype": "Select",
+			on_change: () => {
+				var brand = frappe.query_report.get_filter_value('brand');
+				if (brand!='اختر النوع') {
+                    frappe.call({
+                        method: "car_sale.api.get_category_name",
+                        args: {
+                            search_template: brand
+                        },
+                        async:false,
+                        callback: function (r) {
+                            console.log('brand')
+                            console.log(r)
+                            if (r.message) {
+								let attribute_name = 'Category'
+                                let default_value='اختر الفئة'
+                                data=r.message
+                                var attribute = frappe.query_report.get_filter(attribute_name);
+                                data.unshift(default_value)
+                                attribute.df.options = data;
+                                attribute.df.default = data[0];
+                                attribute.refresh();
+                                attribute.set_input(attribute.df.default);
+                                //reset fields
+                                all_dropdown_fields=[['Color','اختر اللون'],['model','اختر الموديل']]
+                                all_dropdown_fields.forEach(field => {
+                                    let attribute_name = field[0]
+                                    let default_value=field[1]
+                                    var attribute = frappe.query_report.get_filter(attribute_name);
+                                    attribute.df.options = default_value;
+                                    attribute.df.default =default_value;
+                                    attribute.refresh();
+                                    attribute.set_input(attribute.df.default);
+                                });
+                            }else{
+                                //reset fields
+                                all_dropdown_fields=[['Category','اختر الفئة'],['Color','اختر اللون'],['model','اختر الموديل']]
+                                all_dropdown_fields.forEach(field => {
+                                    let attribute_name = field[0]
+                                    let default_value=field[1]
+                                    var attribute = frappe.query_report.get_filter(attribute_name);
+                                    attribute.df.options = default_value;
+                                    attribute.df.default =default_value;
+                                    attribute.refresh();
+                                    attribute.set_input(attribute.df.default);
+                                });                                
+                            }
+                        }
+				
+				}); 
+        }}
         },
         {
             "fieldname": "Category",
             "label": __("Category"),
-            "fieldtype": "Select"
+            "fieldtype": "Select",
+			on_change: () => {
+                var Category = frappe.query_report.get_filter_value('Category');
+                var brand = frappe.query_report.get_filter_value('brand');
+				if (Category!='اختر الفئة' && brand!='اختر النوع') {
+                    frappe.call({
+                        method: "car_sale.api.get_model_name",
+                        args: {
+                            search_template: brand,
+                            search_category: Category
+                        },
+                        async:false,
+                        callback: function (r) {
+                            if (r.message) {
+								let attribute_name = 'model'
+                                let default_value='اختر الموديل'
+                                data=r.message
+                                var attribute = frappe.query_report.get_filter(attribute_name);
+                                data.unshift(default_value)
+                                attribute.df.options = data;
+                                attribute.df.default = data[0];
+                                attribute.refresh();
+                                attribute.set_input(attribute.df.default);
+                                   //reset fields
+                                   all_dropdown_fields=[['Color','اختر اللون']]
+                                   all_dropdown_fields.forEach(field => {
+                                       let attribute_name = field[0]
+                                       let default_value=field[1]
+                                       var attribute = frappe.query_report.get_filter(attribute_name);
+                                       attribute.df.options = default_value;
+                                       attribute.df.default =default_value;
+                                       attribute.refresh();
+                                       attribute.set_input(attribute.df.default);
+                                   }); 
+                            }else{
+                                   //reset fields
+                                   all_dropdown_fields=[['Color','اختر اللون'],['model','اختر الموديل']]
+                                   all_dropdown_fields.forEach(field => {
+                                       let attribute_name = field[0]
+                                       let default_value=field[1]
+                                       var attribute = frappe.query_report.get_filter(attribute_name);
+                                       attribute.df.options = default_value;
+                                       attribute.df.default =default_value;
+                                       attribute.refresh();
+                                       attribute.set_input(attribute.df.default);
+                                   });                              
+                            }
+                        }
+				
+				}); 
+        }}
 		},
-        {
-            "fieldname": "Color",
-            "label": __("Color"),
-            "fieldtype": "Select"
-        },
         {
             "fieldname": "model",
             "label": __("Model"),
+            "fieldtype": "Select",            
+			on_change: () => {
+                var model = frappe.query_report.get_filter_value('model');
+                var Category = frappe.query_report.get_filter_value('Category');
+                var brand = frappe.query_report.get_filter_value('brand');
+				if (model!='اختر الموديل' && Category!='اختر الفئة' && brand!='اختر النوع') {
+                    frappe.call({
+                        method: "car_sale.api.get_color_name",
+                        args: {
+                            search_template: brand,
+                            search_category: Category,
+                            search_model: model
+                        },
+                        async:false,
+                        callback: function (r) {
+                            if (r.message) {
+								let attribute_name = 'Color'
+                                let default_value='اختر اللون'
+                                data=r.message
+                                var attribute = frappe.query_report.get_filter(attribute_name);
+                                data.unshift(default_value)
+                                attribute.df.options = data;
+                                attribute.df.default = data[0];
+                                attribute.refresh();
+                                attribute.set_input(attribute.df.default);
+                             
+                            }else{
+                                   //reset fields
+                                   all_dropdown_fields=[['Color','اختر اللون'],['model','اختر الموديل']]
+                                   all_dropdown_fields.forEach(field => {
+                                       let attribute_name = field[0]
+                                       let default_value=field[1]
+                                       var attribute = frappe.query_report.get_filter(attribute_name);
+                                       attribute.df.options = default_value;
+                                       attribute.df.default =default_value;
+                                       attribute.refresh();
+                                       attribute.set_input(attribute.df.default);
+                                   });                              
+                            }
+                        }
+				
+				}); 
+        }}
+        },
+        {
+            "fieldname": "Color",
+            "label": __("Color"),
             "fieldtype": "Select"
         }
 	],
@@ -65,11 +258,16 @@ frappe.query_reports["Car Available Stock Inquiry"] = {
         }
         report.page.add_inner_button(__("Clear Filters"), function() {
             frappe.query_report.set_filter_value('item_group','اختر المجموعة')
-            frappe.query_report.set_filter_value('brand','اختر النوع')
-            frappe.query_report.set_filter_value('Category', 'اختر الفئة')
-            frappe.query_report.set_filter_value('Color', 'اختر اللون')
-            frappe.query_report.set_filter_value('model','اختر الموديل')
-            
+            all_dropdown_fields=[['brand','اختر النوع'],['Category','اختر الفئة'],['Color','اختر اللون'],['model','اختر الموديل']]
+            all_dropdown_fields.forEach(field => {
+                let attribute_name = field[0]
+                let default_value=field[1]
+                var attribute = frappe.query_report.get_filter(attribute_name);
+                attribute.df.options = default_value;
+                attribute.df.default =default_value;
+                attribute.refresh();
+                attribute.set_input(attribute.df.default);
+            });           
         });
         
         return frappe.call({
