@@ -39,7 +39,9 @@ frappe.query_reports["Car Available Stock Inquiry"] = {
                                     attribute.df.default =default_value;
                                     attribute.refresh();
                                     attribute.set_input(attribute.df.default);
+                              
                                 });
+                                      frappe.query_report.refresh();
                             }
                             else{
                                 //reset fields
@@ -52,13 +54,17 @@ frappe.query_reports["Car Available Stock Inquiry"] = {
                                     attribute.df.default =default_value;
                                     attribute.refresh();
                                     attribute.set_input(attribute.df.default);
-                                });
 
+                                });
+                                frappe.query_report.refresh();
                             }
                         }
 				
 				}); 
-        }}
+        }else{
+            frappe.query_report.refresh();
+        }
+    }
         },
         {
             "fieldname": "brand",
@@ -97,6 +103,7 @@ frappe.query_reports["Car Available Stock Inquiry"] = {
                                     attribute.refresh();
                                     attribute.set_input(attribute.df.default);
                                 });
+                                frappe.query_report.refresh();
                             }else{
                                 //reset fields
                                 all_dropdown_fields=[['Category','اختر الفئة'],['Color','اختر اللون'],['model','اختر الموديل']]
@@ -108,11 +115,14 @@ frappe.query_reports["Car Available Stock Inquiry"] = {
                                     attribute.df.default =default_value;
                                     attribute.refresh();
                                     attribute.set_input(attribute.df.default);
-                                });                                
+                                });  
+                                frappe.query_report.refresh();                              
                             }
                         }
 				
 				}); 
+        }else{
+            frappe.query_report.refresh();
         }}
         },
         {
@@ -152,6 +162,7 @@ frappe.query_reports["Car Available Stock Inquiry"] = {
                                        attribute.refresh();
                                        attribute.set_input(attribute.df.default);
                                    }); 
+                                   frappe.query_report.refresh();
                             }else{
                                    //reset fields
                                    all_dropdown_fields=[['Color','اختر اللون'],['model','اختر الموديل']]
@@ -163,11 +174,14 @@ frappe.query_reports["Car Available Stock Inquiry"] = {
                                        attribute.df.default =default_value;
                                        attribute.refresh();
                                        attribute.set_input(attribute.df.default);
-                                   });                              
+                                   }); 
+                                   frappe.query_report.refresh();                             
                             }
                         }
 				
 				}); 
+        }else{
+            frappe.query_report.refresh();
         }}
 		},
         {
@@ -198,7 +212,7 @@ frappe.query_reports["Car Available Stock Inquiry"] = {
                                 attribute.df.default = data[0];
                                 attribute.refresh();
                                 attribute.set_input(attribute.df.default);
-                             
+                                frappe.query_report.refresh();
                             }else{
                                    //reset fields
                                    all_dropdown_fields=[['Color','اختر اللون'],['model','اختر الموديل']]
@@ -210,11 +224,14 @@ frappe.query_reports["Car Available Stock Inquiry"] = {
                                        attribute.df.default =default_value;
                                        attribute.refresh();
                                        attribute.set_input(attribute.df.default);
-                                   });                              
+                                   });     
+                                   frappe.query_report.refresh();                         
                             }
                         }
 				
 				}); 
+        }else{
+            frappe.query_report.refresh();
         }}
         },
         {

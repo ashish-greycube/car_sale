@@ -14,12 +14,7 @@ def execute(filters=None):
 	return columns, data
 
 def get_column():
-	# return [
-	# 	_("Car Name") + ":Link/Item:200",
-	# 	_("Warehouse") + ":Link/Warehouse:100",
-	# 	_("Qty") + ":Int:40",
-	# 	_("Selling Rate") + ":Float:60"
-	# ]
+
     return [
         {"label": _("Car Name"), 'width': 200, "fieldname": "CarName", 'fieldtype': 'Link/Item'},
 		{"label":_("Warehouse"), 'width': 100, "fieldname": "Warehouse", 'fieldtype': 'Link/Warehouse'},
@@ -28,28 +23,6 @@ def get_column():
     ]
 
 def get_car_available_stock_inquiry(filters):
-	print '-------------before'
-	print filters
-	# if filters=={}:
-	# 	filters.update({"from_date": filters.get("from_date"),"to_date":filters.get("to_date"),
-	# 	"serial_no":filters.get("serial_no"),"cost_center":filters.get("cost_center"),
-	# 	"sales_person":filters.get("sales_person"),
-	# 	"customer_name":filters.get("customer_name"),
-	# 	"item_group":filters.get("item_group"),
-	# 	"brand":filters.get("brand"),
-	# 	"Category":filters.get("Category"),
-	# 	"Color":filters.get("Color"),"model":filters.get("model")})
-	# 	if filters.get("item_group")=='Select Group..':
-	# 		filters.update({"item_group": None})
-	# 	if filters.get("brand")=='Select Brand..':
-	# 		filters.update({"brand": None})
-	# 	if filters.get("Category")=='Select Category..':
-	# 		filters.update({"Category": None})
-	# 	if filters.get("Color")=='Select Color..':
-	# 		filters.update({"Color": None})
-	# 	if filters.get("model")=='Select Model..':
-	# 		filters.update({"model": None})
-	# else:
 	if filters.get("item_group")==None:
 		filters.update({"item_group": _("اختر المجموعة")})
 	if filters.get("brand")==None:
@@ -115,9 +88,9 @@ WHERE
 
        and TS.warehouse is not null
 
-       and 1= case when %(brand)s ='اختر النوع' then 0 when ( TI.variant_of= %(brand)s) then 1 else 0 end
+       and 1= case when %(brand)s ='اختر النوع' then 1 when ( TI.variant_of= %(brand)s) then 1 else 0 end
 
-       and 1= case when %(item_group)s ='اختر المجموعة' then 0 when ( TI.item_group= %(item_group)s) then 1 else 0 end
+       and 1= case when %(item_group)s ='اختر المجموعة' then 1 when ( TI.item_group= %(item_group)s) then 1 else 0 end
 
 group by
 
@@ -135,11 +108,11 @@ group by
 
  WHERE
 
-       1 = case when %(Color)s ='اختر اللون' THEN 0 when ( T.Color = %(Color)s ) then 1 ELSE 0 END
+       1 = case when %(Color)s ='اختر اللون' THEN 1 when ( T.Color = %(Color)s ) then 1 ELSE 0 END
 
-       AND 1= case when %(model)s ='اختر الموديل' THEN 0 when ( T.Model = %(model)s )then 1 else 0 end
+       AND 1= case when %(model)s ='اختر الموديل' THEN 1 when ( T.Model = %(model)s )then 1 else 0 end
 
-       AND 1= case when %(Category)s ='اختر الفئة' then 0 when ( T.Category= %(Category)s) then 1 else 0 end
+       AND 1= case when %(Category)s ='اختر الفئة' then 1 when ( T.Category= %(Category)s) then 1 else 0 end
 
 group by
 
@@ -150,5 +123,4 @@ group by
        T.SellingRate""", filters, as_list=1)
 
 
-	print car_available
 	return car_available

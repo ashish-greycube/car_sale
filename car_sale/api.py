@@ -1052,8 +1052,6 @@ def get_template_name(search_group):
         item_groups.extend([search_group.name for search_group in get_child_nodes('Item Group', search_group)])
         cond = "item_group in (%s)"%(', '.join(['%s']*len(item_groups)))
 
-        print 'get_template_name'
-        print item_groups
     template_name=frappe.db.sql("""select distinct(item_name) 
     from `tabItem` where has_variants=1 and docstatus < 2 and {cond}
         """.format(cond=cond), tuple(item_groups), as_list=1)
