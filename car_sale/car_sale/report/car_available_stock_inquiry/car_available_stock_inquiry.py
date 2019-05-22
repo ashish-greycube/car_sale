@@ -16,10 +16,10 @@ def execute(filters=None):
 def get_column():
 
     return [
-        {"label": _("Car Name"), 'width': 200, "fieldname": "CarName", 'fieldtype': 'Link/Item'},
-		{"label":_("Warehouse"), 'width': 100, "fieldname": "Warehouse", 'fieldtype': 'Link/Warehouse'},
-		{"label": _("Qty"), 'width': 40, "fieldname": "Quantity", 'fieldtype': 'Int'},
-        {"label": _("Selling Rate"), "fieldname": "SellingRate", 'fieldtype': 'Int'}
+        {"label": _("Car Name"), 'width': 250, "fieldname": "CarName", 'fieldtype': 'Link/Item'},
+		{"label":_("Warehouse"), 'width': 170, "fieldname": "Warehouse", 'fieldtype': 'Link/Warehouse'},
+		{"label": _("Qty"), 'width': 41, "fieldname": "Quantity", 'fieldtype': 'Int'},
+        {"label": _("Selling Rate"), 'width': 100, "fieldname": "SellingRate", 'fieldtype': 'Int'}
     ]
 
 def get_car_available_stock_inquiry(filters):

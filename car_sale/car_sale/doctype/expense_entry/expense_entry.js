@@ -30,6 +30,26 @@ frappe.ui.form.on('Expense Entry', {
 			frm.set_df_property("paid_from_account", "reqd", 1);
 		}
 	},
+	onload_post_render:async function (frm) {
+
+		if (frm.doc.expense_type == 'Credit') {
+			
+			frm.set_df_property("party", "reqd", 1);
+			frm.set_df_property("mode_of_payment", "reqd", 0);
+			frm.set_df_property("paid_from_account", "reqd", 0);
+
+			frm.set_value('party_type', 'Supplier');
+			let default_payable_account = (await frappe.db.get_value("Company", frm.doc.company, "default_payable_account")).message.default_payable_account;
+			frm.set_value('payable_account', default_payable_account)
+
+		}
+		else if (frm.doc.expense_type == 'Cash'){
+			frm.set_df_property("party", "reqd", 0);
+			frm.set_df_property("mode_of_payment", "reqd", 1);
+			frm.set_df_property("paid_from_account", "reqd", 1);
+		}		
+
+	},
 	expense_type: async function (frm) {
 		if (frm.doc.expense_type == 'Credit') {
 			
