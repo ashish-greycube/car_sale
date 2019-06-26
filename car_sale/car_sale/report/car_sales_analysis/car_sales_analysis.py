@@ -99,8 +99,6 @@ def get_car_sales_analysis(filters):
 		if filters.get("model")==None:
 			filters.update({"model": _("اختر الموديل")})
 
-	print '-----------------'
-	print filters
 
 	car_sales= frappe.db.sql("""select
 
@@ -309,5 +307,4 @@ TI.item_group
        AND 1= case when %(Category)s ='اختر الفئة' then 1 when ( A.Category= %(Category)s) then 1 else 0 end""", filters, as_list=1)
 
 
-	print car_sales
 	return car_sales

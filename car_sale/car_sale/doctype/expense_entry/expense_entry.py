@@ -153,8 +153,6 @@ class ExpenseEntry(AccountsController):
 					if repeat.serial_no:
 						gl_expense_remarks=gl_expense_remarks+' Serial No#'+repeat.serial_no
 
-			print data.idx
-			print gl_expense_remarks
 			gl_entry.append(
 				self.get_gl_dict({
 					"account": data.expense_account,
@@ -189,7 +187,6 @@ class ExpenseEntry(AccountsController):
 			frappe.throw(_("Please set default paid from account for the company {0}").format(getlink("Company",self.company)))
 
 		for data in self.expenses_entry_detail:
-			print data
 			if not data.expense_account:
 				frappe.throw(_("Expense account is required for {0} row").format(data.idx))
 			if not data.cost_center:

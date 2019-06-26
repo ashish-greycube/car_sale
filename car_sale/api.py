@@ -154,7 +154,6 @@ def make_customer_from_lead(doc):
             customer_name=doc.lead_name
         # create contact and customer
             customer = frappe.new_doc("Customer")
-            print customer.represents_company
             customer.is_internal_customer=0
             customer.represents_company=''
             customer.customer_type=customer_type
@@ -169,7 +168,6 @@ def make_customer_from_lead(doc):
             customer.mobile_no=primary_contact['mobile_no']
             customer.email_id=primary_contact['email_id']
             customer.save(ignore_permissions=True)
-            print customer
         return
 
 #Helpler function for creating contact
@@ -428,8 +426,6 @@ def update_lead_status_from_sales_order(self,method):
         lead=frappe.get_doc("Lead",name_of_linked_lead)
 
         if lead.linked_sales_order== None or lead.linked_sales_order=='':
-            print name_of_linked_lead
-            print 'name_of_linked_lead'
             lead.db_set('linked_sales_order', self.name)
     
         if cstr(lead.status) in ['Lead','Open','Sales Inquiry','Quotation','Converted']:
@@ -466,16 +462,10 @@ def update_lead_status_from_quotation(self,method):
 
 def get_customernamingseries(customer_name):
     customernamingseries=frappe.db.sql("""select name from `tabCustomer` where customer_name=%s""",customer_name,as_list=True) 
-    print customernamingseries
     if customernamingseries==None or customernamingseries==[] :
         customernamingseries=customer_name
-        print customernamingseries
-        print 'customernamingseries'
         return customernamingseries
     else:
-        print customer_name
-        print customernamingseries[0][0]
-        print 'customernamingseries[0][0]'
         return customernamingseries[0][0] if customernamingseries else None
 
 @frappe.whitelist()
@@ -628,10 +618,8 @@ def update_serial_no_status_from_sales_invoice(self,method):
                 # check for empty serial no
                 if not item.serial_no:
                     service_item=frappe.get_list('Item', filters={'item_code': item.item_code}, fields=['is_stock_item', 'is_sales_item', 'is_purchase_item'],)[0]
-                    print service_item
                     if service_item.is_stock_item==0 and service_item.is_sales_item==1 and service_item.is_purchase_item==0:
                         pass
-                        print 'pass'
                     else:
                         frappe.throw(_("Row {0}: {1} Serial numbers required for Item {2}. You have provided None.".format(
                             item.idx, item.qty, item.item_code)))
@@ -642,13 +630,7 @@ def update_serial_no_status_from_sales_invoice(self,method):
                     if item.serial_no and cint(item.qty) != len(si_serial_nos):
                         frappe.throw(_("Row {0}: {1} Serial numbers required for Item {2}. You have provided {3}.".format(
                             item.idx, item.qty, item.item_code, len(si_serial_nos))))
-                    print 'item.serial_no'
-                    print item.serial_no
-                    print len(si_serial_nos)
-                    print item.serial_no.split("\n")
                     for serial_no in item.serial_no.split("\n"):
-                        print '1serial_no'
-                        print len(serial_no)
                         if serial_no and frappe.db.exists('Serial No', serial_no) :
                             #match item_code with serial number-->item_code
                             sno_item_code=frappe.db.get_value("Serial No", serial_no, "item_code")
@@ -787,8 +769,6 @@ def unreserve_serial_no_from_so_on_cancel(self,method):
 
 @frappe.whitelist()
 def unlink_so_from_other_doctype(self,method):
-    print ('in------------------------------')
-    print self.linked_lead
     frappe.db.sql("""update `tabSales Order` set sub_customer='',linked_lead='',sales_person='',sales_person_branch='' where name=%s""",self.name)
     frappe.db.sql("""update `tabLead` set status='Sales Inquiry',linked_sales_order='' where name=%s""",self.linked_lead)
 
@@ -859,26 +839,19 @@ def unreserve_serial_no_from_delivery_note(self,method):
 def auto_unreserve_serial_no_from_quotation_on_expiry():
     expired_quotation_list=frappe.get_all('Quotation', filters = [["valid_till", ">", datetime.date(1900, 1, 1)],["valid_till", "<", getdate(nowdate())]], fields=['name'])
     
-    print expired_quotation_list
     if expired_quotation_list:
         for quotation_name in expired_quotation_list:
             quotation = frappe.get_doc('Quotation', quotation_name)
-            print quotation
             if quotation:
                 unreserve_serial_no_from_quotation(self=quotation,method=None,auto_run=1)
 
 @frappe.whitelist()
 def unreserve_serial_no_from_quotation(self,method,auto_run=0):
     """ update serial no doc with details of Sales Order """
-    print ('unreserve_serial_no_from_quotation')
-    print cint(self.reserve_above_items)
-    print  self.status
-    print self.docstatus
     # if auto_run==1:
     #     self.reserve_above_items=0
     quotation = None if (cint(self.reserve_above_items)==0 or self.status in ('Lost','Ordered') or self.docstatus ==0) else self.name
     if quotation and (self.docstatus ==1 or self.docstatus ==2 ):
-        print 'inside unreserve_serial_no_from_quotation'
         for item in self.items:
             # check for empty serial no
             if not item.serial_no:
@@ -886,7 +859,6 @@ def unreserve_serial_no_from_quotation(self,method,auto_run=0):
             else:
                 # match item qty and serial no count
                 for serial_no in item.serial_no.split("\n"):
-                    print serial_no
                     if serial_no and frappe.db.exists('Serial No', serial_no):
                         #match item_code with serial number-->item_code
                         sno_item_code=frappe.db.get_value("Serial No", serial_no, "item_code")
@@ -1058,7 +1030,6 @@ def get_template_name(search_group):
     return template_name if template_name else None
 
 def get_child_nodes(group_type, root):
-    print (group_type, root)
     lft, rgt = frappe.db.get_value(group_type, root, ["lft", "rgt"])
     return frappe.db.sql(""" Select name, lft, rgt from `tab{tab}` where
             lft >= {lft} and rgt <= {rgt} order by lft""".format(tab=group_type, lft=lft, rgt=rgt), as_dict=1)
@@ -1113,7 +1084,6 @@ def get_registration_plate_no(serial_nos=None):
         FROM `tabSerial No` {}
         group by name
     """.format(where_clause))
-    print nos
     data = []
     if nos:
         for d in serial_nos.split("\n"):
