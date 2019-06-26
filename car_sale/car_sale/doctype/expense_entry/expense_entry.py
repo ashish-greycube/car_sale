@@ -90,8 +90,6 @@ class ExpenseEntry(AccountsController):
 					if repeat.serial_no:
 						gl_expense_remarks=gl_expense_remarks+' Serial No#'+repeat.serial_no
 
-			print data.idx
-			print gl_expense_remarks
 			gl_entry.append(
 				self.get_gl_dict({
 					"account": data.expense_account,

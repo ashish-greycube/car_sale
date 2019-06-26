@@ -120,7 +120,7 @@ def make_customer_from_lead(doc):
     contact_name = frappe.db.get_value('Contact',{'mobile_no': doc.mobile_no}, 'name')
     if contact_name:
         #existing contact
-        print 'duplicate'
+        print('duplicate')
     else:
         #new contact
         if doc.organization_lead==1:

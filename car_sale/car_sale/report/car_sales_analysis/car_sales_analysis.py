@@ -56,8 +56,6 @@ def get_count_of_serial_no(data,columns):
 
 
 def get_car_sales_analysis(filters):
-	print '-------------before'
-	print filters
 	if filters=={}:
 		filters.update({"from_date": filters.get("from_date"),"to_date":filters.get("to_date"),
 		"serial_no":filters.get("serial_no"),"cost_center":filters.get("cost_center"),
