@@ -17,6 +17,7 @@ import datetime
 
 @frappe.whitelist()
 def make_quotation_for_customer(source_name,target_doc=None):
+    print("update_quotation")
     def set_missing_values(source, target):
         from erpnext.controllers.accounts_controller import get_default_taxes_and_charges
         quotation = frappe.get_doc(target)
@@ -46,6 +47,7 @@ def make_quotation_for_customer(source_name,target_doc=None):
         quotation.run_method("set_other_charges")
         
     def update_quotation(source_doc, target_doc, source_parent):
+        print("update_quotation")
         target_doc.quotation_to = "Customer"
         target_doc.linked_lead=source_doc.name
         
@@ -54,27 +56,33 @@ def make_quotation_for_customer(source_name,target_doc=None):
                 # target_doc.customer=source_doc.bank_name
                 # target_doc.sub_customer=source_doc.customer
                 target_doc.customer=get_customernamingseries(source_doc.bank_name)
+                target_doc.party_name=target_doc.customer
                 target_doc.sub_customer=get_customernamingseries(source_doc.customer)
                 
             else:
                 # target_doc.customer=source_doc.customer
                 target_doc.customer=get_customernamingseries(source_doc.customer)
+                target_doc.party_name=target_doc.customer
         else:
             if source_doc.organization_lead==0 and source_doc.transaction_type=='Cash':
                 # target_doc.customer=source_doc.lead_name
                 target_doc.customer=get_customernamingseries(source_doc.lead_name)
+                target_doc.party_name=target_doc.customer
             elif source_doc.organization_lead==1 and source_doc.transaction_type=='Cash':
                 # target_doc.customer=source_doc.company_name
                 target_doc.customer=get_customernamingseries(source_doc.company_name)
+                target_doc.party_name=target_doc.customer
             elif source_doc.organization_lead==0 and source_doc.transaction_type=='Bank Funded':
                 # target_doc.customer=source_doc.bank_name
                 # target_doc.sub_customer=source_doc.lead_name
                 target_doc.customer=get_customernamingseries(source_doc.bank_name)
+                target_doc.party_name=target_doc.customer
                 target_doc.sub_customer=get_customernamingseries(source_doc.lead_name)
             elif source_doc.organization_lead==1 and source_doc.transaction_type=='Bank Funded':
                 # target_doc.customer=source_doc.bank_name
                 # target_doc.sub_customer=source_doc.company_name
                 target_doc.customer=get_customernamingseries(source_doc.bank_name)
+                target_doc.party_name=target_doc.customer
                 target_doc.sub_customer=get_customernamingseries(source_doc.company_name)
     def update_sales_team(obj, target, source_parent):
         target.sales_person = source_parent.sales_person
@@ -131,6 +139,7 @@ def make_customer_from_lead(doc):
             customer.represents_company=''
             customer.customer_type=customer_type
             customer.lead_name=doc.name
+            customer.car_customer_source=doc.car_customer_source
             customer.customer_group=doc.customer_group
             customer.territory=doc.territory
             customer.customer_name=customer_name
@@ -158,6 +167,7 @@ def make_customer_from_lead(doc):
             customer.represents_company=''
             customer.customer_type=customer_type
             customer.lead_name=doc.name
+            customer.car_customer_source=doc.car_customer_source
             customer.customer_group=doc.customer_group
             customer.territory=doc.territory
             customer.customer_name=customer_name
@@ -924,7 +934,7 @@ def update_serial_no_from_quotation(self,method):
                             sno.sales_person=self.sales_person
                             sno.sales_person_phone_no=frappe.get_value('Sales Person', sno.sales_person, 'phone_no')
                             sno.branch=self.sales_person_branch
-                        sno.for_customer=self.customer
+                        sno.for_customer=self.party_name
                         sno.reserved_by_document = self.name
                         sno.save(ignore_permissions=True)
                 else:
