@@ -12,6 +12,9 @@ from erpnext.setup.utils import get_exchange_rate
 from erpnext.accounts.party import get_party_account_currency
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 import datetime
+from erpnext.stock.doctype.item.item import get_item_defaults
+from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
+from frappe.contacts.doctype.address.address import get_company_address
 
 # Lead to Quotation
 
@@ -214,6 +217,7 @@ def get_existing_customer(mobile_no):
             cust.customer_type,
             cust.customer_name,
             cust.name,
+            cust.car_customer_source,
             RTRIM(concat(cont.first_name,' ',ifnull(cont.last_name,'')))as person_name,
             cont.email_id,
             cont.mobile_no
@@ -1107,3 +1111,60 @@ def get_distinct_attributes_values():
     return frappe.db.sql("""select distinct attribute as attribute ,attribute_value as attribute_value from `tabItem Variant Attribute`
 where attribute_value is not null
 group by attribute,attribute_value""",as_dict=True)
+
+@frappe.whitelist()
+def car_make_delivery_note(source_name, target_doc=None):
+    
+	def set_missing_values(source, target):
+		target.ignore_pricing_rule = 1
+		target.run_method("set_missing_values")
+		target.run_method("set_po_nos")
+		target.run_method("calculate_taxes_and_totals")
+
+		# set company address
+		target.update(get_company_address(target.company))
+		if target.company_address:
+			target.update(get_fetch_values("Delivery Note", 'company_address', target.company_address))
+
+	def update_item(source, target, source_parent):
+		target.base_amount = (flt(source.qty) - flt(source.delivered_qty)) * flt(source.base_rate)
+		target.amount = (flt(source.qty) - flt(source.delivered_qty)) * flt(source.rate)
+		target.qty = flt(source.qty) - flt(source.delivered_qty)
+
+		item = get_item_defaults(target.item_code, source_parent.company)
+		item_group = get_item_group_defaults(target.item_code, source_parent.company)
+
+		if item:
+			target.cost_center = frappe.db.get_value("Project", source_parent.project, "cost_center") \
+				or item.get("selling_cost_center") \
+				or item_group.get("selling_cost_center")
+
+	target_doc = get_mapped_doc("Sales Order", source_name, {
+		"Sales Order": {
+			"doctype": "Delivery Note",
+			"validation": {
+				"docstatus": ["=", 1]
+			}
+		},
+		"Sales Order Item": {
+			"doctype": "Delivery Note Item",
+			"field_map": {
+				"rate": "rate",
+				"serial_no":"serial_no",
+				"name": "so_detail",
+				"parent": "against_sales_order",
+			},
+			"postprocess": update_item,
+			"condition": lambda doc: abs(doc.delivered_qty) < abs(doc.qty) and doc.delivered_by_supplier!=1
+		},
+		"Sales Taxes and Charges": {
+			"doctype": "Sales Taxes and Charges",
+			"add_if_empty": True
+		},
+		"Sales Team": {
+			"doctype": "Sales Team",
+			"add_if_empty": True
+		}
+	}, target_doc, set_missing_values)
+
+	return target_doc

@@ -1,6 +1,88 @@
 {% include "car_sale/public/js/car_search.js" %}
+{% include 'erpnext/selling/sales_common.js' %}
 
 frappe.ui.form.on('Sales Order', {
+	onload_post_render: function(doc, dt, dn) {
+		if(cur_frm.doc.docstatus==1) {
+			if(doc.status != 'Closed') {
+			// delivery note
+				if(cur_frm.custom_buttons.Delivery.length==1) {
+					cur_frm.add_custom_button(__('Car Delivery'), () => {
+						cur_frm.events.car_make_delivery_note_based_on_delivery_date();
+					});
+				}
+			} 
+		}
+	},
+	car_make_delivery_note_based_on_delivery_date: function() {
+		var me = this;
+	
+		var delivery_dates = [];
+		$.each(cur_frm.doc.items || [], function(i, d) {
+			if(!delivery_dates.includes(d.delivery_date)) {
+				delivery_dates.push(d.delivery_date);
+			}
+		});
+	
+		var item_grid = cur_frm.fields_dict["items"].grid;
+		if(!item_grid.get_selected().length && delivery_dates.length > 1) {
+			var dialog = new frappe.ui.Dialog({
+				title: __("Select Items based on Delivery Date"),
+				fields: [{fieldtype: "HTML", fieldname: "dates_html"}]
+			});
+	
+			var html = $(`
+				<div style="border: 1px solid #d1d8dd">
+					<div class="list-item list-item--head">
+						<div class="list-item__content list-item__content--flex-2">
+							${__('Delivery Date')}
+						</div>
+					</div>
+					${delivery_dates.map(date => `
+						<div class="list-item">
+							<div class="list-item__content list-item__content--flex-2">
+								<label>
+								<input type="checkbox" data-date="${date}" checked="checked"/>
+								${frappe.datetime.str_to_user(date)}
+								</label>
+							</div>
+						</div>
+					`).join("")}
+				</div>
+			`);
+	
+			var wrapper = dialog.fields_dict.dates_html.$wrapper;
+			wrapper.html(html);
+	
+			dialog.set_primary_action(__("Select"), function() {
+				var dates = wrapper.find('input[type=checkbox]:checked')
+					.map((i, el) => $(el).attr('data-date')).toArray();
+	
+				if(!dates) return;
+	
+				$.each(dates, function(i, d) {
+					$.each(item_grid.grid_rows || [], function(j, row) {
+						if(row.doc.delivery_date == d) {
+							row.doc.__checked = 1;
+						}
+					});
+				})
+				me.car_make_delivery_note();
+				dialog.hide();
+			});
+			dialog.show();
+		} else {
+			this.car_make_delivery_note();
+		}
+	},
+	
+	car_make_delivery_note: function() {
+		frappe.model.open_mapped_doc({
+			method: "car_sale.api.car_make_delivery_note",
+			frm: me.frm
+		})
+	},
+
 	items_on_form_rendered: function() {
 			erpnext.setup_serial_no();
 	},
