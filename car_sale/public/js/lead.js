@@ -111,7 +111,7 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 						}
 						cur_frm.set_value("customer","");
 
-
+						cur_frm.set_df_property('car_customer_source', 'read_only', 0);
 						cur_frm.set_df_property('organization_lead', 'read_only', 0);
 						cur_frm.set_df_property('lead_name', 'read_only', 0);
 						cur_frm.set_df_property('company_name', 'read_only', 0);
