@@ -124,6 +124,7 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 						cur_frm.set_value("lead_name", exist_cust['person_name']);
 						cur_frm.set_value("email_id", exist_cust['email_id']);
 						cur_frm.set_value("car_customer_source", exist_cust['car_customer_source']);
+						cur_frm.set_value("territory", exist_cust['territory']);
 						cur_frm.set_value("source",'Existing Customer')
 						
 						// cur_frm.set_value("customer",exist_cust['customer_name'])
@@ -139,6 +140,7 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 						cur_frm.set_df_property('lead_name', 'read_only', 1);
 						cur_frm.set_df_property('email_id', 'read_only', 1);
 						cur_frm.set_df_property('car_customer_source', 'read_only', 1);
+						cur_frm.set_df_property('territory', 'read_only', 1);
 						cur_frm.set_df_property('source', 'read_only', 1);
 						cur_frm.set_df_property('customer', 'read_only', 1);
 
@@ -161,6 +163,7 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 						cur_frm.set_value("company_name", '');
 						cur_frm.set_value("email_id", '');
 						cur_frm.set_value("car_customer_source", '');
+						cur_frm.set_value("territory", '');
 						
 						if (cur_frm.doc.source=='Existing Customer'){
 							cur_frm.set_value("source",'')
@@ -168,6 +171,7 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 						cur_frm.set_value("customer","");
 
 						cur_frm.set_df_property('car_customer_source', 'read_only', 0);
+						cur_frm.set_df_property('territory', 'read_only', 0);
 						cur_frm.set_df_property('organization_lead', 'read_only', 0);
 						cur_frm.set_df_property('lead_name', 'read_only', 0);
 						cur_frm.set_df_property('company_name', 'read_only', 0);

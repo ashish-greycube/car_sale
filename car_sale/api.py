@@ -218,6 +218,7 @@ def get_existing_customer(mobile_no):
             cust.customer_name,
             cust.name,
             cust.car_customer_source,
+            cust.territory,
             RTRIM(concat(cont.first_name,' ',ifnull(cont.last_name,'')))as person_name,
             cont.email_id,
             cont.mobile_no
