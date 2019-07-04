@@ -24,6 +24,62 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 			cur_frm.set_value("email_id", '');
 		}
 	},
+	sales_inquiry_type: function (frm) {
+		if (cur_frm.doc.sales_inquiry_type == '') {
+			// Hide 
+			cur_frm.set_df_property('unknown_car_group', 'hidden', 1);
+			cur_frm.set_df_property('unknown_car_brand', 'hidden', 1);
+			//Make it non required
+			cur_frm.set_df_property('unknown_car_group', 'reqd', 0);
+			cur_frm.set_df_property('unknown_car_brand', 'reqd', 0)
+			cur_frm.set_df_property('search_group', 'reqd', 0);
+			cur_frm.set_df_property('search_template', 'reqd', 0);
+			//Unhide
+			cur_frm.set_df_property('search_group', 'hidden', 0);
+			cur_frm.set_df_property('search_template', 'hidden', 0);
+			cur_frm.set_df_property('search_category', 'hidden', 0);
+			cur_frm.set_df_property('search_model', 'hidden', 0);
+			cur_frm.set_df_property('search_color', 'hidden', 0);
+			cur_frm.set_df_property('add', 'hidden', 0);
+			cur_frm.set_df_property('inquiry_item', 'hidden', 0);
+		} else if (cur_frm.doc.sales_inquiry_type == 'Basic Only') {
+			// Hide 
+			cur_frm.set_df_property('search_category', 'hidden', 1);
+			cur_frm.set_df_property('search_model', 'hidden', 1);
+			cur_frm.set_df_property('search_color', 'hidden', 1);
+			cur_frm.set_df_property('add', 'hidden', 1);
+			cur_frm.set_df_property('inquiry_item', 'hidden', 1);
+			cur_frm.set_df_property('unknown_car_group', 'hidden', 1);
+			cur_frm.set_df_property('unknown_car_brand', 'hidden', 1);
+			//Make it non required			
+			cur_frm.set_df_property('unknown_car_group', 'reqd', 0);
+			cur_frm.set_df_property('unknown_car_brand', 'reqd', 0);
+			//Unhide
+			cur_frm.set_df_property('search_group', 'hidden', 0);
+			cur_frm.set_df_property('search_template', 'hidden', 0);
+			//Make it required
+			cur_frm.set_df_property('search_group', 'reqd', 1);
+			cur_frm.set_df_property('search_template', 'reqd', 1);
+		} else if (cur_frm.doc.sales_inquiry_type == 'Unknown Car') {
+			// Hide 
+			cur_frm.set_df_property('search_group', 'hidden', 1);
+			cur_frm.set_df_property('search_template', 'hidden', 1);
+			cur_frm.set_df_property('search_category', 'hidden', 1);
+			cur_frm.set_df_property('search_model', 'hidden', 1);
+			cur_frm.set_df_property('search_color', 'hidden', 1);
+			cur_frm.set_df_property('add', 'hidden', 1);
+			cur_frm.set_df_property('inquiry_item', 'hidden', 1);
+			//Make it non required
+			cur_frm.set_df_property('search_group', 'reqd', 0);
+			cur_frm.set_df_property('search_template', 'reqd', 0);
+			//Unhide
+			cur_frm.set_df_property('unknown_car_group', 'hidden', 0);
+			cur_frm.set_df_property('unknown_car_brand', 'hidden', 0);
+			//Make it required
+			cur_frm.set_df_property('unknown_car_group', 'reqd', 1);
+			cur_frm.set_df_property('unknown_car_brand', 'reqd', 1);
+		}
+	},
 	refresh: function() {
 		var doc = cur_frm.doc;
 		erpnext.toggle_naming_series();
