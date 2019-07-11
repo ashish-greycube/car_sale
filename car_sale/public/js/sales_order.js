@@ -6,11 +6,21 @@ frappe.ui.form.on('Sales Order', {
 		if(cur_frm.doc.docstatus==1) {
 			if(doc.status != 'Closed') {
 			// delivery note
-				if((cur_frm.custom_buttons.Delivery.length==1) || (cur_frm.custom_buttons.تسليم.length==1)){
+			if(cur_frm.custom_buttons.Delivery != undefined ){
+				if(cur_frm.custom_buttons.Delivery.length==1){
 					cur_frm.add_custom_button(__('Car Delivery'), () => {
 						cur_frm.events.car_make_delivery_note_based_on_delivery_date();
 					});
 				}
+			}
+			if(cur_frm.custom_buttons.تسليم != undefined ){
+				if(cur_frm.custom_buttons.تسليم.length==1){
+					cur_frm.add_custom_button(__('Car Delivery'), () => {
+						cur_frm.events.car_make_delivery_note_based_on_delivery_date();
+					});
+				}
+			}
+
 			} 
 		}
 	},
