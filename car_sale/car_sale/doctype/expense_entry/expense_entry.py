@@ -52,9 +52,11 @@ class ExpenseEntry(AccountsController):
 			gl_entries = self.get_gl_entries()
 			make_gl_entries(gl_entries, cancel)
 		elif self.expense_type=='Credit':
-
 			gl_entries_for_credit = self.get_gl_entries_for_credit()
-			make_gl_entries(gl_entries_for_credit, cancel)			
+			make_gl_entries(gl_entries_for_credit, cancel)
+		elif self.expense_type=='Employee Petty Cash':
+			gl_entries_for_credit = self.get_gl_entries_for_credit()
+			make_gl_entries(gl_entries_for_credit, cancel)
 
 	def get_gl_entries_for_credit(self):
 
