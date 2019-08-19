@@ -47,6 +47,15 @@ frappe.ui.form.on('Expense Entry', {
 			frm.set_df_property("party", "reqd", 0);
 			frm.set_df_property("mode_of_payment", "reqd", 1);
 			frm.set_df_property("paid_from_account", "reqd", 1);
+		}
+		else if (frm.doc.expense_type == 'Employee Petty Cash'){
+			frm.set_df_property("party", "reqd", 1);
+			frm.set_df_property("mode_of_payment", "reqd", 0);
+			frm.set_df_property("paid_from_account", "reqd", 0);
+
+			frm.set_value('party_type', 'Employee');
+			let default_payable_account = (await frappe.db.get_value("Company", frm.doc.company, "default_payable_account")).message.default_payable_account;
+			frm.set_value('payable_account', default_payable_account)
 		}		
 
 	},
@@ -66,6 +75,15 @@ frappe.ui.form.on('Expense Entry', {
 			frm.set_df_property("party", "reqd", 0);
 			frm.set_df_property("mode_of_payment", "reqd", 1);
 			frm.set_df_property("paid_from_account", "reqd", 1);
+		}
+		else if (frm.doc.expense_type == 'Employee Petty Cash'){
+			frm.set_df_property("party", "reqd", 1);
+			frm.set_df_property("mode_of_payment", "reqd", 0);
+			frm.set_df_property("paid_from_account", "reqd", 0);
+		
+			frm.set_value('party_type', 'Employee');
+			let default_payable_account = (await frappe.db.get_value("Company", frm.doc.company, "default_payable_account")).message.default_payable_account;
+			frm.set_value('payable_account', default_payable_account)
 		}
 	},
 	refresh: function (frm) {
@@ -89,7 +107,6 @@ frappe.ui.form.on('Expense Entry', {
 				},
 				callback: function (r, rt) {
 					if (r.message) {
-						console.log(r.message)
 						let default_cost_center = r.message["cost_center"]
 						frm.set_value("cost_center", default_cost_center || '');
 
