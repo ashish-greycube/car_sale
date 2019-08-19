@@ -202,10 +202,12 @@ class ExpenseEntry(AccountsController):
 	def validate_account_details_for_credit(self):
 		if not self.party_type:
 			frappe.throw(_("Please set party type"))
-		if self.party_type!='Supplier':
-				frappe.throw(_("Please set party type as Supplier"))			
-		if not self.party:
+		# if self.party_type!='Supplier':
+		# 		frappe.throw(_("Please set party type as Supplier"))			
+		if (self.party_type =='Supplier' and (not self.party)):
 			frappe.throw(_("Please set Supplier name"))
+		if (self.party_type =='Employee' and (not self.party)):
+			frappe.throw(_("Please set Employee name"))
 
 		if not self.payable_account:
 			frappe.throw(_("Please set default payable account for the company {0}").format(getlink("Company",self.company)))
