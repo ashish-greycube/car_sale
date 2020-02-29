@@ -1,6 +1,15 @@
 {% include "car_sale/public/js/car_search.js" %}
 {% include "car_sale/public/js/sales_person.js" %}
 frappe.ui.form.on('Quotation', {
+	validate:function(frm) {
+		for (let row of (frm.doc.items || [])) {
+			if (row.rate < row.price_list_rate) {
+				frappe.throw(__("For row <b>#{0} </b>, the rate entered for <b> {1} </b> should be greater than or equal to <b> price list rate  {2} </b>",
+				[row.idx,row.item_name,row.price_list_rate]
+			));	
+			}
+		}
+	},
     on_submit:function(frm) {
         if (cur_frm.doc.reserve_above_items==0) {
             cur_frm.set_df_property("reserve_above_items", "read_only", 1);

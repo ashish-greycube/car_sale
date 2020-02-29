@@ -2,6 +2,15 @@
 {% include 'erpnext/selling/sales_common.js' %}
 
 frappe.ui.form.on('Sales Order', {
+	validate:function(frm) {
+		for (let row of (frm.doc.items || [])) {
+			if (row.rate < row.price_list_rate) {
+				frappe.throw(__("For row <b>#{0} </b>, the rate entered for <b> {1} </b> should be greater than or equal to <b> price list rate  {2} </b>",
+				[row.idx,row.item_name,row.price_list_rate]
+			));	
+			}
+		}
+	},	
 	onload_post_render: function(doc, dt, dn) {
 		if(cur_frm.doc.docstatus==1) {
 			if(doc.status != 'Closed') {
