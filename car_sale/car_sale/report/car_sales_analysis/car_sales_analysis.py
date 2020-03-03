@@ -154,7 +154,7 @@ SI.name as ID,
 
 SI.posting_date as Date,
 
-REPLACE(SIT.serial_no, '\n', '' ) as SerialNo,
+SN.serial_no as SerialNo,
 
 SIT.item_code as ItemCode,
 
@@ -200,7 +200,7 @@ INNER JOIN  `tabItem Variant Attribute` AS TVA
 
 INNER JOIN `tabSerial No` AS SN
 
-              ON SN.serial_no = REPLACE(SIT.serial_no, '\n', '' ) 
+             ON FIND_IN_SET(SN.serial_no, REPLACE(SIT.serial_no, '\n', ',' )) > 0
 
 WHERE
 
@@ -226,9 +226,7 @@ SI.name,
 
 SI.posting_date,
 
-SIT.serial_no,
-
-SIT.item_name,
+SN.serial_no,
 
 SI.customer,
 
