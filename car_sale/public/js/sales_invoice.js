@@ -1,15 +1,6 @@
 {% include "car_sale/public/js/car_search.js" %}
 
 frappe.ui.form.on('Sales Invoice', {
-	validate:function(frm) {
-		for (let row of (frm.doc.items || [])) {
-			if (row.rate < row.price_list_rate) {
-				frappe.throw(__("For row <b>#{0} </b>, the rate entered for <b> {1} </b> should be greater than or equal to <b> price list rate  {2} </b>",
-				[row.idx,row.item_name,row.price_list_rate]
-			));	
-			}
-		}
-	},    
     onload: function (frm) {
         $('[data-fieldname="customer_name_in_arabic"]').hide()
         //get customer of non bank type
