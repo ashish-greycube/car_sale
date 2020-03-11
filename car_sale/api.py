@@ -148,6 +148,7 @@ def make_customer_from_lead(doc):
             customer.customer_group=doc.customer_group
             customer.territory=doc.territory
             customer.customer_name=customer_name
+            customer.national_id_cf=doc.national_id_cf
             # customer.default_sales_partner=doc.sales_person
             customer.insert(ignore_permissions=True)
             args={
@@ -176,6 +177,7 @@ def make_customer_from_lead(doc):
             customer.customer_group=doc.customer_group
             customer.territory=doc.territory
             customer.customer_name=customer_name
+            customer.national_id_cf=doc.national_id_cf
             # customer.default_sales_partner=doc.sales_person
             customer.save(ignore_permissions=True)
             primary_contact=get_customer_primary_contact(customer.name)
@@ -223,7 +225,8 @@ def get_existing_customer(mobile_no):
             cust.territory,
             RTRIM(concat(cont.first_name,' ',ifnull(cont.last_name,'')))as person_name,
             cont.email_id,
-            cont.mobile_no
+            cont.mobile_no,
+            cust.national_id_cf
         from `tabCustomer` cust 
         inner join `tabContact` cont
         on cust.customer_primary_contact=cont.name
@@ -861,6 +864,20 @@ def auto_unreserve_serial_no_from_quotation_on_expiry():
             quotation = frappe.get_doc('Quotation', quotation_name)
             if quotation:
                 unreserve_serial_no_from_quotation(self=quotation,method=None,auto_run=1)
+
+@frappe.whitelist()
+def auto_close_lead_on_end_date():
+    from frappe.utils import nowdate, format_datetime
+    todays_date=format_datetime(str(nowdate()+' 00:00:00'))
+    expired_lead_list=frappe.get_all('Lead', filters = [["ends_on", "<=", todays_date]], fields=['name'])
+    if expired_lead_list:
+        for lead_name in expired_lead_list:
+            lead = frappe.get_doc('Lead', lead_name.name)
+            if lead and lead.ends_on != None:
+                lead.status='Do Not Contact'
+                lead.add_comment("Comment",text="Lead closed after 90 days, by auto system")
+                lead.save(ignore_permissions=True)
+                frappe.db.commit()
 
 @frappe.whitelist()
 def unreserve_serial_no_from_quotation(self,method,auto_run=0):

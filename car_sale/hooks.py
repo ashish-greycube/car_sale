@@ -155,7 +155,8 @@ doc_events = {
 
 scheduler_events = {
 	"daily": [
-		"car_sale.api.auto_unreserve_serial_no_from_quotation_on_expiry"
+		"car_sale.api.auto_unreserve_serial_no_from_quotation_on_expiry",
+		"car_sale.api.auto_close_lead_on_end_date"
 	]
 }
 fixtures = [

@@ -163,17 +163,36 @@ frappe.ui.form.on(cur_frm.doctype, {
             }
         })
     },
-    add_serial_no_item: function (frm) {
+    add_serial_no_item: function (cur_frm) {
         if (cur_frm.doc.search_serial_no && (cur_frm.doc.serial_no_item != undefined || cur_frm.doc.serial_no_item != '')) {
             if ((cur_frm.doc.items[0]) && (cur_frm.doc.items[0].item_code == undefined || cur_frm.doc.items[0].item_code == '' || cur_frm.doc.items[0].item_code == null)) {
                 cur_frm.doc.items.splice(cur_frm.doc.items[0], 1)
             }
-            var child = cur_frm.add_child("items");
-            frappe.model.set_value(child.doctype, child.name, "item_code", cur_frm.doc.serial_no_item)
-            frappe.model.set_value(child.doctype, child.name, "serial_no", cur_frm.doc.search_serial_no)
-            $.extend(child, {
-                "warehouse": cur_frm.doc.serial_no_warehouse
-            });
+
+            // for serial_no with similar item code and warehouse, increase qty and append serail_no
+            var caught = false;
+            var no_of_items = cur_frm.doc.items.length;
+    
+            if (no_of_items != 0) {
+                $.each(cur_frm.doc["items"] || [], function (i, d) {
+                    if (d.item_code == cur_frm.doc.serial_no_item && d.warehouse== cur_frm.doc.serial_no_warehouse) {
+                        caught = true;
+                        var qty=d.qty+1;
+                        frappe.model.set_value(d.doctype, d.name, "qty",qty)
+                        d.serial_no  += `\n` +  cur_frm.doc.search_serial_no
+                    }
+                });
+            }
+    
+            // if item not found then add new item
+            if (!caught){
+                var child = cur_frm.add_child("items");
+                frappe.model.set_value(child.doctype, child.name, "item_code", cur_frm.doc.serial_no_item)
+                frappe.model.set_value(child.doctype, child.name, "serial_no", cur_frm.doc.search_serial_no)
+                $.extend(child, {
+                    "warehouse": cur_frm.doc.serial_no_warehouse
+                });   
+            }
             cur_frm.refresh_field("items")
 
             cur_frm.set_value('search_serial_no', undefined);

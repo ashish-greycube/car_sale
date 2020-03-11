@@ -1,7 +1,49 @@
+
 {% include "car_sale/public/js/car_search.js" %}
 {% include 'erpnext/selling/sales_common.js' %}
 
 frappe.ui.form.on('Sales Order', {
+	customer:function(frm) {
+		frappe.db.get_value('Customer', frm.doc.customer, 'bank_customer')
+		.then(r => {
+			let is_bank=r.message.bank_customer
+			if (is_bank==1) {
+				frm.set_df_property('sub_customer', 'read_only', 0);
+				frm.set_query('sub_customer', () => {
+					return {
+						filters: {
+							bank_customer: 0
+						}
+					}
+				})
+			}else{
+				frm.doc.sub_customer=''
+				frm.set_df_property('sub_customer', 'read_only', 1);
+				frm.doc.sub_customer_name_cf=''
+			}
+		})		
+	},
+	refresh: function(frm) {
+		if (cur_frm.doc.docstatus==1 && cur_frm.doc.status !== 'Closed' && cur_frm.doc.status !== 'On Hold') {
+								// sales invoice
+								if(flt(cur_frm.doc.per_billed, 6) < 100) {
+									if (cur_frm.doc.so_payment_type_cf=='Cash' && cur_frm.doc.advance_paid < cur_frm.doc.grand_total) {
+										setTimeout(() => cur_frm.remove_custom_button('Invoice','Make'), 1000);
+									}					
+								}
+		}
+	},
+	validate: function(frm) {
+		frappe.db.get_value('Customer', frm.doc.customer, 'bank_customer')
+		.then(r => {
+			let is_bank=r.message.bank_customer
+			if (is_bank==1) {
+				frm.set_df_property('po_no', 'reqd', 1);
+			}else{
+				frm.set_df_property('po_no', 'reqd', 0);
+			}
+		})
+	},
 	onload_post_render: function(doc, dt, dn) {
 		if(cur_frm.doc.docstatus==1) {
 			if(doc.status != 'Closed') {

@@ -23,6 +23,12 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 		if (cur_frm.doc.customer){
 			cur_frm.set_value("email_id", '');
 		}
+		console.log(cur_frm.doc.ends_on,'cur_frm.doc.ends_on')
+		if (cur_frm.doc.ends_on == undefined) {
+			var ends_on = frappe.datetime.add_days(cur_frm.doc.date, 90);
+			cur_frm.set_value("ends_on", ends_on);			
+			
+		}
 	},
 	sales_inquiry_type: function (frm) {
 		if (cur_frm.doc.sales_inquiry_type == '') {
@@ -129,9 +135,9 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 						
 						// cur_frm.set_value("customer",exist_cust['customer_name'])
 						cur_frm.set_value("customer",exist_cust['name'])
-						// if (exist_cust['sales_person']){
-						// 	cur_frm.set_value("sales_person", exist_cust['sales_person']);
-						// }
+						if (exist_cust['national_id_cf']){
+							cur_frm.set_value("national_id_cf", exist_cust['national_id_cf']);
+						}
 						if (exist_cust['customer_group']){
 							cur_frm.set_value("customer_group", exist_cust['customer_group']);
 
@@ -143,6 +149,7 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 						cur_frm.set_df_property('territory', 'read_only', 1);
 						cur_frm.set_df_property('source', 'read_only', 1);
 						cur_frm.set_df_property('customer', 'read_only', 1);
+						cur_frm.set_df_property('national_id_cf', 'read_only', 1);
 
 						if (exist_cust['customer_type']=='Company'){
 							cur_frm.set_value("organization_lead", 1);
@@ -164,7 +171,8 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 						cur_frm.set_value("email_id", '');
 						cur_frm.set_value("car_customer_source", '');
 						cur_frm.set_value("territory", '');
-						
+						cur_frm.set_value("national_id_cf", '');
+
 						if (cur_frm.doc.source=='Existing Customer'){
 							cur_frm.set_value("source",'')
 						}
@@ -178,6 +186,7 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 						cur_frm.set_df_property('email_id', 'read_only', 0);
 						cur_frm.set_df_property('source', 'read_only', 0);
 						cur_frm.set_df_property('customer', 'read_only',0);
+						cur_frm.set_df_property('national_id_cf', 'read_only', 0);
 						if (!cur_frm.doc.sales_person){
 							//get sales partenr
 							return frappe.call({
@@ -207,24 +216,29 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 	make_customer_sales_order: function() {
 		if (cur_frm.doc.inquiry_item.length>0){
 		var cur_doc = cur_frm.doc;
-		return frappe.call({
-			type: "POST",
-			method: 'car_sale.api.make_customer_from_lead',
-			args: {doc:cur_frm.doc},			
-			freeze: true,
-			callback: function(r) {
-				console.log('r')
-				console.log(r)
-				if(!r.exc) {
-					if (cur_frm.doc.inquiry_item){
-						frappe.model.open_mapped_doc({
-							method: "car_sale.api._make_sales_order",
-							frm: cur_frm
-						})
+		if (cur_doc.national_id_cf.length>0) {
+			return frappe.call({
+				type: "POST",
+				method: 'car_sale.api.make_customer_from_lead',
+				args: {doc:cur_frm.doc},			
+				freeze: true,
+				callback: function(r) {
+					console.log('r')
+					console.log(r)
+					if(!r.exc) {
+						if (cur_frm.doc.inquiry_item){
+							frappe.model.open_mapped_doc({
+								method: "car_sale.api._make_sales_order",
+								frm: cur_frm
+							})
+						}
 					}
 				}
-			}
-		})
+			})			
+		} else {
+			cur_frm.set_df_property('national_id_cf', 'reqd', 1);
+			frappe.msgprint(__('National ID is required, sales order cannot be created'));			
+		}
 	}
 	else{
 		cur_frm.set_df_property('inquiry_item', 'reqd', 1);
@@ -236,22 +250,27 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 		
 		if (cur_frm.doc.inquiry_item.length>0){
 		var cur_doc = cur_frm.doc;
-		return frappe.call({
-			type: "POST",
-			method: 'car_sale.api.make_customer_from_lead',
-			args: {doc:cur_frm.doc},			
-			freeze: true,
-			callback: function(r) {
-				if(!r.exc) {
-					if (cur_frm.doc.inquiry_item){
-						frappe.model.open_mapped_doc({
-							method: "car_sale.api.make_quotation_for_customer",
-							frm: cur_frm
-						})
+		if (cur_doc.national_id_cf.length>0) {
+			return frappe.call({
+				type: "POST",
+				method: 'car_sale.api.make_customer_from_lead',
+				args: {doc:cur_frm.doc},			
+				freeze: true,
+				callback: function(r) {
+					if(!r.exc) {
+						if (cur_frm.doc.inquiry_item){
+							frappe.model.open_mapped_doc({
+								method: "car_sale.api.make_quotation_for_customer",
+								frm: cur_frm
+							})
+						}
 					}
 				}
-			}
-		})
+			})			
+		} else {
+			cur_frm.set_df_property('national_id_cf', 'reqd', 1);
+			frappe.msgprint(__('National ID is required, quotation cannot be created'));				
+		}
 	}
 	else{
 		cur_frm.set_df_property('inquiry_item', 'reqd', 1);
