@@ -180,14 +180,12 @@ frappe.ui.form.on(cur_frm.doctype, {
                         caught = false;
                         cur_frm.get_field("items").grid.grid_rows[i].remove();
                         cur_frm.refresh_field("items")
-                        break
                     }               
                     else if (d.item_code == cur_frm.doc.serial_no_item && d.warehouse== cur_frm.doc.serial_no_warehouse) {
                         caught = true;
                         var qty=d.qty+1;
                         frappe.model.set_value(d.doctype, d.name, "qty",qty)
                         d.serial_no  += `\n` +  cur_frm.doc.search_serial_no
-                        break
                     }
                 }
             }
