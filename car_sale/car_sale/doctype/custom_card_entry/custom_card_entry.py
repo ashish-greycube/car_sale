@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
-from frappe.utils import cint
+from frappe.utils import cint,cstr
 from frappe import _
 
 class CustomCardEntry(Document):
