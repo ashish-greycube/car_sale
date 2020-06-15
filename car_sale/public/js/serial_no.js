@@ -1,4 +1,21 @@
 frappe.ui.form.on('Serial No', {
+    custom_card_exist_cf: function (frm) {
+        if (['Delivered to Employee', 'Delivered to Customer','Delivered to Supplier'].includes(frm.doc.custom_card_exist_cf)) {    
+            if (frm.doc.custom_card_exist_cf=='Delivered to Employee') {
+                frm.set_value('doctype_cf', 'Employee')
+            }else if(frm.doc.custom_card_exist_cf=='Delivered to Customer') {
+                frm.set_value('doctype_cf', 'Customer')                
+            }else if(frm.doc.custom_card_exist_cf=='Delivered to Supplier') {
+                frm.set_value('doctype_cf', 'Supplier')                
+            }
+            frm.refresh_field('doctype_cf');
+            frm.set_df_property('custom_card_given_to_cf', 'reqd', 1)
+        }else{
+            frm.set_value('doctype_cf', '');
+            frm.set_value('custom_card_given_to_cf', '');
+            frm.set_df_property('custom_card_given_to_cf', 'reqd', 0)
+        }
+    },
     refresh: function (frm) {
 
         function transfer_car() {

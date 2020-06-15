@@ -1246,3 +1246,219 @@ def _make_sales_order_from_quotation(source_name, target_doc=None, ignore_permis
 	# postprocess: fetch shipping address, set missing values
 
 	return doclist
+
+@frappe.whitelist()
+def make_purchase_receipt_from_custom_card_entry(source_name, target_doc=None):
+
+	def set_missing_values(source, target):
+		if len(target.get("items")) == 0:
+			frappe.throw(_("No Items found"))
+
+		doc = frappe.get_doc(target)
+		doc.ignore_pricing_rule = 1
+		doc.run_method("onload")
+		doc.run_method("set_missing_values")
+		doc.run_method("calculate_taxes_and_totals")
+     
+	def update_item(obj, target, source_parent):
+		target.received_qty=flt(obj.qty)
+		target.qty = flt(obj.qty)
+
+	doc = get_mapped_doc("Custom Card Entry", source_name,	{
+		"Custom Card Entry": {
+			"doctype": "Purchase Receipt",
+			"field_map": {
+				"supplier":"supplier",
+			},
+			"validation": {
+				"docstatus": ["=", 1],
+			}
+		},
+		"Custom Card Entry Item": {
+			"doctype": "Purchase Receipt Item",
+			"field_map": {
+				"name": "custom_card_entry_item",
+				"parent": "custom_card_entry",
+                "qty":"qty",
+                "serial_no":"serial_no"
+			},
+			"postprocess": update_item,
+		},
+	}, target_doc, set_missing_values)
+
+	return doc    
+
+
+@frappe.whitelist()
+def update_serial_no_status_from_purchase_receipt(self,method):
+    """ update serial no doc with details of Purchase Receipt"""
+    purchase_receipt_doc = self.name
+    if purchase_receipt_doc:
+        if self.is_return == 1 :
+            for item in self.items:
+                # check for empty serial no
+                if not item.serial_no:
+                    service_item=frappe.get_list('Item', filters={'item_code': item.item_code}, fields=['is_stock_item', 'is_sales_item', 'is_purchase_item'],)[0]
+                    if service_item.is_stock_item==0 and service_item.is_sales_item==1 :
+                        pass
+                    else:
+                        frappe.throw(_("Row {0}: {1} Serial numbers required for Item {2}. You have provided None.".format(
+                            item.idx, item.qty, item.item_code)))
+                else:
+                    # match item qty and serial no count
+                    serial_nos = item.serial_no
+                    si_serial_nos = set(get_serial_nos(serial_nos))
+                    if item.serial_no and cint(item.qty) != len(si_serial_nos):
+                        frappe.throw(_("Row {0}: {1} Serial numbers required for Item {2}. You have provided {3}.".format(
+                            item.idx, item.qty, item.item_code, len(si_serial_nos))))
+                    for serial_no in item.serial_no.split("\n"):
+                        if serial_no and frappe.db.exists('Serial No', serial_no) :
+                            #match item_code with serial number-->item_code
+                            sno_item_code=frappe.db.get_value("Serial No", serial_no, "item_code")
+                            if (cstr(sno_item_code) != cstr(item.item_code)):
+                                frappe.throw(_("{0} serial number is not valid for {1} item code").format(serial_no,item.item_code))
+                            #check if there is delivery_document_no against serial no
+                            delivery_document_no = frappe.db.get_value("Serial No", serial_no, "delivery_document_no")
+                            if delivery_document_no and self.name != delivery_document_no:
+                                frappe.throw(_("Serial Number: {0} is already referenced in Delivery Document No: {1}".format(
+                                serial_no, delivery_document_no)))	
+                            sno = frappe.get_doc('Serial No', serial_no)
+                            #whatever be reservation_status set to returned
+                            if sno.reservation_status:
+                                sno.reservation_status='Returned'
+                                sno.save(ignore_permissions=True)
+                        elif len(serial_no)==0:
+                            pass
+                        else:
+                            # check for invalid serial number
+                            frappe.throw(_("{0} is invalid serial number").format(serial_no))                  
+        elif self.is_return== 0 :
+            for item in self.items:
+                # check for empty serial no
+                if not item.serial_no:
+                    service_item=frappe.get_list('Item', filters={'item_code': item.item_code}, fields=['is_stock_item', 'is_sales_item', 'is_purchase_item'],)[0]
+                    if service_item.is_stock_item==0 and service_item.is_sales_item==1 :
+                        pass
+                    else:
+                        frappe.throw(_("Row {0}: {1} Serial numbers required for Item {2}. You have provided None.".format(
+                            item.idx, item.qty, item.item_code)))
+                else:
+                    # match item qty and serial no count
+                    serial_nos = item.serial_no
+                    si_serial_nos = set(get_serial_nos(serial_nos))
+                    if item.serial_no and cint(item.qty) != len(si_serial_nos):
+                        frappe.throw(_("Row {0}: {1} Serial numbers required for Item {2}. You have provided {3}.".format(
+                            item.idx, item.qty, item.item_code, len(si_serial_nos))))
+                    for serial_no in item.serial_no.split("\n"):
+                        if serial_no and frappe.db.exists('Serial No', serial_no) :
+                            #match item_code with serial number-->item_code
+                            sno_item_code=frappe.db.get_value("Serial No", serial_no, "item_code")
+                            if (cstr(sno_item_code) != cstr(item.item_code)):
+                                frappe.throw(_("{0} serial number is not valid for {1} item code").format(serial_no,item.item_code))
+                            #check if there is delivery_document_no against serial no
+                            delivery_document_no = frappe.db.get_value("Serial No", serial_no, "delivery_document_no")
+                            if delivery_document_no and self.name != delivery_document_no:
+                                frappe.throw(_("Serial Number: {0} is already referenced in Delivery Document No: {1}".format(
+                                serial_no, delivery_document_no)))	
+                            sno = frappe.get_doc('Serial No', serial_no)
+                            #stop if reservation_status=='Sold Out'
+                            if sno.reservation_status=='Sold Out':
+                                frappe.throw(_("It is sold out"))
+                            # pass, if reservation_status=='Reserved'
+                            if sno.reservation_status=='Reserved':
+                                pass
+                            # check, reservation_status=='Showroom Car', set to 'Available'
+                            if sno.reservation_status=='Showroom Car':
+                                sno.reservation_status='Available'
+                                sno.save(ignore_permissions=True)
+                        elif len(serial_no)==0:
+                            pass
+                        else:
+                            # check for invalid serial number
+                            frappe.throw(_("{0} is invalid serial number").format(serial_no))
+
+@frappe.whitelist()
+def update_serial_no_status_from_purchase_invoice(self,method):
+    """ update serial no doc with details of Purchase Invoice"""
+    purchase_invoice_doc = self.name
+    if purchase_invoice_doc:
+        if self.is_return == 1 and self.update_stock == 1:
+            for item in self.items:
+                # check for empty serial no
+                if not item.serial_no:
+                    service_item=frappe.get_list('Item', filters={'item_code': item.item_code}, fields=['is_stock_item', 'is_sales_item', 'is_purchase_item'],)[0]
+                    if service_item.is_stock_item==0 and service_item.is_sales_item==1 :
+                        pass
+                    else:
+                        frappe.throw(_("Row {0}: {1} Serial numbers required for Item {2}. You have provided None.".format(
+                            item.idx, item.qty, item.item_code)))
+                else:
+                    # match item qty and serial no count
+                    serial_nos = item.serial_no
+                    si_serial_nos = set(get_serial_nos(serial_nos))
+                    if item.serial_no and cint(item.qty) != len(si_serial_nos):
+                        frappe.throw(_("Row {0}: {1} Serial numbers required for Item {2}. You have provided {3}.".format(
+                            item.idx, item.qty, item.item_code, len(si_serial_nos))))
+                    for serial_no in item.serial_no.split("\n"):
+                        if serial_no and frappe.db.exists('Serial No', serial_no) :
+                            #match item_code with serial number-->item_code
+                            sno_item_code=frappe.db.get_value("Serial No", serial_no, "item_code")
+                            if (cstr(sno_item_code) != cstr(item.item_code)):
+                                frappe.throw(_("{0} serial number is not valid for {1} item code").format(serial_no,item.item_code))
+                            #check if there is delivery_document_no against serial no
+                            delivery_document_no = frappe.db.get_value("Serial No", serial_no, "delivery_document_no")
+                            if delivery_document_no and self.name != delivery_document_no:
+                                frappe.throw(_("Serial Number: {0} is already referenced in Delivery Document No: {1}".format(
+                                serial_no, delivery_document_no)))	
+                            sno = frappe.get_doc('Serial No', serial_no)
+                            #whatever be reservation_status set to returned
+                            if sno.reservation_status:
+                                sno.reservation_status='Returned'
+                                sno.save(ignore_permissions=True)
+                        elif len(serial_no)==0:
+                            pass
+                        else:
+                            # check for invalid serial number
+                            frappe.throw(_("{0} is invalid serial number").format(serial_no))       
+
+@frappe.whitelist()
+def make_purchase_receipt_from_showroom_car(source_name,serial_no,target_doc=None,):
+
+	def set_missing_values(source, target):
+		if len(target.get("items")) == 0:
+			frappe.throw(_("No Items found"))
+
+		doc = frappe.get_doc(target)
+		doc.ignore_pricing_rule = 1
+		doc.run_method("onload")
+		doc.run_method("set_missing_values")
+		doc.run_method("calculate_taxes_and_totals")
+     
+	def update_item(obj, target, source_parent):
+		target.received_qty=flt(obj.qty)
+		target.qty = flt(obj.qty)
+
+	doc = get_mapped_doc("Showroom Car", source_name,	{
+		"Showroom Car": {
+			"doctype": "Purchase Receipt",
+			"field_map": {
+				"supplier":"supplier",
+			},
+			"validation": {
+				"docstatus": ["=", 1],
+			}
+		},
+		"Showroom Car Item": {
+			"doctype": "Purchase Receipt Item",
+			"field_map": {
+				"name": "showroom_car_item",
+				"parent": "showroom_car",
+                "qty":"qty",
+                "serial_no":"serial_no"
+			},
+			"postprocess": update_item,
+            "condition": lambda doc: serial_no in doc.serial_no
+		},
+	}, target_doc, set_missing_values)
+
+	return doc                                                    

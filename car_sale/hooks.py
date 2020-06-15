@@ -41,6 +41,7 @@ doctype_js = {
 "Stock Reconciliation":"public/js/car_search.js",
 "Serial No":"public/js/serial_no.js",
 "Purchase Receipt":"public/js/car_search.js",
+"Purchase Receipt":"public/js/purchase_receipt.js",
 }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
@@ -129,7 +130,11 @@ doc_events = {
 	"Purchase Invoice":{
 		"on_submit":"car_sale.api.update_warranty_card_issued",
 		"on_cancel":"car_sale.api.update_warranty_card_issued",
-	}
+		"on_submit":"car_sale.api.update_serial_no_status_from_purchase_invoice",
+	},
+	"Purchase Receipt":{
+		"on_submit":"car_sale.api.update_serial_no_status_from_purchase_receipt",
+	}	
 }
 
 # Scheduled Tasks
