@@ -2,9 +2,26 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Custom Card Entry', {
-	refresh: function(frm) {
+    refresh:function(frm){
+        me.frm.add_custom_button(__('Fetch from Purchase Receipt'), function() {
+            erpnext.utils.map_current_doc({
+                method: "car_sale.api.make_custom_card_from_purchase_receipt",
+                source_doctype: "Purchase Receipt",
+                target: me.frm,
+                date_field: "posting_date",
+                setters: {
+                    supplier: me.frm.doc.supplier || undefined,
+                },
+                get_query_filters: {
+                    docstatus: 1,
+                    status: ["not in", ["Closed", "Completed"]],
+                    company: frappe.sys_defaults.company,
+                    is_return: 0
+                }
+            })
+        },);
 
-	}
+    }
 });
 
 //car search code
