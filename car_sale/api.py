@@ -1502,4 +1502,45 @@ def make_custom_card_from_purchase_receipt(source_name,target_doc=None,):
 		},
 	}, target_doc, set_missing_values)
 
-	return doc                                                        
+	return doc
+
+@frappe.whitelist()
+def make_purchase_order_from_new_car_request(source_name,target_doc=None,):
+
+	def set_missing_values(source, target):
+		if len(target.get("items")) == 0:
+			frappe.throw(_("No Items found"))
+
+		doc = frappe.get_doc(target)
+		doc.ignore_pricing_rule = 1
+		doc.run_method("onload")
+		doc.run_method("set_missing_values")
+		doc.run_method("calculate_taxes_and_totals")
+	 
+	def update_item(obj, target, source_parent):
+		target.qty = flt(obj.qty)
+		if obj.rate>0:
+			target.rate=obj.rate
+
+	doc = get_mapped_doc("New Car Request", source_name,	{
+		"New Car Request": {
+			"doctype": "Purchase Order",
+			"field_map": {
+				# "supplier":"supplier",
+			},
+			"validation": {
+				"docstatus": ["=", 1],
+			}
+		},
+		"New Car Request Item": {
+			"doctype": "Purchase Order Item",
+			"field_map": {
+				"name": "new_car_request_item",
+				"parent": "new_car_request",
+				"qty":"qty",
+			},
+			"postprocess": update_item,
+		},
+	}, target_doc, set_missing_values)
+
+	return doc

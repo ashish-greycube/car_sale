@@ -34,6 +34,16 @@ frappe.ui.form.on('Sales Order', {
 		}
 	},
 	validate: function(frm) {
+
+		// check entered price is not less than sales price
+		for (let index = 0; index < frm.doc.items.length; index++) {
+			let row = frm.doc.items[index];
+			if(row.price_list_rate && row.rate < row.price_list_rate) {
+				frappe.throw(__('Rate entered by you is <b> {0} </b>. It cannot be less than sales rate {1}',[row.rate, row.price_list_rate]))				
+			}			
+
+		}
+
 		frappe.db.get_value('Customer', frm.doc.customer, 'bank_customer')
 		.then(r => {
 			let is_bank=r.message.bank_customer
@@ -43,6 +53,11 @@ frappe.ui.form.on('Sales Order', {
 				frm.set_df_property('po_no', 'reqd', 0);
 			}
 		})
+
+
+
+
+		
 	},
 	onload_post_render: function(doc, dt, dn) {
 		if(cur_frm.doc.docstatus==1) {
@@ -181,3 +196,14 @@ sales_person: function (frm) {
 }
 	
 });
+
+frappe.ui.form.on('Sales Order Item', {
+
+	rate: function (frm,cdt,cdn) {
+		// check entered price is not less than sales price
+		let row = locals[cdt][cdn];
+		if (row.price_list_rate && row.rate < row.price_list_rate) {
+			frappe.throw(__('Rate entered by you is <b> {0} </b>. It cannot be less than sales rate {1}',[row.rate, row.price_list_rate]))
+		}
+	}
+})
