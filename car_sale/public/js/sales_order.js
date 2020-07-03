@@ -36,13 +36,16 @@ frappe.ui.form.on('Sales Order', {
 	validate: function(frm) {
 
 		// check entered price is not less than sales price
-		for (let index = 0; index < frm.doc.items.length; index++) {
-			let row = frm.doc.items[index];
-			if(row.price_list_rate && row.rate < row.price_list_rate) {
-				frappe.throw(__('Rate entered by you is <b> {0} </b>. It cannot be less than sales rate {1}',[row.rate, row.price_list_rate]))				
+		if (frappe.user.has_role("Sales Agent")) {
+			for (let index = 0; index < frm.doc.items.length; index++) {
+				let row = frm.doc.items[index];
+				if(row.price_list_rate && row.rate < row.price_list_rate) {
+					frappe.throw(__('Rate entered by you is <b> {0} </b>. It cannot be less than sales rate {1}',[row.rate, row.price_list_rate]))				
+				}			
+	
 			}			
-
 		}
+
 
 		frappe.db.get_value('Customer', frm.doc.customer, 'bank_customer')
 		.then(r => {
@@ -202,7 +205,7 @@ frappe.ui.form.on('Sales Order Item', {
 	rate: function (frm,cdt,cdn) {
 		// check entered price is not less than sales price
 		let row = locals[cdt][cdn];
-		if (row.price_list_rate && row.rate < row.price_list_rate) {
+		if (row.price_list_rate && row.rate < row.price_list_rate && frappe.user.has_role("Sales Agent")) {
 			frappe.throw(__('Rate entered by you is <b> {0} </b>. It cannot be less than sales rate {1}',[row.rate, row.price_list_rate]))
 		}
 	}
