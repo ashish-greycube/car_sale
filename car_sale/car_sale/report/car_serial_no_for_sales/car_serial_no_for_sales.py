@@ -77,7 +77,7 @@ reservation_status as Status,
 warehouse as Warehouse,
 TS.supplier as Supplier,
 reserved_by_document as BookReference,
-sales_partner as SalesPerson,
+TS.sales_person as SalesPerson,
 TI.variant_of AS Brand,
 TI.item_group AS ItemGroup,
 TP.price_list_rate AS PriceListRate,
@@ -93,7 +93,7 @@ INNER JOIN  `tabItem Variant Attribute` AS TVA
 ON TVA.parent = TI.item_code
 where
 TP.price_list=%(price_list_type)s 
-group by sales_partner, 
+group by TS.sales_person, 
 reserved_by_document, 
 TS.supplier,
 warehouse,
