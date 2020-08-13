@@ -82,7 +82,7 @@ supplier as Supplier,
 purchase_document_no AS PINV_STE,
 purchase_date as DateOfPurchase , 
 reserved_by_document as BookReference,
-sales_partner as SalesPerson,
+TS.sales_person as SalesPerson,
 TI.variant_of AS Brand,
 TI.item_group AS ItemGroup,
 MAX(IF (TVA.attribute ='Color',TVA.attribute_value,'')) AS Color,
@@ -93,7 +93,7 @@ tabItem AS TI ON
 TS.item_code = TI.item_code
 INNER JOIN  `tabItem Variant Attribute` AS TVA
 ON TVA.parent = TI.item_code
-group by sales_partner, 
+group by TS.sales_person, 
 reserved_by_document, 
 purchase_date, 
 purchase_document_no,
