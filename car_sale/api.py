@@ -243,6 +243,7 @@ def get_existing_customer(mobile_no):
 	return existing_customer[0] if existing_customer else None
 
 @frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def get_bank_name(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""select name,customer_name from `tabCustomer`
 where 
@@ -250,6 +251,7 @@ docstatus<2
 and bank_customer=1""",as_list=True)
 
 @frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def get_warranty_card_item(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""select name from `tabItem`
 where 
@@ -257,6 +259,7 @@ docstatus<2
 and item_group=1""",as_list=True)
 
 @frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def get_non_bank_customer(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""select name from `tabCustomer`
 where 
