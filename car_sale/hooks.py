@@ -128,9 +128,8 @@ doc_events = {
 		"on_cancel":"car_sale.api.unreserve_serial_no_from_sales_invoice",
 	},
 	"Purchase Invoice":{
-		"on_submit":"car_sale.api.update_warranty_card_issued",
-		"on_cancel":"car_sale.api.update_warranty_card_issued",
-		"on_submit":"car_sale.api.update_serial_no_status_from_purchase_invoice",
+		"on_submit":"car_sale.api.on_submit_of_purchase_invoice",
+		"on_cancel":"car_sale.api.update_warranty_card_issued"
 	},
 	"Purchase Receipt":{
 		"on_submit":"car_sale.api.update_serial_no_status_from_purchase_receipt",

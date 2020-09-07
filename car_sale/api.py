@@ -16,6 +16,9 @@ from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from frappe.contacts.doctype.address.address import get_company_address
 from erpnext.selling.doctype.quotation.quotation import _make_customer
+from frappe.utils.xlsxutils import handle_html
+from frappe import scrub
+import ast
 
 
 # Lead to Quotation
@@ -408,14 +411,18 @@ def update_warranty_card_issued(self,method):
 				item_group=frappe.get_value('Item', item.item_code, 'item_group')
 				if item_group=='Warranty Card Group':
 					description=item.description
-					warranty_card_number=description.split("|")
+					warranty_card_number=handle_html(description.split("|"))
+					x=ast.literal_eval(warranty_card_number)
+					warranty_card_number = [n.strip() for n in x]
 					for card_no in warranty_card_number:
 						doc = frappe.get_doc('Warranty Card Issued', card_no)
 						doc.purchase_invoice=self.name
 						doc.save(ignore_permissions=True)
 				elif item.item_code==default_item_for_car_transfer:
 					description=item.description
-					serial_no_list=description.split("|")
+					serial_no_list=handle_html(description.split("|"))
+					x=ast.literal_eval(serial_no_list)
+					serial_no_list = [n.strip() for n in x]					
 					for serial_no in serial_no_list:
 						doc = frappe.get_doc('Stock Entry', item.stock_entry_for_car_transfer)
 						doc.transfer_purchase_invoice=self.name
@@ -428,14 +435,18 @@ def update_warranty_card_issued(self,method):
 				item_group=frappe.get_value('Item', item.item_code, 'item_group')
 				if item_group=='Warranty Card Group':
 					description=item.description
-					warranty_card_number=description.split("|")
+					warranty_card_number=handle_html(description.split("|"))
+					x=ast.literal_eval(warranty_card_number)
+					warranty_card_number = [n.strip() for n in x]
 					for card_no in warranty_card_number:
 						doc = frappe.get_doc('Warranty Card Issued', card_no)
 						doc.purchase_invoice=None
 						doc.save(ignore_permissions=True)
 				elif item.item_code==default_item_for_car_transfer:
 					description=item.description
-					serial_no_list=description.split("|")
+					serial_no_list=handle_html(description.split("|"))
+					x=ast.literal_eval(serial_no_list)
+					serial_no_list = [n.strip() for n in x]					
 					for serial_no in serial_no_list:
 						doc = frappe.get_doc('Stock Entry', item.stock_entry_for_car_transfer)
 						doc.transfer_purchase_invoice=None
@@ -1379,6 +1390,11 @@ def update_serial_no_status_from_purchase_receipt(self,method):
 						else:
 							# check for invalid serial number
 							frappe.throw(_("{0} is invalid serial number").format(serial_no))
+
+@frappe.whitelist()
+def on_submit_of_purchase_invoice(self,method):
+	update_warranty_card_issued(self,method)
+	update_serial_no_status_from_purchase_invoice(self,method)
 
 @frappe.whitelist()
 def update_serial_no_status_from_purchase_invoice(self,method):
