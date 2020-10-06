@@ -713,7 +713,7 @@ def update_serial_no_status_from_delivery_note(self,method):
 			# match item qty and serial no count
 			serial_nos = item.serial_no
 			si_serial_nos = set(get_serial_nos(serial_nos))
-			if item.serial_no and cint(item.qty) != len(si_serial_nos):
+			if item.serial_no and abs(cint(item.qty)) != len(si_serial_nos):
 				frappe.throw(_("Row {0}: {1} Serial numbers required for Item {2}. You have provided {3}.".format(
 					item.idx, item.qty, item.item_code, len(si_serial_nos))))
 
@@ -1322,7 +1322,7 @@ def update_serial_no_status_from_purchase_receipt(self,method):
 					# match item qty and serial no count
 					serial_nos = item.serial_no
 					si_serial_nos = set(get_serial_nos(serial_nos))
-					if item.serial_no and cint(item.qty) != len(si_serial_nos):
+					if item.serial_no and abs(cint(item.qty)) != len(si_serial_nos):
 						frappe.throw(_("Row {0}: {1} Serial numbers required for Item {2}. You have provided {3}.".format(
 							item.idx, item.qty, item.item_code, len(si_serial_nos))))
 					for serial_no in item.serial_no.split("\n"):
@@ -1415,7 +1415,7 @@ def update_serial_no_status_from_purchase_invoice(self,method):
 					# match item qty and serial no count
 					serial_nos = item.serial_no
 					si_serial_nos = set(get_serial_nos(serial_nos))
-					if item.serial_no and cint(item.qty) != len(si_serial_nos):
+					if item.serial_no and abs(cint(item.qty)) != len(si_serial_nos):
 						frappe.throw(_("Row {0}: {1} Serial numbers required for Item {2}. You have provided {3}.".format(
 							item.idx, item.qty, item.item_code, len(si_serial_nos))))
 					for serial_no in item.serial_no.split("\n"):
