@@ -37,7 +37,6 @@ def get_count_of_serial_no(data,columns):
 			if d[3]:
 				count=+count+1
 			total_row[7] = flt(total_row[7]) + flt(d[7])
-			total_row[8] = flt(total_row[8]) + flt(d[8])
 	total_row[3] = cstr(count)
 	total_row[0] = '<b>TOTAL :</b>'
 	return total_row
@@ -106,25 +105,7 @@ A.CustomerName,
 
 A.TotalSelling,
 
-A.PurchaseRate,
-
-A.PlateCost,
-
-B.TransferCost,
-
-C.GaureenteeCardCost,
-
-D.ServiceCost ,
-
-A.TotalSelling - (IFNULL(A.PurchaseRate,0)  + IFNULL(A.PlateCost,0) + IFNULL(B.TransferCost,0)+ IFNULL(C.GaureenteeCardCost,0)+IFNULL( D.ServiceCost,0)) as Net,
-
 A.SalesPerson,
-
-A.TaxID,
-
-A.Brand,
-
-A.ItemGroup,
 
 A.Color,
 
