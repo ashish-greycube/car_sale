@@ -61,6 +61,12 @@ def get_data():
 				},
 				{
 					"type": "report",
+					"name": "Car Sales Report",
+					"is_query_report": True,
+					"doctype": "Serial No"
+				},
+				{
+					"type": "report",
 					"name": "Car Sales Analysis",
 					"is_query_report": True,
 					"doctype": "Serial No"
