@@ -627,7 +627,7 @@ def update_serial_no_from_so(self,method):
 											frappe.throw(_("{0} is already reserved by {1} ,for Customer : {2} against Document No : {3}").format(sno.name,sno.sales_person,sno.for_customer,sno.reserved_by_document))
 									if sno.reservation_status=='Sold Out':
 										frappe.throw(_("It is sold out"))
-									if sno.reservation_status=='Available':
+									if sno.reservation_status=='Available' or sno.reservation_status=='Showroom Car':
 										sno.reservation_status='Reserved'
 										if self.sales_person:
 											sno.sales_person=self.sales_person
