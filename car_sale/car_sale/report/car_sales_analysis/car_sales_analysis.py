@@ -164,11 +164,11 @@ SI.customer as CustomerID,
 
 SI.customer_name as CustomerName,
 
-SN.purchase_rate as PurchaseRate,
+CASE SIT.QTY WHEN > 0 THEN SN.purchase_rate WHEN < 0 THEN (-1 * SN.purchase_rate) ELSE 0 END  as PurchaseRate,
 
 SN.plate_cost AS PlateCost,
 
-SIT.base_net_amount as TotalSelling,
+CASE SIT.QTY WHEN > 0 THEN SIT.base_net_rate WHEN <0 THEN (-1 * SIT.base_net_rate) ELSE 0 END as TotalSelling,
 
 SI.sales_person as SalesPerson ,
 
@@ -236,7 +236,7 @@ SN.purchase_rate,
 
 SN.plate_cost,
 
-SIT.base_net_amount,
+SIT.base_net_rate,
 
 SI.sales_person,
 
