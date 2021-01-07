@@ -133,6 +133,9 @@ doc_events = {
 	},
 	"Purchase Receipt":{
 		"on_submit":"car_sale.api.update_serial_no_status_from_purchase_receipt",
+	},
+	"Stock Entry":{
+		"before_submit":"car_sale.api.preserve_last_purchase_document_values",
 	}	
 }
 
