@@ -1566,6 +1566,29 @@ def make_purchase_order_from_new_car_request(source_name,target_doc=None,):
 
 @frappe.whitelist()
 def preserve_last_purchase_document_values(self,method):
-	self.original_purchase_doctype_cf=self.purchase_document_type
-	self.original_purchase_doc_no_cf=self.purchase_document_no
-	self.save(ignore_permissions=True)
+	if self.stock_entry_type =='Material Transfer':
+		for item in self.items:
+			# check for empty serial no
+			if item.serial_no:
+				# match item qty and serial no count
+				serial_nos = item.serial_no
+				si_serial_nos = set(get_serial_nos(serial_nos))
+				if item.serial_no and abs(cint(item.qty)) != len(si_serial_nos):
+					frappe.throw(_("Row {0}: {1} Serial numbers required for Item {2}. You have provided {3}.".format(
+						item.idx, item.qty, item.item_code, len(si_serial_nos))))
+				for serial_no in item.serial_no.split("\n"):
+					if serial_no and frappe.db.exists('Serial No', serial_no) :
+						#match item_code with serial number-->item_code
+						sno_item_code=frappe.db.get_value("Serial No", serial_no, "item_code")
+						if (cstr(sno_item_code) != cstr(item.item_code)):
+							frappe.throw(_("{0} serial number is not valid for {1} item code").format(serial_no,item.item_code))
+						sno = frappe.get_doc('Serial No', serial_no)
+						if not sno.original_purchase_doc_no_cf :
+							sno.original_purchase_doctype_cf=sno.purchase_document_type
+							sno.original_purchase_doc_no_cf=sno.purchase_document_no
+							sno.save(ignore_permissions=True)
+					elif len(serial_no)==0:
+						pass
+					else:
+						# check for invalid serial number
+						frappe.throw(_("{0} is invalid serial number").format(serial_no))
