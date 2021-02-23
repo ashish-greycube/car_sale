@@ -1,0 +1,46 @@
+{
+ "creation": "2021-02-23 07:49:11.047089",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "item",
+  "qty",
+  "serial_no"
+ ],
+ "fields": [
+  {
+   "fieldname": "item",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "qty",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Qty",
+   "reqd": 1
+  },
+  {
+   "fieldname": "serial_no",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Serial No",
+   "reqd": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2021-02-23 07:49:11.047089",
+ "modified_by": "Administrator",
+ "module": "Car Sale",
+ "name": "Car Stock Entry Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
