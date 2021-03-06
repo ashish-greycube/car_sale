@@ -8,11 +8,50 @@ from frappe.model.document import Document
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from frappe.utils import cint,cstr
 from frappe import _
+from erpnext import get_default_company
+from frappe.utils import get_link_to_form
 
 class CustomCardEntry(Document):
 
 	def on_submit(self):
-		self.update_serial_no_status_from_custom_card()
+		if self.from_doctype=='Purchase Order':
+			self.match_serial_no_and_qty()
+			self.auto_make_serial_nos()
+		else:
+			self.update_serial_no_status_from_custom_card()
+
+	def match_serial_no_and_qty(self):
+		for item in self.custom_card_item:
+			if not frappe.get_cached_value('Item', item.item_code, 'has_serial_no'):
+				continue
+			if not item.serial_no:
+				frappe.throw(_('Row #{0}: {1} does not have any serial number').format(frappe.bold(item.idx), frappe.bold(item.item_code)))
+			if len(get_serial_nos(item.serial_no)) == item.qty:
+				continue			
+			frappe.throw(_('For item {0} at row {1}, count of serial numbers does not match with the quantity')
+				.format(frappe.bold(item.item_code), frappe.bold(item.idx)))	
+
+	def auto_make_serial_nos(self):
+		for item in self.custom_card_item:
+			if frappe.get_cached_value('Item', item.item_code, 'has_serial_no')==1 and frappe.get_cached_value('Item', item.item_code, 'is_stock_item')==1:
+				serial_nos = get_serial_nos(item.serial_no)
+				created_numbers = []
+				for serial_no in serial_nos:
+					sr = frappe.new_doc("Serial No")
+					sr.serial_no=serial_no
+					sr.item_code=item.item_code
+					sr.company=get_default_company()
+					sr.custom_card_exist_cf='Yes'
+					sr.reservation_status='Available-Card'
+					sr.custom_card_no_cf=self.name
+					sr.save(ignore_permissions=True)
+					created_numbers.append(sr.name)
+
+		form_links = list(map(lambda d: get_link_to_form('Serial No', d), created_numbers))
+		if len(form_links) == 1:
+			frappe.msgprint(_("Serial No {0} created").format(form_links[0]))
+		elif len(form_links) > 0:
+			frappe.msgprint(_("The following serial numbers were created: <br> {0}").format(', '.join(form_links)))	
 
 	def update_serial_no_status_from_custom_card(self):
 		""" update serial no doc with details of Custom Card """

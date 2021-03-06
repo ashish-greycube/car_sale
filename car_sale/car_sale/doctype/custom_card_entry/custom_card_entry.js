@@ -2,25 +2,79 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Custom Card Entry', {
-    refresh:function(frm){
-        me.frm.add_custom_button(__('Fetch from Purchase Receipt'), function() {
+    from_doctype:function(frm) {
+        if (frm.doc.from_doctype =='Purchase Receipt' ) {
+            frm.set_query('from_docname', () => {
+                return {
+                    filters: {
+                        'docstatus': 1,
+                        'status': ["not in", ["Closed", "Completed"]],
+                        'company': frappe.sys_defaults.company,
+                        'is_return': 0                        
+                    }
+                }
+            })   
+        }
+        else if(frm.doc.from_doctype =='Purchase Order'){
+            frm.set_query('from_docname', () => {
+                return {
+                    filters: {
+                        'docstatus': 1,
+                        'status': ["not in", ["Closed", "Completed"]],
+                        'company': frappe.sys_defaults.company
+                    }
+                }
+            })              
+        }
+        else if(frm.doc.from_doctype =='Car Stock Entry'){
+            frm.set_query('from_docname', () => {
+                return {
+                    filters: {
+                        'docstatus': 1,
+                        'entry_type':'Receipt',
+                        'company': frappe.sys_defaults.company
+                    }
+                }
+            })             
+        }
+
+        if (frm.doc.from_docname) {
+            frm.set_value('from_docname', '')
+        }        
+    },
+    fetch_items:function(frm) {
+        frm.clear_table('custom_card_item')
+        frm.refresh_field('custom_card_item')
+        if (frm.doc.from_doctype =='Purchase Receipt') {
             erpnext.utils.map_current_doc({
                 method: "car_sale.api.make_custom_card_from_purchase_receipt",
-                source_doctype: "Purchase Receipt",
-                target: me.frm,
-                date_field: "posting_date",
-                setters: {
-                    supplier: me.frm.doc.supplier || undefined,
-                },
-                get_query_filters: {
-                    docstatus: 1,
-                    status: ["not in", ["Closed", "Completed"]],
-                    company: frappe.sys_defaults.company,
-                    is_return: 0
-                }
+                source_name:frm.doc.from_docname,
+                target: frm
+            })            
+        } else if(frm.doc.from_doctype =='Purchase Order'){
+            erpnext.utils.map_current_doc({
+                method: "car_sale.api.make_custom_card_from_purchase_order",
+                source_name:frm.doc.from_docname,
+                target: frm
             })
-        },);
-
+        } else if(frm.doc.from_doctype =='Car Stock Entry'){
+            erpnext.utils.map_current_doc({
+                method: "car_sale.api.make_custom_card_from_car_stock_entry",
+                source_name:frm.doc.from_docname,
+                target: frm
+            })
+        }
+         
+    },
+    setup:function(frm) {
+        frm.set_query('from_doctype', () => {
+            return {
+                filters: {
+                    'name': ['in',['Purchase Receipt','Purchase Order','Car Stock Entry']]
+                }
+            }
+        }) 
+         		 
     }
 });
 

@@ -19,13 +19,14 @@ from erpnext.selling.doctype.quotation.quotation import _make_customer
 from frappe.utils.xlsxutils import handle_html
 from frappe import scrub
 import ast
+from frappe.utils import get_link_to_form
+
 
 
 # Lead to Quotation
 
 @frappe.whitelist()
 def make_quotation_for_customer(source_name,target_doc=None):
-	print("update_quotation")
 	def set_missing_values(source, target):
 		from erpnext.controllers.accounts_controller import get_default_taxes_and_charges
 		quotation = frappe.get_doc(target)
@@ -55,7 +56,6 @@ def make_quotation_for_customer(source_name,target_doc=None):
 		quotation.run_method("set_other_charges")
 		
 	def update_quotation(source_doc, target_doc, source_parent):
-		print("update_quotation")
 		target_doc.quotation_to = "Customer"
 		target_doc.linked_lead=source_doc.name
 		
@@ -135,8 +135,8 @@ def make_customer_from_lead(doc):
 	#check existing contact
 	contact_name = frappe.db.get_value('Contact',{'mobile_no': doc.mobile_no}, 'name')
 	if contact_name:
-		#existing contact
-		print('duplicate')
+		#existing contact, i.e. duplicate
+		pass
 	else:
 		#new contact
 		if doc.organization_lead==1:
@@ -1302,6 +1302,47 @@ def make_purchase_receipt_from_custom_card_entry(source_name, target_doc=None):
 
 	return doc    
 
+def item_exists_in_SO(item_code,qty,serial_nos):
+	results=frappe.db.sql("""select SOI.warehouse,SOI.serial_no,SOI.name,SO.name as so_name
+							from `tabSales Order` as SO
+							inner join `tabSales Order Item` as SOI
+							on SO.name=SOI.parent
+							where SOI.item_code = %(item_code)s
+							and SOI.qty=%(qty)s
+			""", {
+				'item_code': item_code,
+				'qty':qty
+			},as_dict=True)
+	if len(results)>0:
+		for result in results:
+			if qty==1 and cstr(result.serial_no).strip().upper()== cstr(serial_nos).strip().upper():
+				return result
+			elif cstr(result.serial_no).strip().upper()== cstr(serial_nos).strip().upper():
+				return result
+			elif sorted(result.serial_no.split(",")) ==  sorted(serial_nos.split(",")) :
+				return result
+		return False
+	else:
+		return False
+
+@frappe.whitelist()
+def custom_logic_on_submit_of_purchase_receipt(self,method):
+	update_serial_no_status_from_purchase_receipt(self,method)
+	update_sales_order_item_warehouse_based_on_purchase_receipt_item_warehouse(self,method)
+
+@frappe.whitelist()
+def update_sales_order_item_warehouse_based_on_purchase_receipt_item_warehouse(self,method):
+	for item in self.items:
+		if item.item_code and item.serial_no :
+			result=item_exists_in_SO(item.item_code,item.qty,item.serial_no)
+			if result:
+				if result.warehouse==item.warehouse:
+					return True
+				else:
+					frappe.db.set_value('Sales Order Item', result.name, 'warehouse', item.warehouse)
+					frappe.msgprint(_('Warehouse is updated for item {0} in sales order {1}').format(
+								frappe.bold(item.item_code), frappe.bold(get_link_to_form('Sales Order', result.so_name))))
+
 
 @frappe.whitelist()
 def update_serial_no_status_from_purchase_receipt(self,method):
@@ -1485,8 +1526,81 @@ def make_purchase_receipt_from_showroom_car(source_name,serial_no,target_doc=Non
 	return doc
 
 @frappe.whitelist()
-def make_custom_card_from_purchase_receipt(source_name,target_doc=None,):
+def make_custom_card_from_purchase_order(source_name,target_doc=None,):
 
+	def set_missing_values(source, target):
+		if len(target.get("custom_card_item")) == 0:
+			frappe.throw(_("No Items found"))
+		doc = frappe.get_doc(target)
+		doc.supplier=source.supplier
+		doc.run_method("onload")
+		doc.run_method("set_missing_values")
+	 
+	def update_item(obj, target, source_parent):
+		target.item_code=obj.item_code
+		target.item_name=obj.item_name
+		target.qty = flt(obj.qty)
+
+	doc = get_mapped_doc("Purchase Order", source_name,	{
+		"Purchase Order": {
+			"doctype": "Custom Card Entry",
+			"field_map": {
+				"supplier":"supplier",
+			}
+		},
+		"Purchase Order Item": {
+			"doctype": "Custom Card Entry Item",
+			"field_map": {
+				"name": "po_detail",
+				"parent": "purchase_order",
+				"qty":"qty",
+				"serial_no":"serial_no"
+			},
+			"postprocess": update_item,
+		},
+	}, target_doc, set_missing_values)
+
+	return doc
+
+
+@frappe.whitelist()
+def make_custom_card_from_car_stock_entry(source_name,target_doc=None,):
+	def set_missing_values(source, target):
+		if len(target.get("custom_card_item")) == 0:
+			frappe.throw(_("No Items found"))
+		doc = frappe.get_doc(target)
+		doc.supplier=source.supplier
+		doc.run_method("set_missing_values")
+	 
+	def update_item(obj, target, source_parent):
+		target.item_code=obj.item_code
+		target.item_name=frappe.db.get_value('Item', obj.item_code, 'item_name')
+		target.qty = flt(obj.qty)
+		target.serial_no=obj.serial_no
+
+	doc = get_mapped_doc("Car Stock Entry", source_name,	{
+		"Car Stock Entry": {
+			"doctype": "Custom Card Entry",
+			"field_map": {
+				"supplier":"supplier",
+			}
+		},
+		"Car Stock Entry Detail": {
+			"doctype": "Custom Card Entry Item",
+			"field_map": {
+				"name": "items",
+				"parent": "car_stock_entry",
+				"item_code":"qty",
+				"qty":"qty",
+				"serial_no":"serial_no"
+			},
+			"postprocess": update_item,
+		},
+	}, target_doc, set_missing_values)
+	return doc
+
+@frappe.whitelist()
+def make_custom_card_from_purchase_receipt(source_name,target_doc=None,):
 	def set_missing_values(source, target):
 		if len(target.get("custom_card_item")) == 0:
 			frappe.throw(_("No Items found"))
@@ -1520,7 +1634,6 @@ def make_custom_card_from_purchase_receipt(source_name,target_doc=None,):
 			"postprocess": update_item,
 		},
 	}, target_doc, set_missing_values)
-
 	return doc
 
 @frappe.whitelist()
@@ -1592,3 +1705,110 @@ def preserve_last_purchase_document_values(self,method):
 					else:
 						# check for invalid serial number
 						frappe.throw(_("{0} is invalid serial number").format(serial_no))
+
+@frappe.whitelist()
+def make_car_stock_entry(source_name, target_doc=None):
+	def set_missing_values(source, target):
+		target.entry_type='Receipt'
+		target.run_method("set_missing_values")
+		target.run_method("calculate_taxes_and_totals")
+
+	def update_item(obj, target, source_parent):
+		pass
+
+	def get_existing_CSE_items(po_reference):
+		items = frappe.db.sql('''
+					select CSED.item_code,sum(CSED.qty) as qty from 
+					`tabCar Stock Entry` CSE inner join
+					`tabCar Stock Entry Detail` CSED
+					on CSE.name=CSED.parent
+					where 
+					CSE.entry_type='Receipt'
+					and CSE.po_reference=%s
+					and CSED.docstatus!=2
+					group by CSED.item_code
+		''', (po_reference), as_dict=True)
+
+		return items
+
+
+
+	doc = get_mapped_doc("Purchase Order", source_name,	{
+		"Purchase Order": {
+			"doctype": "Car Stock Entry",
+			"field_map": {
+				"company": "company",
+				"po_reference":"purchase_order"
+			},
+			"validation": {
+				"docstatus": ["=", 1],
+			}
+		},
+		"Purchase Order Item": {
+			"doctype": "Car Stock Entry Detail",
+			"field_map": {
+				"name": "purchase_order_item",
+				"parent": "purchase_order",
+				"item_code":"item_code",
+				"qty":"qty"
+			},
+			"postprocess": update_item,
+			"condition": lambda doc: frappe.db.get_value("Item", doc.item_code, "has_serial_no")==1,
+		}
+	}, target_doc, set_missing_values)
+
+	existing_items=get_existing_CSE_items(source_name)
+	if existing_items:
+		for idx,item in enumerate(doc.get('items')):
+			for existing_item in existing_items:
+				if item.item_code == existing_item.item_code and existing_item.qty >=item.qty:
+					doc.items.remove(item)
+				elif item.item_code == existing_item.item_code and existing_item.qty < item.qty:
+					doc.items[idx].qty=(item.qty-existing_item.qty)
+	return doc						
+
+	
+
+@frappe.whitelist()
+def make_return_car_stock_entry(source_name, target_doc=None):
+	def set_missing_values(source, target):
+		target.entry_type='Return'
+		target.run_method("set_missing_values")
+		target.run_method("calculate_taxes_and_totals")
+
+	doc = get_mapped_doc("Car Stock Entry", source_name,	{
+		"Car Stock Entry": {
+			"doctype": "Car Stock Entry",
+			"validation": {
+				"docstatus": ["=", 1],
+			}
+		},
+		"Car Stock Entry Detail": {
+			"doctype": "Car Stock Entry Detail"
+		}
+	}, target_doc, set_missing_values)
+
+	return doc	
+
+
+def get_serial_nos_from_custom_card(purchase_order):
+		return frappe.db.sql("""select serial_no from `tabCustom Card Entry` as CC
+					inner join `tabCustom Card Entry Item` as CCE
+					on CC.name=CCE.parent
+					where from_doctype='Purchase Order'
+					and from_docname=%(from_docname)s""", {
+									'from_docname': purchase_order
+								},as_dict=True)
+
+
+@frappe.whitelist()
+def update_serial_no_status_from_po(self,method):
+	if self.docstatus==2 or self.status == "Closed":
+		# get serial_no value from custom card
+		result=get_serial_nos_from_custom_card(self.name)
+		if len(result)>0:
+			for row in result:
+				serial_nos = get_serial_nos(row.serial_no)
+				for serial_no in serial_nos:
+					frappe.db.set_value('Serial No', serial_no, 'reservation_status', 'Returned')
+				

@@ -35,7 +35,7 @@ doctype_js = {
 "Material Request":"public/js/car_search.js",
 "Request for Quotation":"public/js/car_search.js",
 "Supplier Quotation":"public/js/car_search.js",
-"Purchase Order":"public/js/car_search.js",
+"Purchase Order":"public/js/purchase_order.js",
 "Purchase Invoice":"public/js/purchase_invoice.js",
 "Delivery Note":"public/js/delivery_note.js",
 "Stock Reconciliation":"public/js/car_search.js",
@@ -132,8 +132,12 @@ doc_events = {
 		"on_cancel":"car_sale.api.update_warranty_card_issued"
 	},
 	"Purchase Receipt":{
-		"on_submit":"car_sale.api.update_serial_no_status_from_purchase_receipt",
+		"on_submit":"car_sale.api.custom_logic_on_submit_of_purchase_receipt",
 	},
+	"Purchase Order":{
+		"on_submit":"car_sale.api.update_serial_no_status_from_po",
+		"on_cancel":"car_sale.api.update_serial_no_status_from_po"
+	},	
 	"Stock Entry":{
 		"before_submit":"car_sale.api.preserve_last_purchase_document_values",
 	}

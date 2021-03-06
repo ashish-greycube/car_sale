@@ -6,27 +6,32 @@
  "engine": "InnoDB",
  "field_order": [
   "naming_series",
-  "company",
   "entry_type",
+  "supplier",
+  "supplier_name",
   "cb_1",
   "posting_date",
+  "company",
+  "warehouse",
   "po_reference",
   "cse_detail",
-  "table_8",
+  "items",
   "amended_from"
  ],
  "fields": [
   {
+   "default": "CSE-.YY.MM.DD.-.#",
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Series",
    "options": "CSE-.YY.MM.DD.-.#",
+   "read_only": 1,
    "reqd": 1
   },
   {
    "fieldname": "company",
    "fieldtype": "Link",
-   "in_standard_filter": 1,
    "label": "Company",
    "options": "Company",
    "reqd": 1
@@ -68,12 +73,6 @@
    "label": "Car Stock Entry Detail"
   },
   {
-   "fieldname": "table_8",
-   "fieldtype": "Table",
-   "options": "Car Stock Entry Detail",
-   "reqd": 1
-  },
-  {
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "label": "Amended From",
@@ -81,10 +80,37 @@
    "options": "Car Stock Entry",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "options": "Car Stock Entry Detail",
+   "reqd": 1
+  },
+  {
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "label": "Supplier",
+   "options": "Supplier",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "supplier.supplier_name",
+   "fieldname": "supplier_name",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "label": "Supplier Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "label": "Warehouse",
+   "options": "Warehouse"
   }
  ],
  "is_submittable": 1,
- "modified": "2021-02-23 07:55:37.987114",
+ "modified": "2021-03-01 09:19:56.494430",
  "modified_by": "Administrator",
  "module": "Car Sale",
  "name": "Car Stock Entry",
