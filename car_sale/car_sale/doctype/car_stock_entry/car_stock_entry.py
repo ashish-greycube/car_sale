@@ -32,7 +32,7 @@ class CarStockEntry(Document):
 					where 
 					CSE.entry_type='Receipt'
 					and CSE.po_reference=%s
-					and CSED.docstatus!=2
+					and CSED.docstatus = 1
 					group by CSED.item_code
 		''', (po_reference), as_dict=True)
 
