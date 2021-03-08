@@ -32,9 +32,10 @@ class CarStockEntry(Document):
 					where 
 					CSE.entry_type='Receipt'
 					and CSE.po_reference=%s
-					and CSED.docstatus = 1
+					and CSED.docstatus !=2
+					and CSE.name !=%s
 					group by CSED.item_code
-		''', (po_reference), as_dict=True)
+		''', (po_reference,self.name), as_dict=True)
 
 		return items
 
@@ -64,7 +65,7 @@ class CarStockEntry(Document):
 						for po_item in PO_items:
 							if row_item.item_code==po_item.item_code:
 								expected_qty=po_item.qty-cse_item.qty
-								if new_qty>expected_qty:
+								if new_qty>po_item.qty:
 									frappe.throw(_('Row #{0}: item {1} entered qty is {2}. It should be not be more than {3}').format(
 										frappe.bold(row_item.idx), frappe.bold(row_item.item_code),frappe.bold(row_item.qty),frappe.bold(expected_qty)))	
 								else:								
