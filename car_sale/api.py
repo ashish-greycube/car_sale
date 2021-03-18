@@ -95,7 +95,7 @@ def make_quotation_for_customer(source_name,target_doc=None):
 	def update_sales_team(obj, target, source_parent):
 		target.sales_person = source_parent.sales_person
 		target.allocated_percentage= 100
-		target.car_sale_incentives=frappe.get_value('Sales Person', source_parent.sales_person, 'incentive')
+		target.car_sale_incentives=frappe.get_value('Sales Person', source_parent.sales_person, 'commission_per_car')
 	table_maps={
 			"Lead": 
 			{"doctype": "Quotation",
@@ -126,7 +126,7 @@ def make_quotation_for_customer(source_name,target_doc=None):
 	return target_doc
 @frappe.whitelist()
 def get_incentive_of_sales_person(sales_person):
-	incentives=frappe.get_value('Sales Person',sales_person, 'incentive')
+	incentives=frappe.get_value('Sales Person',sales_person, 'commission_per_car')
 	return incentives if incentives else None
 # Lead to Customer
 @frappe.whitelist()
@@ -360,7 +360,7 @@ def get_item_details(item_code):
 
 @frappe.whitelist()
 def get_sales_person_and_branch(user_email):
-	sales_person= frappe.db.sql("""select name,branch,incentive,source,customer_group from `tabSales Person`
+	sales_person= frappe.db.sql("""select name,branch,commission_per_car,source,customer_group from `tabSales Person`
 where
 is_group=0
 and user_id=%(user_email)s
@@ -371,7 +371,7 @@ and user_id=%(user_email)s
 
 @frappe.whitelist()
 def get_sales_person_and_branch_and_costcenter(user_email):
-	sales_person= frappe.db.sql("""select sp.name,sp.branch, sp.incentive, b.cost_center 
+	sales_person= frappe.db.sql("""select sp.name,sp.branch, sp.commission_per_car, b.cost_center 
 from `tabSales Person` as sp
 inner join `tabBranch` as b
 on sp.branch=b.name
@@ -386,7 +386,7 @@ and sp.user_id=%(user_email)s
 
 @frappe.whitelist()
 def get_branch_and_costcenter(name):
-	sales_person= frappe.db.sql("""select sp.branch, sp.incentive, b.cost_center 
+	sales_person= frappe.db.sql("""select sp.branch, sp.commission_per_car, b.cost_center 
 from `tabSales Person` as sp
 inner join `tabBranch` as b
 on sp.branch=b.name
@@ -555,7 +555,7 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=True):
 	def update_sales_team(obj, target, source_parent):
 		target.sales_person = source_parent.sales_person
 		target.allocated_percentage= 100
-		target.car_sale_incentives=frappe.get_value('Sales Person', source_parent.sales_person, 'incentive')
+		target.car_sale_incentives=frappe.get_value('Sales Person', source_parent.sales_person, 'commission_per_car')
 
 	doclist = get_mapped_doc("Lead", source_name, {
 			"Lead": 

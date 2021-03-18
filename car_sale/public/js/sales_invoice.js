@@ -33,10 +33,10 @@ frappe.ui.form.on('Sales Invoice', {
                     if(r.message) {
                         let sales_person=r.message[0][0]
                         let branch=r.message[0][1]
-                        let incentive=r.message[0][2]
+                        let commission_per_car=r.message[0][2]
                         cur_frm.set_value('sales_person',sales_person);
                         cur_frm.set_value('sales_person_branch',branch);
-                        cur_frm.set_value('commission_per_car',incentive);
+                        cur_frm.set_value('commission_per_car',commission_per_car);
                         cur_frm.refresh_field('sales_person')
                         cur_frm.refresh_field('commission_per_car')
                         cur_frm.refresh_field('sales_person_branch')
