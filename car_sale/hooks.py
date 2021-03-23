@@ -191,3 +191,7 @@ fixtures = [
 # 	"frappe.desk.doctype.event.event.get_events": "car_sale.event.get_events"
 # }
 
+override_doctype_dashboards = {
+    "Purchase Order": "car_sale.config.purchase_order_dashboard.get_data",
+}
+
