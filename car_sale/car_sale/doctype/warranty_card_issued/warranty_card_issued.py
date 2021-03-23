@@ -7,6 +7,7 @@ import frappe
 from frappe import _
 import erpnext
 from frappe.model.document import Document
+from erpnext.controllers.accounts_controller import get_taxes_and_charges
 
 class WarrantyCardIssued(Document):
 	def on_submit(self):
@@ -23,6 +24,7 @@ class WarrantyCardIssued(Document):
     												'is_default': ['=', '1']})
 		if default_purchase_taxes_and_charges_template:
 			default_purchase_taxes_and_charges_template=default_purchase_taxes_and_charges_template[0].name
+			taxes = get_taxes_and_charges('Purchase Taxes and Charges Template',default_purchase_taxes_and_charges_template)
 
 		pi = frappe.new_doc("Purchase Invoice")
 		pi.posting_date = frappe.utils.today()
@@ -60,7 +62,9 @@ class WarrantyCardIssued(Document):
 			# "rejected_serial_no": args.rejected_serial_no or "",
 			# "asset_location": args.location or ""
 		})
-
+		for tax in taxes:
+			pi.append("taxes", tax)
+			
 		pi.run_method("set_missing_values")
 		pi.run_method("calculate_taxes_and_totals")
 		pi.save(ignore_permissions=True)
