@@ -201,16 +201,16 @@ frappe.ui.form.on(cur_frm.doctype, {
             }
             cur_frm.refresh_field("items")
 
-            cur_frm.set_value('search_serial_no', undefined);
-            cur_frm.set_value('serial_no_item', undefined);
-            cur_frm.set_value('serial_no_warehouse', undefined);
-            cur_frm.refresh_field("search_serial_no")
-            cur_frm.refresh_field("serial_no_item")
-            cur_frm.refresh_field("serial_no_warehouse")
+
         } else {
             frappe.msgprint(__("Select appropriate serial no."));
             return;
         }
-
+        cur_frm.set_value('search_serial_no', undefined);
+        cur_frm.set_value('serial_no_item', undefined);
+        cur_frm.set_value('serial_no_warehouse', undefined);
+        cur_frm.refresh_field("search_serial_no")
+        cur_frm.refresh_field("serial_no_item")
+        cur_frm.refresh_field("serial_no_warehouse")
     }
 });
