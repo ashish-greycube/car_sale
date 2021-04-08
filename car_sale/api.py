@@ -592,7 +592,7 @@ def update_serial_no_from_so(self,method):
 						# check for empty serial no
 						if not item.serial_no:
 							service_item=frappe.get_list('Item', filters={'item_code': item.item_code}, fields=['is_stock_item', 'is_sales_item', 'is_purchase_item'],)[0]
-							if service_item.is_stock_item==0 and service_item.is_sales_item==1 and service_item.is_purchase_item==0:
+							if service_item.is_stock_item==0 and service_item.is_sales_item==1 :
 								pass
 							else:
 								frappe.throw(_("Row {0}: {1} Serial numbers required for Item {2}. You have provided None.".format(
