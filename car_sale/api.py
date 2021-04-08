@@ -401,24 +401,17 @@ and sp.name=%(name)s
 
 @frappe.whitelist()
 def update_warranty_card_issued(self,method):
+# It is called both on submit and cancel of PI
 	company = get_default_company()
 	default_item_for_car_transfer=frappe.get_value('Company', company, 'default_item_for_car_transfer')
 	if self.docstatus==1:
 	# submitted
 		for item in self.items:
-			# check for empty serial no
+			# item.description of PI items stores serial no.
+			# based on serial no update SE with PI reference
 			if item.description:
 				item_group=frappe.get_value('Item', item.item_code, 'item_group')
-				if item_group=='Warranty Card Group':
-					description=item.description
-					warranty_card_number=handle_html(description.split("|"))
-					x=ast.literal_eval(warranty_card_number)
-					warranty_card_number = [n.strip() for n in x]
-					for card_no in warranty_card_number:
-						doc = frappe.get_doc('Warranty Card Issued', card_no)
-						doc.purchase_invoice=self.name
-						doc.save(ignore_permissions=True)
-				elif item.item_code==default_item_for_car_transfer:
+				if item.item_code==default_item_for_car_transfer:
 					description=item.description
 					serial_no_list=handle_html(description.split("|"))
 					x=ast.literal_eval(serial_no_list)
@@ -426,23 +419,24 @@ def update_warranty_card_issued(self,method):
 					for serial_no in serial_no_list:
 						doc = frappe.get_doc('Stock Entry', item.stock_entry_for_car_transfer)
 						doc.transfer_purchase_invoice=self.name
-						doc.save(ignore_permissions=True)              
+						doc.save(ignore_permissions=True)
+						frappe.msgprint(_('Stock Entry {0} is updated with purchase invoice reference {1}').format(
+								frappe.bold(get_link_to_form('Stock Entry', doc.name)),frappe.bold(self.name)))              
 	elif self.docstatus==2:
 	# cancelled
+		# delink PI reference from 'Warranty Card Issued
+		if self.warranty_card_issued:
+			doc = frappe.get_doc('Warranty Card Issued', self.warranty_card_issued)
+			doc.purchase_invoice=None
+			doc.save(ignore_permissions=True)
+			frappe.msgprint(_('Warranty Card Issued {0} is updated. Purchase invoice {1} reference is removed').format(
+					frappe.bold(get_link_to_form('Warranty Card Issued', doc.name)),frappe.bold(self.name))) 			
+
 		for item in self.items:
-			# check for empty serial no
+			# item.description of PI items stores serial no.
 			if item.description:
-				item_group=frappe.get_value('Item', item.item_code, 'item_group')
-				if item_group=='Warranty Card Group':
-					description=item.description
-					warranty_card_number=handle_html(description.split("|"))
-					x=ast.literal_eval(warranty_card_number)
-					warranty_card_number = [n.strip() for n in x]
-					for card_no in warranty_card_number:
-						doc = frappe.get_doc('Warranty Card Issued', card_no)
-						doc.purchase_invoice=None
-						doc.save(ignore_permissions=True)
-				elif item.item_code==default_item_for_car_transfer:
+				if item.item_code==default_item_for_car_transfer:
+				# based on serial no update SE to remove  PI reference
 					description=item.description
 					serial_no_list=handle_html(description.split("|"))
 					x=ast.literal_eval(serial_no_list)
@@ -451,6 +445,8 @@ def update_warranty_card_issued(self,method):
 						doc = frappe.get_doc('Stock Entry', item.stock_entry_for_car_transfer)
 						doc.transfer_purchase_invoice=None
 						doc.save(ignore_permissions=True) 
+						frappe.msgprint(_('Stock Entry {0} is updated. Purchase invoice {1} reference is removed').format(
+								frappe.bold(get_link_to_form('Stock Entry', doc.name)),frappe.bold(self.name))) 						
 
 # Update status : Lead to Sales Order
 @frappe.whitelist()
