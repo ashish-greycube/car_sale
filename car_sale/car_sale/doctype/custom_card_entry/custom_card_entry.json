@@ -9,6 +9,7 @@
   "from_doctype",
   "column_break_2",
   "from_docname",
+  "po_reference",
   "column_break_4",
   "fetch_items",
   "section_break_4",
@@ -149,10 +150,18 @@
    "fieldname": "fetch_data_from_section",
    "fieldtype": "Section Break",
    "label": "Fetch Data From"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "po_reference",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "po_reference",
+   "options": "Purchase Order"
   }
  ],
  "is_submittable": 1,
- "modified": "2021-03-05 08:07:19.000452",
+ "modified": "2021-04-16 08:06:00.783873",
  "modified_by": "Administrator",
  "module": "Car Sale",
  "name": "Custom Card Entry",

@@ -66,7 +66,17 @@ frappe.ui.form.on('Custom Card Entry', {
         }
          
     },
+    po_reference:function(frm) {
+        if (frm.doc.po_reference){
+            if (!frm.doc.from_doctype && !frm.doc.from_docname)
+            frm.set_value('from_doctype','Purchase Order')
+            setTimeout(() => {
+            frm.set_value('from_docname',frm.doc.po_reference)
+            }, 150);
+        }
+    },
     setup:function(frm) {
+
         frm.set_query('from_doctype', () => {
             return {
                 filters: {

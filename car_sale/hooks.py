@@ -106,7 +106,7 @@ doctype_js = {
 doc_events = {
 	"Sales Order": {
 		"after_insert": "car_sale.api.update_lead_status_from_sales_order",
-		"validate":"car_sale.api.update_serial_no_from_so",
+		"validate":"car_sale.api.custom_logid_on_validate_of_so",
 		"on_cancel":"car_sale.api.unreserve_serial_no_from_so_on_cancel",
 		"after_delete":"car_sale.api.unreserve_serial_no_from_so_on_cancel",
 		"on_trash":"car_sale.api.unlink_so_from_other_doctype",
@@ -136,7 +136,7 @@ doc_events = {
 	},
 	"Purchase Order":{
 		"on_submit":"car_sale.api.update_serial_no_status_from_po",
-		"on_cancel":"car_sale.api.update_serial_no_status_from_po"
+		"on_cancel":"car_sale.api.custom_logic_on_cancel_of_purchase_order"
 	},	
 	"Stock Entry":{
 		"before_submit":"car_sale.api.preserve_last_purchase_document_values",

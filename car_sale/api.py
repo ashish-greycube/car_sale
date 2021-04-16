@@ -579,6 +579,21 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=True):
 
 	return doclist
 
+@frappe.whitelist()
+def custom_logid_on_validate_of_so(self,method):
+	validate_serial_no_for_eligible_service_items(self,method)
+	update_serial_no_from_so(self,method)
+
+def validate_serial_no_for_eligible_service_items(self,method):
+	for item in self.items:
+		is_serial_no_mandatory_in_sales_cf = frappe.db.get_value('Item', item.item_code, 'is_serial_no_mandatory_in_sales_cf')
+		if is_serial_no_mandatory_in_sales_cf==1:
+			if not item.serial_no_for_service_item_cf:
+				frappe.throw(_("Row {0}: {1} Item  requires 'Serial No for Service Item' value. You have provided None.".format(
+					frappe.bold(item.idx),frappe.bold(item.item_code))))				
+				
+
+
 # Serail No: reserve from SO
 @frappe.whitelist()
 def update_serial_no_from_so(self,method):
@@ -1796,8 +1811,12 @@ def get_serial_nos_from_custom_card(purchase_order):
 									'from_docname': purchase_order
 								},as_dict=True)
 
-
 @frappe.whitelist()
+def custom_logic_on_cancel_of_purchase_order(self,method):
+	update_serial_no_status_from_po(self,method)
+	delink_custom_card_entry_from_po(self,method)
+
+
 def update_serial_no_status_from_po(self,method):
 	if self.docstatus==2 or self.status == "Closed":
 		# get serial_no value from custom card
@@ -1807,4 +1826,16 @@ def update_serial_no_status_from_po(self,method):
 				serial_nos = get_serial_nos(row.serial_no)
 				for serial_no in serial_nos:
 					frappe.db.set_value('Serial No', serial_no, 'reservation_status', 'Returned')
+
+
+					
 				
+def delink_custom_card_entry_from_po(self,method):
+	linked_custom_card_entry=frappe.get_all('Custom Card Entry', filters = [["po_reference", "=", self.name]], fields=['name'])
+	if linked_custom_card_entry:
+		for custom_card_entry in linked_custom_card_entry:
+			custom_card_entry_name=custom_card_entry.name
+			frappe.db.set_value('Custom Card Entry', custom_card_entry_name, 'po_reference', None)
+			frappe.db.commit()
+			frappe.msgprint(_('Custom Card Entry {0} is updated. Purchase Order {1} reference is removed').format(
+					frappe.bold(get_link_to_form('Custom Card Entry', custom_card_entry_name)),frappe.bold(self.name))) 
