@@ -32,10 +32,10 @@ class CustomCardEntry(Document):
 				.format(frappe.bold(item.item_code), frappe.bold(item.idx)))	
 
 	def auto_make_serial_nos(self):
+		created_numbers = []
 		for item in self.custom_card_item:
 			if frappe.get_cached_value('Item', item.item_code, 'has_serial_no')==1 and frappe.get_cached_value('Item', item.item_code, 'is_stock_item')==1:
 				serial_nos = get_serial_nos(item.serial_no)
-				created_numbers = []
 				for serial_no in serial_nos:
 					sr = frappe.new_doc("Serial No")
 					sr.serial_no=serial_no
