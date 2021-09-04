@@ -91,7 +91,7 @@ def get_data():
                 },
                 {
                     "type": "report",
-                    "name": "Stock Balance Detail",
+                    "name": "Stock Balance with Balance Serial No",
                     "is_query_report": True,
                     "doctype": "Stock Ledger Entry",
                 },
