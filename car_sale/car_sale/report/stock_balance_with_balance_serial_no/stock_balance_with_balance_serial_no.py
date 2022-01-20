@@ -14,6 +14,9 @@ def execute(filters=None):
 
     columns, data = stock_balance(filters)
 
+    # filter items with non zero bal_qty
+    data = filter(lambda x: x.get("bal_qty") > 0, data)
+
     # set balance serial no column from Stock Ledger report
     filters.from_date = "2000-01-01"
     ledger_columns, ledger_data = stock_ledger(filters)
