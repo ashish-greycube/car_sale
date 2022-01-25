@@ -1,0 +1,431 @@
+{
+ "autoname": "naming_series:",
+ "creation": "2022-01-25 07:31:37.641426",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "entry_date",
+  "plate_no",
+  "customer_seller",
+  "customer_buyer",
+  "selling_date",
+  "sales_invoice_reference",
+  "notes",
+  "cb_1",
+  "naming_series",
+  "kilometer",
+  "status",
+  "commission_paid_by",
+  "payment_status",
+  "mode_of_payment",
+  "car_information_section",
+  "item_code",
+  "cb_2",
+  "item_name",
+  "cb_3",
+  "receive_rate",
+  "cb_4",
+  "sale_rate",
+  "cb_5",
+  "serial_no_data",
+  "other_information_section",
+  "car_license",
+  "periodic_checkup",
+  "side_mirror_left",
+  "side_mirror_right",
+  "car_key",
+  "remote_control",
+  "car_signs",
+  "front_plate",
+  "back_plate",
+  "column_break_34",
+  "floor_mats",
+  "cigarette_lighter",
+  "ashtray",
+  "fire_extinguisher",
+  "first_aid_kit",
+  "petrol_tank_cover",
+  "spare_tyre",
+  "triangle_emergency",
+  "tyre_cover",
+  "hag",
+  "car_expenses_section",
+  "individual_car_expense_detail",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "default": "Today",
+   "fieldname": "entry_date",
+   "fieldtype": "Date",
+   "label": "Entry Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "plate_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Plate No",
+   "reqd": 1
+  },
+  {
+   "fieldname": "customer_seller",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Customer Seller",
+   "options": "Customer",
+   "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "selling_date",
+   "fieldtype": "Date",
+   "label": "Selling Date"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "sales_invoice_reference",
+   "fieldtype": "Link",
+   "label": "Sales Invoice Reference",
+   "options": "Sales Invoice",
+   "read_only": 1
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "ICSE-.YY.MM.-.#",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "options": "ICSE-.YY.MM.-.#",
+   "reqd": 1
+  },
+  {
+   "fieldname": "kilometer",
+   "fieldtype": "Int",
+   "label": "Kilometer"
+  },
+  {
+   "default": "Car Received",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Car Received\nCar Returned\nCar Sold Out",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "default": "Seller",
+   "fieldname": "commission_paid_by",
+   "fieldtype": "Select",
+   "label": "Commission Paid By",
+   "options": "Seller\nBuyer",
+   "reqd": 1
+  },
+  {
+   "fieldname": "payment_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Payment Status",
+   "options": "\nPaid\nUnPaid"
+  },
+  {
+   "depends_on": "eval:doc.payment_status == 'Paid'",
+   "fieldname": "mode_of_payment",
+   "fieldtype": "Link",
+   "label": "Mode of Payment",
+   "options": "Mode of Payment"
+  },
+  {
+   "fieldname": "car_information_section",
+   "fieldtype": "Section Break",
+   "label": "Car Information"
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "label": "Item Code",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "item_code.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "label": "Item Name",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "receive_rate",
+   "fieldtype": "Currency",
+   "label": "Receive Rate",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sale_rate",
+   "fieldtype": "Currency",
+   "label": "Sale Rate"
+  },
+  {
+   "fieldname": "cb_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "serial_no_data",
+   "fieldtype": "Data",
+   "label": "Serial No",
+   "reqd": 1
+  },
+  {
+   "fieldname": "other_information_section",
+   "fieldtype": "Section Break",
+   "label": "Other Information"
+  },
+  {
+   "fieldname": "car_license",
+   "fieldtype": "Select",
+   "label": "Car License",
+   "options": "\nYES\nNO"
+  },
+  {
+   "fieldname": "periodic_checkup",
+   "fieldtype": "Select",
+   "label": "Periodic Checkup",
+   "options": "\nYES\nNO"
+  },
+  {
+   "fieldname": "side_mirror_left",
+   "fieldtype": "Select",
+   "label": "Side Mirror Left",
+   "options": "\nYES\nNO"
+  },
+  {
+   "fieldname": "side_mirror_right",
+   "fieldtype": "Select",
+   "label": "Side Mirror Right",
+   "options": "\nYES\nNO"
+  },
+  {
+   "fieldname": "car_key",
+   "fieldtype": "Select",
+   "label": "Car Key",
+   "options": "\nYES\nNO"
+  },
+  {
+   "fieldname": "remote_control",
+   "fieldtype": "Select",
+   "label": "Remote Control",
+   "options": "\nYES\nNO"
+  },
+  {
+   "fieldname": "car_signs",
+   "fieldtype": "Select",
+   "label": "Car Signs",
+   "options": "\nYES\nNO"
+  },
+  {
+   "fieldname": "front_plate",
+   "fieldtype": "Select",
+   "label": "Front Plate",
+   "options": "\nYES\nNO"
+  },
+  {
+   "fieldname": "back_plate",
+   "fieldtype": "Select",
+   "label": "Back Plate",
+   "options": "\nYES\nNO"
+  },
+  {
+   "fieldname": "column_break_34",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "floor_mats",
+   "fieldtype": "Select",
+   "label": "Floor Mats",
+   "options": "\nYES\nNO"
+  },
+  {
+   "fieldname": "cigarette_lighter",
+   "fieldtype": "Select",
+   "label": "Cigarette Lighter",
+   "options": "\nYES\nNO"
+  },
+  {
+   "fieldname": "ashtray",
+   "fieldtype": "Select",
+   "label": " Ashtray",
+   "options": "\nYES\nNO"
+  },
+  {
+   "fieldname": "fire_extinguisher",
+   "fieldtype": "Select",
+   "label": "Fire Extinguisher",
+   "options": "\nYES\nNO"
+  },
+  {
+   "fieldname": "first_aid_kit",
+   "fieldtype": "Select",
+   "label": "First Aid Kit",
+   "options": "\nYES\nNO"
+  },
+  {
+   "fieldname": "petrol_tank_cover",
+   "fieldtype": "Select",
+   "label": "Petrol Tank Cover",
+   "options": "\nYES\nNO"
+  },
+  {
+   "fieldname": "spare_tyre",
+   "fieldtype": "Select",
+   "label": "Spare Tyre",
+   "options": "\nYES\nNO"
+  },
+  {
+   "fieldname": "triangle_emergency",
+   "fieldtype": "Select",
+   "label": "Triangle Emergency",
+   "options": "\nYES\nNO"
+  },
+  {
+   "fieldname": "tyre_cover",
+   "fieldtype": "Select",
+   "label": "Tyre Cover",
+   "options": "\nYES\nNO"
+  },
+  {
+   "fieldname": "hag",
+   "fieldtype": "Select",
+   "label": "Hag",
+   "options": "\nYES\nNO"
+  },
+  {
+   "fieldname": "car_expenses_section",
+   "fieldtype": "Section Break",
+   "label": "Car Expenses"
+  },
+  {
+   "fieldname": "individual_car_expense_detail",
+   "fieldtype": "Table",
+   "label": "Individual Car Expense Detail",
+   "options": "Individual Car Expense Detail"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Individual Car Stock Entry",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "customer_buyer",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Customer Buyer",
+   "options": "Customer"
+  }
+ ],
+ "is_submittable": 1,
+ "modified": "2022-01-25 07:43:15.814913",
+ "modified_by": "Administrator",
+ "module": "Car Sale",
+ "name": "Individual Car Stock Entry",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
