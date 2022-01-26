@@ -6,6 +6,20 @@ import frappe
 def get_data():
     return [
         {
+            "label": _("Car Sale - Comission"),
+            "items": [
+                {
+                    "type": "doctype",
+                    "name": "Individual Car Stock Entry",
+                },   
+                {
+                    "type": "doctype",
+                    "name": "Company",
+                },      
+                                                     
+            ],
+        },        
+        {
             "label": _("Setup"),
             "items": [
                 {
@@ -35,7 +49,7 @@ def get_data():
                 {
                     "type": "doctype",
                     "name": "Warranty Card Issued",
-                },
+                }              
             ],
         },
         {

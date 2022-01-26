@@ -9,10 +9,11 @@
   "plate_no",
   "customer_seller",
   "customer_buyer",
-  "selling_date",
+  "selling_or_return_date",
   "sales_invoice_reference",
   "notes",
   "cb_1",
+  "company",
   "naming_series",
   "kilometer",
   "status",
@@ -29,6 +30,7 @@
   "sale_rate",
   "cb_5",
   "serial_no_data",
+  "generated_serial_no",
   "other_information_section",
   "car_license",
   "periodic_checkup",
@@ -81,12 +83,6 @@
   },
   {
    "allow_on_submit": 1,
-   "fieldname": "selling_date",
-   "fieldtype": "Date",
-   "label": "Selling Date"
-  },
-  {
-   "allow_on_submit": 1,
    "fieldname": "sales_invoice_reference",
    "fieldtype": "Link",
    "label": "Sales Invoice Reference",
@@ -134,6 +130,7 @@
    "reqd": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "payment_status",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -142,6 +139,7 @@
    "options": "\nPaid\nUnPaid"
   },
   {
+   "allow_on_submit": 1,
    "depends_on": "eval:doc.payment_status == 'Paid'",
    "fieldname": "mode_of_payment",
    "fieldtype": "Link",
@@ -351,10 +349,29 @@
    "in_standard_filter": 1,
    "label": "Customer Buyer",
    "options": "Customer"
+  },
+  {
+   "fieldname": "generated_serial_no",
+   "fieldtype": "Link",
+   "label": "Generated Serial No",
+   "options": "Serial No",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "selling_or_return_date",
+   "fieldtype": "Date",
+   "label": "Selling/Return Date"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
   }
  ],
  "is_submittable": 1,
- "modified": "2022-01-25 10:21:05.880469",
+ "modified": "2022-01-26 20:17:33.029449",
  "modified_by": "Administrator",
  "module": "Car Sale",
  "name": "Individual Car Stock Entry",
