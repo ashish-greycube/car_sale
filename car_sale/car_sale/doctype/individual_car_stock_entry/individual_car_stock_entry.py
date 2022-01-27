@@ -44,6 +44,8 @@ class IndividualCarStockEntry(Document):
 
 		si.flags.ignore_permissions = True
 		si.ignore_pricing_rule = 1
+		si.update_stock=0
+		si.individual_car_entry_reference=self.name
 		si.run_method("set_missing_values")
 		si.run_method("set_po_nos")
 		si.run_method("calculate_taxes_and_totals")		
@@ -52,16 +54,9 @@ class IndividualCarStockEntry(Document):
 		msg = _('Sales Invoice {} is created'.format(frappe.bold(get_link_to_form('Sales Invoice',si.name))))
 		frappe.msgprint(msg)		
 
-	def create_journal_entry(self):
-		payment_jv=self.create_payment_journal_entry()
-		msg = _('Payment Journal Entry {} is created'.format(frappe.bold(get_link_to_form('Journal Entry',payment_jv))))
-		frappe.msgprint(msg)
-		expense_jv=self.create_expense_journal_entry()
-		if expense_jv:
-			msg = _('Expense Journal Entry {} is created'.format(frappe.bold(get_link_to_form('Journal Entry',expense_jv))))
-			frappe.msgprint(msg)		
+	
 
-	def create_expense_journal_entry(self):
+	def create_other_journal_entry(self):
 		accounts = []
 		precision = frappe.get_precision("Journal Entry Account", "debit_in_account_currency")
 		default_car_individual_receivable_account = frappe.db.get_value('Company', self.company, 'default_car_individual_receivable_account')
@@ -79,22 +74,24 @@ class IndividualCarStockEntry(Document):
 		elif self.commission_paid_by =='Buyer':
 			debit_amount=self.receive_rate+total_expense
 			credit_amount=self.receive_rate
-		if total_expense>0:
-			# debit
-			accounts.append({
-				"account": default_car_individual_receivable_account,
-				"debit_in_account_currency": flt(debit_amount, precision),
-				'party_type':'Customer',
-				'party':self.customer_buyer				
-			})			
-			# credit
-			accounts.append({
+		
+		# debit
+		accounts.append({
 			"account": default_car_individual_receivable_account,
-			"credit_in_account_currency": flt(credit_amount, precision),
+			"debit_in_account_currency": flt(debit_amount, precision),
 			'party_type':'Customer',
-			'party':self.customer_seller
-			})
-			# credit
+			'party':self.customer_buyer				
+		})			
+		# credit
+		accounts.append({
+		"account": default_car_individual_receivable_account,
+		"credit_in_account_currency": flt(credit_amount, precision),
+		'party_type':'Customer',
+		'party':self.customer_seller
+		})
+
+		if total_expense>0:
+		# credit
 			for expense in self.individual_car_expense_detail:
 				accounts.append({
 					"account": default_creditors_account,
@@ -103,20 +100,22 @@ class IndividualCarStockEntry(Document):
 					'party':expense.supplier				
 				})		
 
-			customer= self.customer_seller if self.commission_paid_by =='Seller' else self.customer_buyer
-			user_remark=_('Car Stock Entry {0} \n Commission Paid by {1} \n Commission Paid by {2} \n Receive Rate {3} \n Sale Rate {4} \n Expense {5}'
-			.format(self.name,self.commission_paid_by,customer,self.receive_rate,self.sale_rate,total_expense))
-			
-			journal_entry = frappe.new_doc('Journal Entry')
-			journal_entry.voucher_type = 'Journal Entry'
-			journal_entry.user_remark =user_remark
-			journal_entry.company = self.company
-			journal_entry.posting_date = getdate(nowdate())
-			journal_entry.set("accounts", accounts)
-			journal_entry.save(ignore_permissions = True)				
-			# journal_entry.submit()	
-			msg = _('Expense Journal Entry {} is created'.format(frappe.bold(get_link_to_form('Journal Entry',journal_entry.name))))
-			frappe.msgprint(msg)			
+		customer= self.customer_seller if self.commission_paid_by =='Seller' else self.customer_buyer
+		user_remark=_('Car Stock Entry {0} \n Commission Paid by {1} \n Commission Paid by {2} \n Receive Rate {3} \n Sale Rate {4} \n Expense {5}'
+		.format(self.name,self.commission_paid_by,customer,self.receive_rate,self.sale_rate,total_expense))
+		
+		journal_entry = frappe.new_doc('Journal Entry')
+		journal_entry.voucher_type = 'Journal Entry'
+		journal_entry.user_remark =user_remark
+		journal_entry.company = self.company
+		journal_entry.posting_date = getdate(nowdate())
+		journal_entry.set("accounts", accounts)
+		journal_entry.individual_car_entry_reference=self.name
+		journal_entry.individual_car_entry_type='Other'
+		journal_entry.save(ignore_permissions = True)				
+		# journal_entry.submit()	
+		msg = _('Other Journal Entry {} is created'.format(frappe.bold(get_link_to_form('Journal Entry',journal_entry.name))))
+		frappe.msgprint(msg)			
 
 	def create_payment_journal_entry(self):
 		amount=self.sale_rate
@@ -157,6 +156,8 @@ class IndividualCarStockEntry(Document):
 		journal_entry.company = self.company
 		journal_entry.posting_date = getdate(nowdate())
 		journal_entry.set("accounts", accounts)
+		journal_entry.individual_car_entry_reference=self.name
+		journal_entry.individual_car_entry_type='Payment'
 		journal_entry.save(ignore_permissions = True)				
 		# journal_entry.submit()	
 		msg = _('Payment Journal Entry {} is created'.format(frappe.bold(get_link_to_form('Journal Entry',journal_entry.name))))
@@ -182,10 +183,12 @@ class IndividualCarStockEntry(Document):
 				sr.save(ignore_permissions=True)
 				self.generated_serial_no=sr.name
 				msg = _('Serial No {} is created'.format(frappe.bold(get_link_to_form('Serial No',sr.name))))
-				frappe.msgprint(msg, alert=1)
+				frappe.msgprint(msg)
+			else:
+				if not self.generated_serial_no:
+						self.generated_serial_no=self.serial_no_data				
 		if self.docstatus==1 and self.generated_serial_no:
 			if self.status=='Car Sold Out':
 				frappe.db.set_value('Serial No', self.generated_serial_no, { 'reservation_status': 'Sold Individual', 'individual_car_return_date': self.selling_or_return_date})
 			elif self.status=='Car Returned':
 				frappe.db.set_value('Serial No', self.generated_serial_no, { 'reservation_status': 'Returned Individual',   'individual_car_return_date': self.selling_or_return_date})
-			

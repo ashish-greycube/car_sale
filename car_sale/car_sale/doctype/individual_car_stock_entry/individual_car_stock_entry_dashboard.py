@@ -3,9 +3,9 @@ from frappe import _
 
 def get_data():
 	return {
-		'fieldname': 'individual_car_stock_entry',
+		'fieldname': 'individual_car_entry_reference',
 		'non_standard_fieldnames': {
-			'Serial No': 'individual_car_entry_reference',
+			# 'Serial No': 'individual_car_entry_reference',
 			# 'Sales Invoice':'sales_invoice_reference'
 		},
 		'transactions': [
@@ -13,9 +13,13 @@ def get_data():
 				'label': _('Serial No'),
 				'items': ['Serial No']
 			},
-			# 	{
-			# 	'label': _('Sales Invoice'),
-			# 	'items': ['Sales Invoice']
-			# },		
+			{
+				'label': _('Journal Entry'),
+				'items': ['Journal Entry']
+			},			
+			{
+				'label': _('Sales Invoice'),
+				'items': ['Sales Invoice']
+			}	
 		]
 	}

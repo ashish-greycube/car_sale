@@ -27,6 +27,7 @@ app_license = "MIT"
 
 # include js in doctype views
 doctype_js = {
+"Company" : "public/js/company.js",	
 "Lead" : "public/js/lead.js",
 "Quotation":"public/js/quotation.js",
 "Sales Order":"public/js/sales_order.js",
@@ -72,7 +73,7 @@ doctype_js = {
 
 # before_install = "car_sale.install.before_install"
 # after_install = "car_sale.install.after_install"
-
+after_migrate = "car_sale.hook_methods.after_migrate"
 # Desk Notifications
 # ------------------
 # See frappe.core.notifications.get_notification_config
@@ -171,13 +172,17 @@ scheduler_events = {
 	]
 }
 fixtures = [
-	    	{
+	{
 		"dt":'Property Setter',
 		"filters":[
 			["doc_type", "in", ["Sales Invoice"]],
 			["field_name", "in", ["naming_series"]],
 		]
 	},	
+  # {
+  # 	"dt": "Custom Field", 
+  # 	"filters": [["modified", ">=", '2022-01-24 13:41:25.822609']]
+	# }
 	]
 # Testing
 # -------
