@@ -247,7 +247,7 @@
    "modified_by": "Administrator",
    "name": "Serial No-reservation_status",
    "no_copy": 0,
-   "options": "\nReserved\nAvailable\nSold Out\nShowroom Car\nReturned\nAvailable-Qty\nAvailable-Card",
+   "options": "\nReserved\nAvailable\nAvailable Individual\nSold Out\nSold Individual\nShowroom Car\nReturned\nReturned Individual\nAvailable-Qty\nAvailable-Card",
    "owner": "Administrator",
    "parent": null,
    "parentfield": null,
