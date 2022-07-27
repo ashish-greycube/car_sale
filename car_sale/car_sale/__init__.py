@@ -12,8 +12,8 @@ def carsale_has_customer(self):
                         return None
                     else:
                         return frappe.db.get_value("Customer", {"lead_name": self.name})
-    except Exception:
-        frappe.msgprint(Exception)
+    except Exception as e:
+        frappe.msgprint(frappe.utils.get_traceback())
         
 from erpnext.crm.doctype.lead.lead import Lead
 Lead.has_customer = carsale_has_customer
