@@ -25,6 +25,10 @@
   "cb_2",
   "item_name",
   "cb_3",
+  "car_color",
+  "cb_3_1",
+  "car_model",
+  "cb_3_2",
   "receive_rate",
   "cb_4",
   "sale_rate",
@@ -368,10 +372,32 @@
    "fieldtype": "Link",
    "label": "Company",
    "options": "Company"
+  },
+  {
+   "fieldname": "car_color",
+   "fieldtype": "Link",
+   "label": "Car Color",
+   "options": "Car Color",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb_3_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "car_model",
+   "fieldtype": "Link",
+   "label": "Car Model",
+   "options": "Car Model",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb_3_2",
+   "fieldtype": "Column Break"
   }
  ],
  "is_submittable": 1,
- "modified": "2022-01-26 20:17:33.029449",
+ "modified": "2022-10-03 11:44:02.590727",
  "modified_by": "Administrator",
  "module": "Car Sale",
  "name": "Individual Car Stock Entry",

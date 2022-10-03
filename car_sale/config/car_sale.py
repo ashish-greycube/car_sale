@@ -49,7 +49,15 @@ def get_data():
                 {
                     "type": "doctype",
                     "name": "Warranty Card Issued",
-                }              
+                },
+                {
+                    "type": "doctype",
+                    "name": "Car Color",
+                } ,
+                {
+                    "type": "doctype",
+                    "name": "Car Model",
+                }                                               
             ],
         },
         {

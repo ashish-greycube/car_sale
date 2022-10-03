@@ -180,6 +180,8 @@ class IndividualCarStockEntry(Document):
 				sr.individual_car_entry_reference=self.name
 				sr.customer_seller=self.customer_seller
 				sr.customer_buyer=self.customer_buyer
+				sr.car_color_cf=self.car_color
+				sr.car_model_cf=self.car_model
 				sr.save(ignore_permissions=True)
 				self.generated_serial_no=sr.name
 				msg = _('Serial No {} is created'.format(frappe.bold(get_link_to_form('Serial No',sr.name))))
