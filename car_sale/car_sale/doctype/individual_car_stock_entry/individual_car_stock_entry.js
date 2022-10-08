@@ -1,7 +1,24 @@
 // Copyright (c) 2022, GreyCube Technologies and contributors
 // For license information, please see license.txt
+var sourceImage ;
+var targetRoot;
+var maState;
 
 frappe.ui.form.on('Individual Car Stock Entry', {
+	onload_post_render: function(frm) {
+		$(frm.fields_dict['car_structure_html'].wrapper)
+		.html('<div  style="position: relative; display: flex;flex-direction: column;align-items: center;justify-content: center;padding-top: 50px;"> \
+		<img  id="sourceImage"   src="/assets/car_sale/image/car_structure.png" style="max-width: 900px; max-height: 80%;"  crossorigin="anonymous" /> \
+		<img  id="sampleImage"   src="/assets/car_sale/image/car_structure.png"  style="max-width: 900px; max-height: 100%; position: absolute;" crossorigin="anonymous" /> \
+		</div>');
+	
+		setSourceImage(document.getElementById("sourceImage"));
+	
+		const sampleImage = document.getElementById("sampleImage");
+		sampleImage.addEventListener("click", () => {
+		  showMarkerArea(sampleImage);
+		});      
+	},	
 	refresh: function (frm) {
 		if (frm.doc.docstatus == 1 && frm.doc.status == "Car Sold Out") {
 			if (frm.doc.payment_status == 'Paid') {
@@ -100,5 +117,38 @@ frappe.ui.form.on('Individual Car Stock Entry', {
 			frm.set_df_property('selling_or_return_date', 'reqd', 1)
 			frm.set_df_property('customer_buyer', 'reqd', 1)
 		}
+	},
+	validate: function(frm){
+		if (frm.doc.status == "Car Sold Out" && frm.doc.sale_rate<=0) {
+			frappe.throw(__('As car is Sold Out, please put correct sale rate value.'));
+		}		
 	}
 });
+
+function setSourceImage(source) {
+	sourceImage = source;
+	targetRoot = source.parentElement;
+  }
+  
+  function showMarkerArea(target) {
+	const markerArea = new markerjs2.MarkerArea(sourceImage);
+	  markerArea.renderImageQuality = 0.5;
+	  markerArea.renderImageType = 'image/jpeg';
+  
+	// since the container div is set to position: relative it is now our positioning root
+	// end we have to let marker.js know that
+	markerArea.targetRoot = targetRoot;
+	markerArea.addRenderEventListener((imgURL, state) => {
+	  target.src = imgURL;
+	  // save the state of MarkerArea
+	  cur_frm.doc.car_structure_annotation=JSON.stringify(state)
+	 
+	  cur_frm.set_value('annotated_car_image_cf', imgURL)
+	  cur_frm.save()
+	});
+	markerArea.show();
+	// if previous state is present - restore it
+	if (cur_frm.doc.car_structure_annotation) {
+	  markerArea.restoreState(JSON.parse(cur_frm.doc.car_structure_annotation));
+	}
+  }

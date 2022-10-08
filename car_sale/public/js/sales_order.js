@@ -208,5 +208,17 @@ frappe.ui.form.on('Sales Order Item', {
 		if (row.price_list_rate && row.rate < row.price_list_rate && frappe.user.has_role("Sales Agent")) {
 			frappe.throw(__('Rate entered by you is <b> {0} </b>. It cannot be less than sales rate {1}',[row.rate, row.price_list_rate]))
 		}
+	},
+	serial_no: function (frm,cdt,cdn) {
+		let row = locals[cdt][cdn];
+		frappe.db.get_value('Serial No',row.serial_no, ['car_color_cf', 'car_model_cf'])
+    .then(r => {
+        let values = r.message;
+		let car_color=values.car_color_cf;
+		let car_model=values.car_model_cf;
+		frappe.model.set_value(row.doctype, row.name, "car_color_cf", car_color)
+		frappe.model.set_value(row.doctype, row.name, "car_model_cf", car_model)
+		frm.refresh_field("items")
+    })
 	}
 })

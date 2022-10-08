@@ -1,4 +1,9 @@
 frappe.ui.form.on('Stock Entry', {
+    before_save: function (frm) {
+        if (frm.doc.purpose=='Material Receipt') {
+             return make_color_model_mandatory_for_serialized_items(frm)
+        }
+    },    
     refresh: function (frm) {
         if (frm.doc.with_transfer_cost == 1) {
             frm.set_df_property("transferred_by_supplier", "reqd", 1);
@@ -84,3 +89,25 @@ frappe.ui.form.on('Stock Entry', {
         }
     }
 });
+
+
+
+function make_color_model_mandatory_for_serialized_items(frm) {
+    return new Promise((resolve, reject) => {
+        frm.doc.items.forEach(row => {
+            let grid_row = frm.get_field('items').grid.get_row(row.name)
+            if (row.serial_no == undefined || row.serial_no == '') {} else {
+                //  item has serial no
+                if (row.car_color_cf == undefined || row.car_color_cf == '') {
+                    // item has serial_no and no color
+                    frappe.throw(__("Row <b>{0}</b> : is a serialized item and hence  <b>car color</b> is required.", [row.idx]));
+                }
+                if (row.car_model_cf == undefined || row.car_model_cf == '') {
+                    // item has serial_no and no model
+                    frappe.throw(__("Row <b>{0}</b> : is a serialized item and hence  <b>car model</b> is required.", [row.idx]));
+                }
+            }
+        });
+        resolve()
+    })
+}

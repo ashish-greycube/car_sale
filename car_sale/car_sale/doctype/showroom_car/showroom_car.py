@@ -53,6 +53,8 @@ class ShowroomCar(Document):
 							doc.reservation_status='Showroom Car'
 							# doc.warehouse=item.warehouse
 							doc.serial_no_details='This is a showroom car.'
+							doc.car_color_cf=item.car_color_cf
+							doc.car_model_cf=item.car_model_cf
 							doc.insert()	
 							frappe.msgprint(_("{0} is created for item {1}").format("<a href='#Form/Serial No/{0}'>Serial No {0}</a>".format(doc.name),item.item_name))						
 

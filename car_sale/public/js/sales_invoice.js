@@ -70,6 +70,16 @@ frappe.ui.form.on('Sales Invoice', {
 frappe.ui.form.on('Sales Invoice Item', {
     serial_no: function(frm, cdt, cdn) {
         let row = locals[cdt][cdn];
+        frappe.db.get_value('Serial No', row.serial_no, ['car_color_cf', 'car_model_cf'])
+		    .then(r => {
+                console.log(r,'r')
+		        let values = r.message;
+		        let car_color = values.car_color_cf;
+		        let car_model = values.car_model_cf;
+		        frappe.model.set_value(row.doctype, row.name, "car_color_cf", car_color)
+		        frappe.model.set_value(row.doctype, row.name, "car_model_cf", car_model)
+		        frm.refresh_field("items")
+		    })        
         if (row.serial_no.length > 0){
        return frappe.call({
             method: "car_sale.api.get_registration_plate_no",
@@ -87,5 +97,7 @@ frappe.ui.form.on('Sales Invoice Item', {
             row.registration_plate_no=undefined
             cur_frm.refresh_field('items')
         }
+		
+
     }
 });
