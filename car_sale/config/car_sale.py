@@ -117,6 +117,18 @@ def get_data():
                     "is_query_report": True,
                     "doctype": "Stock Ledger Entry",
                 },
+                {
+                    "type": "report",
+                    "name": "Car Sales Analysis Report",
+                    "is_query_report": True,
+                    "doctype": "Serial No",
+                },      
+                {
+                    "type": "report",
+                    "name": "Car Serial No Report",
+                    "is_query_report": True,
+                    "doctype": "Serial No",
+                },                            
             ],
         },
     ]
