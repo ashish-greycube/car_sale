@@ -40,7 +40,7 @@ Maintenance Cost,maintenance_cost,Currency,,110
 Other Expense,other_expense,Currency,,110
 Total Expense,total_expense,Currency,,110
 Net Profit,net_profit,Currency,,120
-Percentage,percentage,Percent,,100,1
+Percentage,net_percentage,Percent,,100,1
 """
     )
 
@@ -68,9 +68,8 @@ def get_data(filters=None):
         """
 	select 
 		tsn.name serial_no , tsn.item_code , tsn.item_name ,
-		tsn.car_color_cf , tsn.car_model_cf , tsn .delivery_document_no sales_invoice , 
-		tsn.delivery_date sales_date , tpi.supplier , tsn.customer , 
-		tsn.customer_name ,
+		tsn.car_color_cf , tsn.car_model_cf , tpi.supplier , tsn.delivery_document_no sales_invoice , 
+		tsn.customer,tsn.customer_name, tsn.delivery_date sales_date ,   
 		tsii.rate , 
 		tsii.base_net_amount  as sales_amount ,
 	CASE
@@ -88,18 +87,14 @@ def get_data(filters=None):
 )
 		ELSE tsn.purchase_rate
 	END as cost_amount,
-		exp.plate_no_cost ,
-		exp.insurance_expense ,
-		exp.transfer_cost ,
-		exp.maintenance_cost ,
-		exp.other_expense ,
-		COALESCE(exp.plate_no_cost) +
-		COALESCE(exp.insurance_expense) +
-		COALESCE(exp.transfer_cost) +
-		COALESCE(exp.maintenance_cost) +
-		COALESCE(exp.other_expense) total_expense,
+	exp.plate_no_cost ,
+	exp.insurance_expense ,
+	exp.transfer_cost ,
+	exp.maintenance_cost ,
+	exp.other_expense ,
+	(COALESCE(exp.plate_no_cost) + COALESCE(exp.insurance_expense) +	COALESCE(exp.transfer_cost) +COALESCE(exp.maintenance_cost) + COALESCE(exp.other_expense)) as total_expense,
 		((SELECT sales_amount)-((SELECT cost_amount)+(SELECT total_expense))) as net_profit,
-		((SELECT net_profit)/(SELECT sales_amount))*100 as net_percentage
+		((SELECT net_profit)/(SELECT sales_amount))*100 as net_percentage    
 	from `tabSerial No` tsn 
 left outer join `tabPurchase Invoice Item` tpii on
 	tpii.item_code = tsn.item_code
@@ -158,16 +153,15 @@ left outer join `tabSales Invoice` tsi on
             conditions=get_conditions(filters)
         ),
         filters,
-        as_dict=True,
-        debug=True,
+        as_dict=True
     )
 
-    for d in data:
-        d["net_profit"] = (d.get("total_expense", 0) or 0) + (d.get("cost_amount") or 0)
-        d["percentage"] = (
-            (d.get("net_profit") or 0) * 100 / d.get("sales_amount")
-            if d.get("sales_amount")
-            else 0
-        )
+    # for d in data:
+    #     d["net_profit"] = (d.get("total_expense", 0) or 0) + (d.get("cost_amount") or 0)
+    #     d["percentage"] = (
+    #         (d.get("net_profit") or 0) * 100 / d.get("sales_amount")
+    #         if d.get("sales_amount")
+    #         else 0
+    #     )
 
     return data

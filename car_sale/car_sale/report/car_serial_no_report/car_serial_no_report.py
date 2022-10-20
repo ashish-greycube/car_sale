@@ -60,6 +60,7 @@ def get_data(filters=None):
 	tsn.item_name ,
 	tsn.car_color_cf ,
 	tsn.status ,
+    tsn.warehouse,
 	tsn.car_model_cf ,
 	tsn.reservation_status ,
 	tpi.name purchase_invoice ,
