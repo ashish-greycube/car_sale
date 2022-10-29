@@ -28,6 +28,7 @@ Item Name,item_name,Data,,210
 Color,car_color_cf,,,70
 Model,car_model_cf,,,70
 Supplier,supplier,Link,Supplier,110
+Individual Car Entry,individual_car_entry_reference,Link,Individual Car Stock Entry,130
 Sales Invoice,sales_invoice,Link,Sales Invoice,110
 Customer Name,customer_name,,,120
 Sales Date,sales_date,Date,,100
@@ -55,7 +56,12 @@ def get_conditions(filters=None):
         conditions += ["tsn.car_color_cf = %(color)s"]
     if filters.get("model"):
         conditions += ["tsn.car_model_cf = %(model)s"]
-
+    if filters.get("car_type"):
+        car_type_filter=filters.get("car_type")
+        if car_type_filter=='Individual Car':
+            conditions += ["tsn.individual_car_entry_reference   IS NOT NULL "]
+        elif car_type_filter=='Purchase Car':
+            conditions += ["tsn.individual_car_entry_reference   IS  NULL "]
     return conditions and " where " + " and ".join(conditions) or ""
 
 
@@ -71,7 +77,18 @@ def get_data(filters=None):
 		tsn.car_color_cf , tsn.car_model_cf , tpi.supplier , tsn.delivery_document_no sales_invoice , 
 		tsn.customer,tsn.customer_name, tsn.delivery_date sales_date ,   
 		tsii.rate , 
-		tsii.base_net_amount  as sales_amount ,
+        tsn.individual_car_entry_reference,
+	CASE
+		WHEN tsn.individual_car_entry_reference is not null THEN (
+		select
+			icse.sale_rate
+		from
+			`tabIndividual Car Stock Entry` icse
+        where
+			icse.name = tsn.individual_car_entry_reference    
+)
+		ELSE tsii.base_net_amount
+	END as sales_amount,        
 	CASE
 		WHEN tsn.individual_car_entry_reference is not null THEN (
 		select
@@ -92,8 +109,8 @@ def get_data(filters=None):
 	exp.transfer_cost ,
 	exp.maintenance_cost ,
 	exp.other_expense ,
-	(COALESCE(exp.plate_no_cost) + COALESCE(exp.insurance_expense) +	COALESCE(exp.transfer_cost) +COALESCE(exp.maintenance_cost) + COALESCE(exp.other_expense)) as total_expense,
-		((SELECT sales_amount)-((SELECT cost_amount)+(SELECT total_expense))) as net_profit,
+	IFNULL(COALESCE(exp.plate_no_cost) + COALESCE(exp.insurance_expense) +	COALESCE(exp.transfer_cost) +COALESCE(exp.maintenance_cost) + COALESCE(exp.other_expense),0) as total_expense,
+		((SELECT sales_amount)-(IFNULL((SELECT cost_amount),0)+(SELECT total_expense))) as net_profit,
 		((SELECT net_profit)/(SELECT sales_amount))*100 as net_percentage    
 	from `tabSerial No` tsn 
 left outer join `tabPurchase Invoice Item` tpii on

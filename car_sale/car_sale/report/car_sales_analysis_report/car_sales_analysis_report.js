@@ -18,13 +18,21 @@ frappe.query_reports["Car Sales Analysis Report"] = {
     },
     {
       fieldname: "Color",
+      fieldtype: "Link",
       label: __("Color"),
-      fieldtype: "Select",
+      options: "Car Color"
     },
     {
       fieldname: "model",
+      fieldtype: "Link",
       label: __("Model"),
-      fieldtype: "Select",
+      options: "Car Model"
     },
+    {
+      fieldname: "car_type",
+      fieldtype: "Select",
+      label: __("Car Type"),
+      options: "\nIndividual Car\nPurchase Car"
+    },    
   ],
 };

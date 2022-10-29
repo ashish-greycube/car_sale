@@ -38,7 +38,7 @@ Sales Rate,sales_rate,Currency,,120
 Customer,customer,Link,Customer,100
 Sales Date,sales_date,Date,,100
 Booking No,booking_no,Link,Sales Order,100
-Advance Amount,advance_amount,Currency,,120
+Advance Amount,advance_paid,Currency,,120
 """
     )
 
@@ -47,36 +47,32 @@ def get_data(filters=None):
 
     data = frappe.db.sql(
         """
-        select
-	tsn .delivery_document_no sales_invoice ,
-	tsn.delivery_date sales_date ,
-	tsn.supplier ,
-	tsn.customer ,
-	tsii.rate ,
-	tsn.reserved_by_document ,
+SELECT 
 	tsn.name serial_no ,
 	tsn.registration_plate_no ,
-	tsn.item_code ,
 	tsn.item_name ,
-	tsn.car_color_cf ,
-	tsn.status ,
-    tsn.warehouse,
 	tsn.car_model_cf ,
+	tsn.car_color_cf ,
 	tsn.reservation_status ,
-	tpi.name purchase_invoice ,
-	tpi.posting_date purchase_date,
-	tpii.rate ,
+	tsn.warehouse,
+	tsn.purchase_document_no as purchase_invoice,
+	tsn.purchase_rate,
+	tsn.purchase_date as purchase_date,
+	tsn.supplier ,
+	tsn.delivery_document_no sales_invoice ,
+	tsii.base_rate as sales_rate,
+	tsn.customer ,
+	tsn.delivery_date sales_date ,
+	tsn.reserved_by_document as booking_no ,
 	tso.advance_paid as advance
 from
 	`tabSerial No` tsn
-left outer join `tabPurchase Invoice Item` tpii on
-	tpii.item_code = tsn.item_code
-	and tpii.serial_no = tsn.name
-left outer join `tabPurchase Invoice` tpi on
-	tpi.name = tpii.parent
-	and tpi.docstatus = 1
+left outer join
+	`tabSales Invoice` tsi 
+on
+	tsn.delivery_document_no = tsi.name
 left outer join `tabSales Invoice Item` tsii on
-	tsii.parent = tsn.delivery_document_no
+	tsii.parent = tsi.name
 	and tsii.item_code = tsn.item_code
 	and tsii.serial_no = tsn.name
 	and tsii.docstatus = 1
@@ -87,7 +83,6 @@ left outer join `tabSales Order` tso on
             conditions=get_conditions(filters)
         ),
         filters,
-        debug=True,
         as_dict=True,
     )
 
@@ -107,6 +102,6 @@ def get_conditions(filters=None):
     if filters.get("reservation_status"):
         conditions += ["tsn.reservation_status = %(reservation_status)s"]
     if filters.get("warehouse"):
-        conditions += ["tsn.cse_warehouse_cf = %(warehouse)s"]
+        conditions += ["tsn.warehouse = %(warehouse)s"]
 
     return conditions and " where " + " and ".join(conditions) or ""

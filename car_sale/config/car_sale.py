@@ -128,7 +128,13 @@ def get_data():
                     "name": "Car Serial No Report",
                     "is_query_report": True,
                     "doctype": "Serial No",
-                },                            
+                }, 
+                {
+                    "type": "report",
+                    "name": "Total Car Report",
+                    "is_query_report": True,
+                    "doctype": "Serial No",
+                },                                            
             ],
         },
     ]
