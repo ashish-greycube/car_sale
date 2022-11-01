@@ -113,6 +113,7 @@ def get_data(filters=None):
 		((SELECT sales_amount)-(IFNULL((SELECT cost_amount),0)+(SELECT total_expense))) as net_profit,
 		((SELECT net_profit)/(SELECT sales_amount))*100 as net_percentage    
 	from `tabSerial No` tsn 
+	where tsn.reservation_status in ('Sold Out','Sold Individual')
 left outer join `tabPurchase Invoice Item` tpii on
 	tpii.item_code = tsn.item_code
 	and tpii.serial_no = tsn.name
