@@ -8,7 +8,7 @@ import erpnext
 
 
 def csv_to_columns(csv_str):
-    props = ["label", "fieldname", "fieldtype", "options", "width","precision"]
+    props = ["label", "fieldname", "fieldtype", "options", "width", "precision"]
     return [
         zip(props, [x.strip() for x in col.split(",")])
         for col in csv_str.split("\n")
@@ -57,10 +57,10 @@ def get_conditions(filters=None):
     if filters.get("model"):
         conditions += ["tsn.car_model_cf = %(model)s"]
     if filters.get("car_type"):
-        car_type_filter=filters.get("car_type")
-        if car_type_filter=='Individual Car':
+        car_type_filter = filters.get("car_type")
+        if car_type_filter == "Individual Car":
             conditions += ["tsn.individual_car_entry_reference   IS NOT NULL "]
-        elif car_type_filter=='Purchase Car':
+        elif car_type_filter == "Purchase Car":
             conditions += ["tsn.individual_car_entry_reference   IS  NULL "]
     return conditions and " where " + " and ".join(conditions) or ""
 
@@ -74,7 +74,16 @@ def get_data(filters=None):
         """
 	select 
 		tsn.name serial_no , tsn.item_code , tsn.item_name ,
-		tsn.car_color_cf , tsn.car_model_cf , tpi.supplier , tsn.delivery_document_no sales_invoice , 
+		tsn.car_color_cf , tsn.car_model_cf , tpi.supplier , 
+        case 
+        when tsn.individual_car_entry_reference is not null then 
+        (
+            select name 
+            from `tabSales Invoice` x
+            where x.individual_car_entry_reference = tsn.individual_car_entry_reference
+        )
+        else tsn.delivery_document_no 
+        end sales_invoice , 
 		tsn.customer,tsn.customer_name, tsn.delivery_date sales_date ,   
 		tsii.rate , 
         tsn.individual_car_entry_reference,
@@ -170,7 +179,7 @@ left outer join `tabSales Invoice` tsi on
             conditions=get_conditions(filters)
         ),
         filters,
-        as_dict=True
+        as_dict=True,
     )
 
     # for d in data:
