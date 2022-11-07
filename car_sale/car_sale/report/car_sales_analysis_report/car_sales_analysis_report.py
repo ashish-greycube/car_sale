@@ -48,6 +48,9 @@ Percentage,net_percentage,Percent,,100,1
 
 def get_conditions(filters=None):
     conditions = []
+
+    conditions += ["tsn.reservation_status in ('Sold Out','Sold Individual') "]
+
     if filters.get("item_code"):
         conditions += ["tsn.item_code = %(item_code)s"]
     if filters.get("customer"):
@@ -172,7 +175,7 @@ left outer join `tabSales Invoice` tsi on
                 and tpii.serial_no is not null
         ) t
         group by serial_no	
-	) exp on exp.serial_no = tsn.name and tsn.reservation_status in ('Sold Out','Sold Individual') 
+	) exp on exp.serial_no = tsn.name 
         {conditions}
     order by tsi.posting_date
     """.format(

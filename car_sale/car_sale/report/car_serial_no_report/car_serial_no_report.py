@@ -39,6 +39,7 @@ Customer,customer,Link,Customer,100
 Sales Date,sales_date,Date,,100
 Booking No,booking_no,Link,Sales Order,100
 Advance Amount,advance_paid,Currency,,120
+Booking Days Remaining,booking_days,Int,,120
 """
     )
 
@@ -64,7 +65,9 @@ SELECT
 	tsn.customer ,
 	tsn.delivery_date sales_date ,
 	tsn.reserved_by_document as booking_no ,
-	tso.advance_paid as advance
+	tso.advance_paid ,
+    DATEDIFF(tso.delivery_date,CURDATE()) booking_days ,
+    tso.delivery_date
 from
 	`tabSerial No` tsn
 left outer join
