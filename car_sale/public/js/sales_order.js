@@ -32,6 +32,41 @@ frappe.ui.form.on('Sales Order', {
 									}					
 								}
 		}
+		if (cur_frm.doc.docstatus==1 && cur_frm.has_perm("submit") && cur_frm.doc.status === 'On Hold' 
+			&& (flt(cur_frm.doc.per_delivered, 6) < 100 || flt(cur_frm.doc.per_billed) < 100) ) {
+					   // close
+					   cur_frm.add_custom_button(__('Close'), () => 
+					   cur_frm.events.close_sales_order_with_changing_serial_no_status(), __("Status"))
+		}
+		
+		if(cur_frm.doc.status !== 'Closed' && cur_frm.doc.status !== 'On Hold' && cur_frm.has_perm("submit")
+		  && (flt(cur_frm.doc.per_delivered, 6) < 100 || flt(cur_frm.doc.per_billed) < 100) ) {
+						// close
+						cur_frm.add_custom_button(__('Close'), () => 
+						cur_frm.events.close_sales_order_with_changing_serial_no_status(), __("Status"))
+		}		
+	},
+	close_sales_order_with_changing_serial_no_status:function(frm){
+		frappe.ui.form.is_saving = true;
+		frappe.call({
+			method: "car_sale.api.call_unreserve_serial_no_from_so_on_cancel",
+			args: {so_name:cur_frm.doc.name},
+			callback: function(r){
+				frappe.call({
+					method: "erpnext.selling.doctype.sales_order.sales_order.update_status",
+					args: {status: 'Closed', name: cur_frm.doc.name},
+					callback: function(r){
+						cur_frm.reload_doc();
+					},
+					always: function() {
+						frappe.ui.form.is_saving = false;
+					}
+				});	
+			},
+			always: function() {
+				frappe.ui.form.is_saving = false;
+			}
+		});
 	},
 	validate: function(frm) {
 

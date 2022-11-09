@@ -8,6 +8,8 @@
   "entry_date",
   "plate_no",
   "customer_seller",
+  "seller_phone_no",
+  "seller_id_no",
   "customer_buyer",
   "selling_or_return_date",
   "sales_invoice_reference",
@@ -403,10 +405,24 @@
    "fieldname": "annotated_car_image_cf",
    "fieldtype": "Attach Image",
    "hidden": 1
+  },
+  {
+   "fetch_from": "customer_seller.phone_no_cf",
+   "fieldname": "seller_phone_no",
+   "fieldtype": "Data",
+   "label": "Seller Phone No",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "customer_seller.id_no_cf",
+   "fieldname": "seller_id_no",
+   "fieldtype": "Data",
+   "label": "Seller ID No",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2022-10-08 10:14:48.469834",
+ "modified": "2022-11-08 14:47:13.997002",
  "modified_by": "Administrator",
  "module": "Car Sale",
  "name": "Individual Car Stock Entry",

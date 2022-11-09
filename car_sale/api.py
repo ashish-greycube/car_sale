@@ -1889,3 +1889,8 @@ def delink_custom_card_entry_from_po(self,method):
 			frappe.db.commit()
 			frappe.msgprint(_('Custom Card Entry {0} is updated. Purchase Order {1} reference is removed').format(
 					frappe.bold(get_link_to_form('Custom Card Entry', custom_card_entry_name)),frappe.bold(self.name))) 
+
+@frappe.whitelist()
+def call_unreserve_serial_no_from_so_on_cancel(so_name):
+	self=frappe.get_doc('Sales Order',so_name)
+	unreserve_serial_no_from_so_on_cancel(self,method='Cancel')					

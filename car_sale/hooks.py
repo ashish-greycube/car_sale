@@ -179,9 +179,9 @@ fixtures = [
 			["field_name", "in", ["naming_series"]],
 		]
 	},	
-  # {
-  # 	"dt": "Custom Field", 
-  # 	"filters": [["modified", ">=", '2022-01-24 13:41:25.822609']]
+  	# {
+  	# "dt": "Custom Field", 
+  	# "filters": [["name", "in", ["Customer-id_no_cf","Customer-phone_no_cf"]]]
 	# }
 	]
 # Testing

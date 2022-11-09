@@ -13,6 +13,25 @@ from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 def after_migrate():
     custom_fields = [
         {
+        "doctype": "Custom Field",
+        "dt": "Customer",
+        "fieldname": "phone_no_cf",
+        "fieldtype": "Data",
+        "insert_after": "image",
+        "label": "Phone No",
+        "name": "Customer-phone_no_cf",
+        "options": "Phone",
+        },     
+        {
+        "doctype": "Custom Field",
+        "dt": "Customer",
+        "fieldname": "id_no_cf",
+        "fieldtype": "Data",
+        "insert_after": "phone_no_cf",
+        "label": "ID No",
+        "name": "Customer-id_no_cf",
+        },           
+        {
             "doctype": "Custom Field",
             "dt": "Journal Entry",
             "fieldname": "individual_car_entry_reference",
