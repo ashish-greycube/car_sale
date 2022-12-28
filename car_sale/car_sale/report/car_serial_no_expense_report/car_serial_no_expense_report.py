@@ -71,32 +71,17 @@ def get_data(filters=None):
 
     data = frappe.db.sql(
         """
-	select 
-		tsn.name serial_no , tsn.item_code , tsn.item_name ,
-		tsn.car_color_cf , tsn.car_model_cf , tpi.supplier , 
-        case 
-        when tsn.individual_car_entry_reference is not null then 
-        (
-            select name 
-            from `tabSales Invoice` x
-            where x.individual_car_entry_reference = tsn.individual_car_entry_reference
-        )
-        else tsn.delivery_document_no 
-        end sales_invoice , 
-		tsn.customer,tsn.customer_name, tsn.delivery_date sales_date ,   
-		tsii.rate , 
-        tsn.individual_car_entry_reference,
-	CASE
-		WHEN tsn.individual_car_entry_reference is not null THEN (
-		select
-			icse.sale_rate
-		from
-			`tabIndividual Car Stock Entry` icse
-        where
-			icse.name = tsn.individual_car_entry_reference    
-)
-		ELSE tsii.base_net_amount
-	END as sales_amount,        
+    select 
+	tsn.name serial_no ,
+	tsn.item_code ,
+	tsn.item_name ,
+	tsn.car_color_cf ,
+	tsn.car_model_cf ,
+	tpi.supplier ,
+	tsn.customer,
+	tsn.customer_name,
+	tsn.delivery_date sales_date ,   
+	tsn.individual_car_entry_reference,
 	CASE
 		WHEN tsn.individual_car_entry_reference is not null THEN (
 		select
@@ -119,64 +104,79 @@ def get_data(filters=None):
 	exp.other_expense ,
 	tpi.name as purchase_invoice,
 	tpi.posting_date as purchase_date,
-	IFNULL(COALESCE(exp.plate_no_cost) + COALESCE(exp.insurance_expense) +	COALESCE(exp.transfer_cost) +COALESCE(exp.maintenance_cost) + COALESCE(exp.other_expense),0) as total_expense,
-		((SELECT sales_amount)-(IFNULL((SELECT cost_amount),0)+(SELECT total_expense))) as net_profit,
-		((SELECT net_profit)/(SELECT sales_amount))*100 as net_percentage,
-	((SELECT total_expense) + (SELECT cost_amount))	as total_cost    
-	from `tabSerial No` tsn 
+	IFNULL(COALESCE(exp.plate_no_cost) + COALESCE(exp.insurance_expense) + COALESCE(exp.transfer_cost) + COALESCE(exp.maintenance_cost) + COALESCE(exp.other_expense), 0) as total_expense,
+		((IFNULL((SELECT cost_amount), 0)+(
+	SELECT
+		total_expense))) as net_profit,
+	((
+	SELECT
+		total_expense) + (
+	SELECT
+		cost_amount)) as total_cost
+from
+	`tabSerial No` tsn
 left outer join `tabPurchase Invoice Item` tpii on
 	tpii.item_code = tsn.item_code
 	and tpii.serial_no = tsn.name
 left outer join `tabPurchase Invoice` tpi on
 	tpi.name = tpii.parent
 	and tpi.docstatus = 1
-left outer join `tabSales Invoice Item` tsii on
-	tsii.parent = tsn.delivery_document_no
-	and tsii.item_code = tsn.item_code
-	and tsii.serial_no = tsn.name
-	and tsii.docstatus = 1
-left outer join `tabSales Invoice` tsi on 
-	tsi.name=tsii.parent 
-	left outer join (
-		select 
-            serial_no , 
-            sum(case when expense_account in 
+left outer join (
+	select
+		serial_no ,
+		sum(case when expense_account in 
             (select car_plate_no_cost_account_cf from tabCompany where name = %(company)s) then amount else 0 end) plate_no_cost ,
-            sum(case when expense_account in 
+		sum(case when expense_account in 
             (select car_insurance_expense_account_cf from tabCompany where name = %(company)s) then amount else 0 end) insurance_expense ,
-            sum(case when expense_account in 
+		sum(case when expense_account in 
             (select car_transfer_cost_account_cf from tabCompany where name = %(company)s) then amount else 0 end) transfer_cost ,
-            sum(case when expense_account in 
+		sum(case when expense_account in 
             (select car_maintenance_cost_account_cf from tabCompany where name = %(company)s) then amount else 0 end) maintenance_cost ,
-            sum(case when expense_account in 
-            (select car_other_expense_account_cf from tabCompany where name = %(company)s) then amount else 0 end) other_expense 
-        from 
-        (	
-            select 
-                teed.expense_account , teed.amount , teed.serial_no 
-            from `tabExpense Entry` tee 
-            inner join `tabExpenses Entry Detail` teed on teed.parent = tee.name 
-                and tee.docstatus = 1 -- and tee.company = %(company)s
-                and teed.serial_no is not null
-            union all		
-            select 
-                tjea.account , tje.total_debit , tjea.serial_no_cf 
-            from `tabJournal Entry` tje 
-            inner join `tabJournal Entry Account` tjea on tjea.parent = tje.name
-                and tje.docstatus = 1 -- and tje.company = %(company)s
-                and tjea.serial_no_cf is not null
-            union all
-            select 
-                tpii.expense_account , tpii.amount , tpii.serial_no 
-            from `tabPurchase Invoice` tpi 
-            inner join `tabPurchase Invoice Item` tpii on tpii.parent = tpi.name
-                and tpi.docstatus = 1 -- and tpi.company = %(company)s
-                and tpii.serial_no is not null
+		sum(case when expense_account in 
+            (select car_other_expense_account_cf from tabCompany where name = %(company)s) then amount else 0 end) other_expense
+	from
+		(
+		select
+			teed.expense_account ,
+			teed.amount ,
+			teed.serial_no
+		from
+			`tabExpense Entry` tee
+		inner join `tabExpenses Entry Detail` teed on
+			teed.parent = tee.name
+			and tee.docstatus = 1
+			-- and tee.company = %(company)s
+			and teed.serial_no is not null
+	union all
+		select
+			tjea.account ,
+			tje.total_debit ,
+			tjea.serial_no_cf
+		from
+			`tabJournal Entry` tje
+		inner join `tabJournal Entry Account` tjea on
+			tjea.parent = tje.name
+			and tje.docstatus = 1
+			-- and tje.company = %(company)s
+			and tjea.serial_no_cf is not null
+	union all
+		select
+			tpii.expense_account ,
+			tpii.amount ,
+			tpii.serial_no
+		from
+			`tabPurchase Invoice` tpi
+		inner join `tabPurchase Invoice Item` tpii on
+			tpii.parent = tpi.name
+			and tpi.docstatus = 1
+			-- and tpi.company = %(company)s
+			and tpii.serial_no is not null
         ) t
-        group by serial_no	
-	) exp on exp.serial_no = tsn.name 
+	group by
+		serial_no	
+	) exp on
+	exp.serial_no = tsn.name 
         {conditions}
-    order by tsi.posting_date
     """.format(
             conditions=get_conditions(filters)
         ),
