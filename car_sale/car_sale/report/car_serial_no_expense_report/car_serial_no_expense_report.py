@@ -45,7 +45,7 @@ Total Cost,total_cost,Currency,,110
 def get_conditions(filters=None):
     conditions = []
 
-    conditions += ["tsn.reservation_status in ('Sold Out','Sold Individual') "]
+    conditions += ["1=1"]
 
     if filters.get("item_code"):
         conditions += ["tsn.item_code = %(item_code)s"]
@@ -78,10 +78,8 @@ def get_data(filters=None):
 	tsn.car_color_cf ,
 	tsn.car_model_cf ,
 	tpi.supplier ,
-	tsn.customer,
-	tsn.customer_name,
-	tsn.delivery_date sales_date ,   
-	tsn.individual_car_entry_reference,
+	tpi.name as purchase_invoice,
+	tpi.posting_date as purchase_date,
 	CASE
 		WHEN tsn.individual_car_entry_reference is not null THEN (
 		select
@@ -102,22 +100,13 @@ def get_data(filters=None):
 	exp.transfer_cost ,
 	exp.maintenance_cost ,
 	exp.other_expense ,
-	tpi.name as purchase_invoice,
-	tpi.posting_date as purchase_date,
-	IFNULL(COALESCE(exp.plate_no_cost) + COALESCE(exp.insurance_expense) + COALESCE(exp.transfer_cost) + COALESCE(exp.maintenance_cost) + COALESCE(exp.other_expense), 0) as total_expense,
-		((IFNULL((SELECT cost_amount), 0)+(
-	SELECT
-		total_expense))) as net_profit,
-	((
-	SELECT
-		total_expense) + (
-	SELECT
-		cost_amount)) as total_cost
-from
-	`tabSerial No` tsn
+	coalesce(COALESCE(exp.plate_no_cost) + COALESCE(exp.insurance_expense) + COALESCE(exp.transfer_cost) + COALESCE(exp.maintenance_cost) + COALESCE(exp.other_expense), 0) as total_expense,
+	((SELECT total_expense) + (SELECT cost_amount)) as total_cost 
+from `tabSerial No` tsn
 left outer join `tabPurchase Invoice Item` tpii on
 	tpii.item_code = tsn.item_code
 	and tpii.serial_no = tsn.name
+    and tpii.docstatus = 1
 left outer join `tabPurchase Invoice` tpi on
 	tpi.name = tpii.parent
 	and tpi.docstatus = 1
@@ -145,7 +134,6 @@ left outer join (
 		inner join `tabExpenses Entry Detail` teed on
 			teed.parent = tee.name
 			and tee.docstatus = 1
-			-- and tee.company = %(company)s
 			and teed.serial_no is not null
 	union all
 		select
@@ -157,7 +145,6 @@ left outer join (
 		inner join `tabJournal Entry Account` tjea on
 			tjea.parent = tje.name
 			and tje.docstatus = 1
-			-- and tje.company = %(company)s
 			and tjea.serial_no_cf is not null
 	union all
 		select
@@ -169,19 +156,18 @@ left outer join (
 		inner join `tabPurchase Invoice Item` tpii on
 			tpii.parent = tpi.name
 			and tpi.docstatus = 1
-			-- and tpi.company = %(company)s
 			and tpii.serial_no is not null
         ) t
 	group by
 		serial_no	
 	) exp on
 	exp.serial_no = tsn.name 
-        {conditions}
+          {conditions} 
     """.format(
             conditions=get_conditions(filters)
         ),
         filters,
-        as_dict=True,
+        as_dict=True
     )
 
     # for d in data:

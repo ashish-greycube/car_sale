@@ -128,6 +128,7 @@ def get_data(filters=None):
 left outer join `tabPurchase Invoice Item` tpii on
 	tpii.item_code = tsn.item_code
 	and tpii.serial_no = tsn.name
+    and tpii.docstatus = 1
 left outer join `tabPurchase Invoice` tpi on
 	tpi.name = tpii.parent
 	and tpi.docstatus = 1
