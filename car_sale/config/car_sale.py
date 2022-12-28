@@ -107,6 +107,12 @@ def get_data():
                 },
                 {
                     "type": "report",
+                    "name": "Car Serial No Expense Report",
+                    "is_query_report": True,
+                    "doctype": "Serial No",
+                },                
+                {
+                    "type": "report",
                     "name": "Sales Inquiry Analysis",
                     "is_query_report": True,
                     "doctype": "Lead",

@@ -101,12 +101,12 @@ class IndividualCarStockEntry(Document):
 				})		
 
 		customer= self.customer_seller if self.commission_paid_by =='Seller' else self.customer_buyer
-		user_remark=_('Car Stock Entry {0} \n Commission Paid by {1} \n Commission Paid by {2} \n Receive Rate {3} \n Sale Rate {4} \n Expense {5}'
-		.format(self.name,self.commission_paid_by,customer,self.receive_rate,self.sale_rate,total_expense))
+		# user_remark=_('Car Stock Entry {0} \n Commission Paid by {1} \n Commission Paid by {2} \n Receive Rate {3} \n Sale Rate {4} \n Expense {5}'
+		# .format(self.name,self.commission_paid_by,customer,self.receive_rate,self.sale_rate,total_expense))
 		
 		journal_entry = frappe.new_doc('Journal Entry')
 		journal_entry.voucher_type = 'Journal Entry'
-		journal_entry.user_remark =user_remark
+		journal_entry.user_remark =None
 		journal_entry.company = self.company
 		journal_entry.posting_date = getdate(nowdate())
 		journal_entry.set("accounts", accounts)
@@ -147,12 +147,12 @@ class IndividualCarStockEntry(Document):
 			'party':self.customer_buyer
 		})
 		customer= self.customer_seller if self.commission_paid_by =='Seller' else self.customer_buyer
-		user_remark=_('Car Stock Entry {0} \n Commission Paid by {1} \n Commission Paid by {2} \n Receive Rate {3} \n Sale Rate {4}'
-		.format(self.name,self.commission_paid_by,customer,self.receive_rate,self.sale_rate))
+		# user_remark=_('Car Stock Entry {0} \n Commission Paid by {1} \n Commission Paid by {2} \n Receive Rate {3} \n Sale Rate {4}'
+		# .format(self.name,self.commission_paid_by,customer,self.receive_rate,self.sale_rate))
 		
 		journal_entry = frappe.new_doc('Journal Entry')
 		journal_entry.voucher_type = 'Journal Entry'
-		journal_entry.user_remark =user_remark
+		journal_entry.user_remark = None
 		journal_entry.company = self.company
 		journal_entry.posting_date = getdate(nowdate())
 		journal_entry.set("accounts", accounts)
