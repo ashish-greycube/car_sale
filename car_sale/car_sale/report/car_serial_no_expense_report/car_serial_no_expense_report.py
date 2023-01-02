@@ -30,6 +30,7 @@ Model,car_model_cf,,,70
 Supplier,supplier,Link,Supplier,110,
 Purchase Reference,purchase_invoice,Link,Purchase Invoice,100,
 Purchase Date,purchase_date,Date,,100
+Receive Rate,receive_rate,Currency,,120
 Purchase Rate,cost_amount,Currency,,120
 Plate No Cost,plate_no_cost,Currency,,100
 Insurance Expense,insurance_expense,Currency,,100
@@ -83,7 +84,20 @@ def get_data(filters=None):
 	CASE
 		WHEN tsn.individual_car_entry_reference is not null THEN (
 		select
-			icse.receive_rate + sum(iced.amount)
+			icse.receive_rate
+		from
+			`tabIndividual Car Stock Entry` icse
+		left outer join `tabIndividual Car Expense Detail` iced on
+			icse.name = iced.parent
+		where
+			icse.name = tsn.individual_car_entry_reference
+		group by
+			icse.name
+)	END as receive_rate,	
+	CASE
+		WHEN tsn.individual_car_entry_reference is not null THEN (
+		select
+			icse.receive_rate + COALESCE(sum(iced.amount),0)
 		from
 			`tabIndividual Car Stock Entry` icse
 		left outer join `tabIndividual Car Expense Detail` iced on
@@ -100,8 +114,8 @@ def get_data(filters=None):
 	exp.transfer_cost ,
 	exp.maintenance_cost ,
 	exp.other_expense ,
-	coalesce(COALESCE(exp.plate_no_cost) + COALESCE(exp.insurance_expense) + COALESCE(exp.transfer_cost) + COALESCE(exp.maintenance_cost) + COALESCE(exp.other_expense), 0) as total_expense,
-	((SELECT total_expense) + (SELECT cost_amount)) as total_cost 
+	coalesce(COALESCE(exp.plate_no_cost,0) + COALESCE(exp.insurance_expense,0) + COALESCE(exp.transfer_cost,0) + COALESCE(exp.maintenance_cost,0) + COALESCE(exp.other_expense), 0) as total_expense,
+	(COALESCE((SELECT total_expense),0) + COALESCE((SELECT cost_amount),0)) as total_cost 
 from `tabSerial No` tsn
 left outer join `tabPurchase Invoice Item` tpii on
 	tpii.item_code = tsn.item_code

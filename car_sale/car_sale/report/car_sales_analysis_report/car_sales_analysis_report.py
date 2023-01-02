@@ -104,7 +104,7 @@ def get_data(filters=None):
 	CASE
 		WHEN tsn.individual_car_entry_reference is not null THEN (
 		select
-			icse.receive_rate + sum(iced.amount)
+			icse.receive_rate + COALESCE(sum(iced.amount),0)
 		from
 			`tabIndividual Car Stock Entry` icse
 		left outer join `tabIndividual Car Expense Detail` iced on
@@ -121,9 +121,9 @@ def get_data(filters=None):
 	exp.transfer_cost ,
 	exp.maintenance_cost ,
 	exp.other_expense ,
-	IFNULL(COALESCE(exp.plate_no_cost) + COALESCE(exp.insurance_expense) +	COALESCE(exp.transfer_cost) +COALESCE(exp.maintenance_cost) + COALESCE(exp.other_expense),0) as total_expense,
-		((SELECT sales_amount)-(IFNULL((SELECT cost_amount),0)+(SELECT total_expense))) as net_profit,
-		((SELECT net_profit)/(SELECT sales_amount))*100 as net_percentage    
+	IFNULL(COALESCE(exp.plate_no_cost,0) + COALESCE(exp.insurance_expense,0) +	COALESCE(exp.transfer_cost,0) +COALESCE(exp.maintenance_cost,0) + COALESCE(exp.other_expense,0),0) as total_expense,
+		(COALESCE((SELECT sales_amount),0)-(IFNULL((SELECT cost_amount),0)+COALESCE((SELECT total_expense),0))) as net_profit,
+		(COALESCE((SELECT net_profit),0)/(SELECT sales_amount))*100 as net_percentage    
 	from `tabSerial No` tsn 
 left outer join `tabPurchase Invoice Item` tpii on
 	tpii.item_code = tsn.item_code
