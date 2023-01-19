@@ -72,7 +72,7 @@ doctype_js = {
 # ------------
 
 # before_install = "car_sale.install.before_install"
-# after_install = "car_sale.install.after_install"
+after_install = "car_sale.hook_methods.after_migrate"
 after_migrate = "car_sale.hook_methods.after_migrate"
 # Desk Notifications
 # ------------------

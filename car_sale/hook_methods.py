@@ -159,12 +159,17 @@ def after_migrate():
         },
     ]
 
-    for d in custom_fields:
-        if not frappe.get_meta(d["dt"]).has_field(d["fieldname"]):
-            frappe.get_doc(d).insert()
+    try:
+        for d in custom_fields:
+            if not frappe.get_meta(d["dt"]).has_field(d["fieldname"]):
+                frappe.get_doc(d).insert()
 
-    add_car_sales_report_custom_fields()
+        add_car_sales_report_custom_fields()
 
+    except Exception as e:
+        print("Failed to create custom fields for car_sale")
+        frappe.log_error(e, title="Car Sale Custom Field Creation Failed")
+        raise e
 
 def add_car_sales_report_custom_fields():
     print("Creating custom fields for Car Sales Analysis Report")
