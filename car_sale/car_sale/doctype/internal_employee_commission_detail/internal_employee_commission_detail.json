@@ -1,0 +1,91 @@
+{
+ "creation": "2023-06-01 09:47:59.156753",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "sales_invoice",
+  "item_name",
+  "sales_person",
+  "serial_no",
+  "customer_name",
+  "sales_amount",
+  "cogs",
+  "other_cost",
+  "profit",
+  "profit_for_party"
+ ],
+ "fields": [
+  {
+   "columns": 1,
+   "fieldname": "sales_invoice",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Sales Invoice"
+  },
+  {
+   "columns": 2,
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Item Name"
+  },
+  {
+   "columns": 1,
+   "fieldname": "serial_no",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Serial No"
+  },
+  {
+   "columns": 1,
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Customer Name"
+  },
+  {
+   "fieldname": "sales_amount",
+   "fieldtype": "Currency",
+   "label": "Sales Amount"
+  },
+  {
+   "fieldname": "cogs",
+   "fieldtype": "Currency",
+   "label": "COGS"
+  },
+  {
+   "fieldname": "other_cost",
+   "fieldtype": "Currency",
+   "label": "Other Cost"
+  },
+  {
+   "fieldname": "profit",
+   "fieldtype": "Currency",
+   "label": "Profit"
+  },
+  {
+   "columns": 1,
+   "fieldname": "profit_for_party",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Profit For Party"
+  },
+  {
+   "fieldname": "sales_person",
+   "fieldtype": "Data",
+   "label": "Sales Person"
+  }
+ ],
+ "istable": 1,
+ "modified": "2023-06-03 09:16:57.721360",
+ "modified_by": "Administrator",
+ "module": "Car Sale",
+ "name": "Internal Employee Commission Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

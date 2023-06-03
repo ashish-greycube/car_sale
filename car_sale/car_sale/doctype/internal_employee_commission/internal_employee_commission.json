@@ -1,0 +1,98 @@
+{
+ "creation": "2023-06-01 09:23:10.175160",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "commission_filter",
+  "from_date",
+  "calculate_for",
+  "column_break_4",
+  "to_date",
+  "party",
+  "fetch",
+  "section_break_8",
+  "commission_details",
+  "section_break_total",
+  "total_commission"
+ ],
+ "fields": [
+  {
+   "fieldname": "commission_filter",
+   "fieldtype": "Section Break",
+   "label": "Comission Calculation"
+  },
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From Date"
+  },
+  {
+   "fieldname": "calculate_for",
+   "fieldtype": "Link",
+   "label": "Calculate For",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Today",
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "To Date"
+  },
+  {
+   "fieldname": "party",
+   "fieldtype": "Dynamic Link",
+   "label": "Party",
+   "options": "calculate_for"
+  },
+  {
+   "fieldname": "fetch",
+   "fieldtype": "Button",
+   "label": "Fetch"
+  },
+  {
+   "fieldname": "section_break_8",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "commission_details",
+   "fieldtype": "Table",
+   "label": "Internal Employee Commission Detail",
+   "options": "Internal Employee Commission Detail"
+  },
+  {
+   "fieldname": "section_break_total",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "total_commission",
+   "fieldtype": "Float",
+   "label": "Total Commission"
+  }
+ ],
+ "modified": "2023-06-01 14:34:11.031763",
+ "modified_by": "Administrator",
+ "module": "Car Sale",
+ "name": "Internal Employee Commission",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}
