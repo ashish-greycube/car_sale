@@ -13,7 +13,8 @@
   "cogs",
   "other_cost",
   "profit",
-  "profit_for_party"
+  "profit_for_party",
+  "si_items_hex_name"
  ],
  "fields": [
   {
@@ -24,7 +25,7 @@
    "label": "Sales Invoice"
   },
   {
-   "columns": 2,
+   "columns": 1,
    "fieldname": "item_name",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -38,28 +39,32 @@
    "label": "Serial No"
   },
   {
-   "columns": 1,
+   "columns": 2,
    "fieldname": "customer_name",
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Customer Name"
   },
   {
+   "columns": 1,
    "fieldname": "sales_amount",
    "fieldtype": "Currency",
    "label": "Sales Amount"
   },
   {
+   "columns": 1,
    "fieldname": "cogs",
    "fieldtype": "Currency",
    "label": "COGS"
   },
   {
+   "columns": 1,
    "fieldname": "other_cost",
    "fieldtype": "Currency",
    "label": "Other Cost"
   },
   {
+   "columns": 1,
    "fieldname": "profit",
    "fieldtype": "Currency",
    "label": "Profit"
@@ -75,10 +80,16 @@
    "fieldname": "sales_person",
    "fieldtype": "Data",
    "label": "Sales Person"
+  },
+  {
+   "fieldname": "si_items_hex_name",
+   "fieldtype": "Data",
+   "label": "Sales invoice item name",
+   "read_only": 1
   }
  ],
  "istable": 1,
- "modified": "2023-06-03 09:16:57.721360",
+ "modified": "2023-06-13 08:31:28.625122",
  "modified_by": "Administrator",
  "module": "Car Sale",
  "name": "Internal Employee Commission Detail",

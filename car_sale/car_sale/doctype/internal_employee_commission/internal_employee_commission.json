@@ -1,4 +1,5 @@
 {
+ "autoname": "IEC.#####",
  "creation": "2023-06-01 09:23:10.175160",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -14,7 +15,9 @@
   "section_break_8",
   "commission_details",
   "section_break_total",
-  "total_commission"
+  "total_commission",
+  "company",
+  "amended_from"
  ],
  "fields": [
   {
@@ -72,9 +75,26 @@
    "fieldname": "total_commission",
    "fieldtype": "Float",
    "label": "Total Commission"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Internal Employee Commission",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "default": "PLATINUM CAR SA",
+   "fieldname": "company",
+   "fieldtype": "Data",
+   "label": "Company",
+   "read_only": 1
   }
  ],
- "modified": "2023-06-01 14:34:11.031763",
+ "is_submittable": 1,
+ "modified": "2023-06-10 12:35:15.881342",
  "modified_by": "Administrator",
  "module": "Car Sale",
  "name": "Internal Employee Commission",
