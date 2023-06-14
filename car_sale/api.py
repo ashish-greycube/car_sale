@@ -779,9 +779,9 @@ def calculate_sales_person_total_commission(self,method):
 					total_qty_of_serialized_item=total_qty_of_serialized_item+item.qty
 					sales_person_total_commission+=item.qty*commission_per_car
 			self.sales_person_total_commission=sales_person_total_commission
-			if self.sales_person_extra_comission_cf>0:
+			if self.sales_person_extra_comission_cf and self.sales_person_extra_comission_cf>0:
 				self.sales_person_total_commission=self.sales_person_total_commission+self.sales_person_extra_comission_cf
-			if self.sales_person_total_commission>0 and total_qty_of_serialized_item>0:
+			if self.sales_person_total_commission and self.sales_person_total_commission>0 and total_qty_of_serialized_item>0:
 				self.sales_person_total_commission_per_car_cf=self.sales_person_total_commission/total_qty_of_serialized_item
 
 @frappe.whitelist()
