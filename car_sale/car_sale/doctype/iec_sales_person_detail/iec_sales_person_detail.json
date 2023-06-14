@@ -9,10 +9,6 @@
   "item_name",
   "serial_no",
   "customer_name",
-  "sales_amount",
-  "cogs",
-  "other_cost",
-  "profit",
   "profit_for_party",
   "si_items_hex_name"
  ],
@@ -41,39 +37,11 @@
    "read_only": 1
   },
   {
-   "columns": 1,
+   "columns": 2,
    "fieldname": "customer_name",
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Customer Name",
-   "read_only": 1
-  },
-  {
-   "columns": 1,
-   "fieldname": "sales_amount",
-   "fieldtype": "Currency",
-   "label": "Sales Amount",
-   "read_only": 1
-  },
-  {
-   "columns": 1,
-   "fieldname": "cogs",
-   "fieldtype": "Currency",
-   "label": "COGS",
-   "read_only": 1
-  },
-  {
-   "columns": 1,
-   "fieldname": "other_cost",
-   "fieldtype": "Currency",
-   "label": "Other Cost",
-   "read_only": 1
-  },
-  {
-   "columns": 1,
-   "fieldname": "profit",
-   "fieldtype": "Currency",
-   "label": "Profit",
    "read_only": 1
   },
   {
@@ -87,11 +55,12 @@
   {
    "fieldname": "si_items_hex_name",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Sales invoice item name",
    "read_only": 1
   },
   {
-   "columns": 1,
+   "columns": 2,
    "fieldname": "item_code",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -101,10 +70,10 @@
   }
  ],
  "istable": 1,
- "modified": "2023-06-14 11:48:59.216857",
+ "modified": "2023-06-14 14:26:58.203802",
  "modified_by": "Administrator",
  "module": "Car Sale",
- "name": "Internal Employee Commission Detail",
+ "name": "IEC Sales Person Detail",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,

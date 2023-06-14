@@ -13,7 +13,8 @@
   "party",
   "fetch",
   "section_break_8",
-  "commission_details",
+  "iec_sales_person_commission_details",
+  "iec_sales_partner_commission_details",
   "section_break_total",
   "total_commission",
   "company",
@@ -62,12 +63,6 @@
    "fieldtype": "Section Break"
   },
   {
-   "fieldname": "commission_details",
-   "fieldtype": "Table",
-   "label": "Internal Employee Commission Detail",
-   "options": "Internal Employee Commission Detail"
-  },
-  {
    "fieldname": "section_break_total",
    "fieldtype": "Section Break"
   },
@@ -92,10 +87,22 @@
    "hidden": 1,
    "label": "Company",
    "read_only": 1
+  },
+  {
+   "fieldname": "iec_sales_partner_commission_details",
+   "fieldtype": "Table",
+   "label": "Commission Detail",
+   "options": "IEC Sales Partner Detail"
+  },
+  {
+   "fieldname": "iec_sales_person_commission_details",
+   "fieldtype": "Table",
+   "label": "Commission Detail",
+   "options": "IEC Sales Person Detail"
   }
  ],
  "is_submittable": 1,
- "modified": "2023-06-14 08:41:27.510513",
+ "modified": "2023-06-14 14:17:33.896942",
  "modified_by": "Administrator",
  "module": "Car Sale",
  "name": "Internal Employee Commission",

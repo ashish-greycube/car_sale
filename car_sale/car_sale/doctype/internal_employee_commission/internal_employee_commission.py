@@ -15,7 +15,7 @@ class InternalEmployeeCommission(Document):
 		total_commission = 0
 		if(self.calculate_for =="Sales Person"):
 			values = {'from_date':self.from_date,'to_date':self.to_date,'sales_person': self.party}
-			self.clear_table('commission_details')
+			self.clear_table('iec_sales_person_commission_details')
 			self.total_commission = total_commission
 
 			query = """
@@ -38,7 +38,7 @@ class InternalEmployeeCommission(Document):
 				self.company=result[0].company
 				for row in result:
 					profit_for_party_sales_person = row.sales_person_total_commission_per_car_cf
-					self.append('commission_details', {
+					self.append('iec_sales_person_commission_details', {
 						'sales_invoice': row.name,
 						'item_code': row.item_code,
 						'item_name': row.item_name,
@@ -55,7 +55,7 @@ class InternalEmployeeCommission(Document):
 
 		elif(self.calculate_for == "Sales Partner"):
 			values = {'from_date':self.from_date,'to_date':self.to_date,'sales_partner': self.party}
-			self.clear_table('commission_details')
+			self.clear_table('iec_sales_partner_commission_details')
 			self.total_commission = total_commission
 
 			query = """
@@ -83,7 +83,7 @@ class InternalEmployeeCommission(Document):
 				for row in result:
 						profit_computed = (row.rate or 0) - (row.purchase_rate or 0) - (row.other_cost or 0)
 						profit_for_party_sales_partner = ((row.commission_rate)*(profit_computed))/100
-						self.append('commission_details', {
+						self.append('iec_sales_partner_commission_details', {
 							'sales_invoice': row.name,
 							'item_code': row.item_code,
 							'item_name': row.item_name,
@@ -104,8 +104,8 @@ class InternalEmployeeCommission(Document):
 		else:
 			frappe.msgprint("Select sales person / sales partner first")
 	
-	def clear_table(self, commission_details):
-		self.set(commission_details, [])
+	def clear_table(self, table_name):
+		self.set(table_name, [])
 
 	def on_submit(self):
 		self.create_journal_entry()
