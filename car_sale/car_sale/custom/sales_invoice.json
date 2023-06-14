@@ -1719,7 +1719,7 @@
    "parenttype": null,
    "property": "hidden",
    "property_type": "Check",
-   "value": "1"
+   "value": "0"
   },
   {
    "_assign": null,

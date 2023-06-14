@@ -18,7 +18,37 @@ def get_data():
                 },      
                                                      
             ],
-        },        
+        },    
+        {
+            "label": _("Sales - Comission"),
+            "items": [
+                {
+                    "type": "doctype",
+                    "name": "Internal Employee Commission",
+                },   
+                {
+                    "type": "doctype",
+                    "name": "Sales Invoice",
+                }, 
+                {
+                    "type": "doctype",
+                    "name": "Sales Person",
+                },                                 
+                {
+                    "type": "doctype",
+                    "name": "Sales Partner",
+                }, 
+                {
+                    "type": "doctype",
+                    "name": "Journal Entry",
+                },                 
+                {
+                    "type": "doctype",
+                    "name": "Company",
+                },                      
+                                                     
+            ],
+        },              
         {
             "label": _("Setup"),
             "items": [

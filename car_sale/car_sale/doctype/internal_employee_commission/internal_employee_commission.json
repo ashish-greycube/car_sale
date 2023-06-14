@@ -73,8 +73,9 @@
   },
   {
    "fieldname": "total_commission",
-   "fieldtype": "Float",
-   "label": "Total Commission"
+   "fieldtype": "Currency",
+   "label": "Total Commission",
+   "read_only": 1
   },
   {
    "fieldname": "amended_from",
@@ -86,15 +87,15 @@
    "read_only": 1
   },
   {
-   "default": "PLATINUM CAR SA",
    "fieldname": "company",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Company",
    "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2023-06-10 12:35:15.881342",
+ "modified": "2023-06-14 08:41:27.510513",
  "modified_by": "Administrator",
  "module": "Car Sale",
  "name": "Internal Employee Commission",

@@ -2,67 +2,72 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Internal Employee Commission', {
-	setup: function(frm) {
-		frm.set_query("calculate_for", function() {
-			return{
+	setup: function (frm) {
+		frm.set_query("calculate_for", function () {
+			return {
 				"filters": {
 					"name": ["in", ["Sales Person", "Sales Partner"]],
 				}
 			}
 		});
 	},
-
-
-	onload: function(frm){
-
-		let fields_to_show_in_listview = ["sales_amount","cogs","other_cost","profit"];
-		fields_to_show_in_listview.forEach(function(field) {
-
-        	frappe.meta.get_docfield("Internal Employee Commission Detail", field, cur_frm.doc.name).in_list_view = 0;	
-		})
+	calculate_for: function (frm) {
+		commission_details_UI(frm)
 	},
-
-
-	fetch: function(frm){
-
-		// let fields_to_toggle = ["sales_amount","cogs","other_cost","profit"];
-
-		// if (frm.doc.calculate_for == "Sales Person"){
-
-		// 	fields_to_toggle.forEach(function(field) {
-		// 		frm.fields_dict['commission_details'].grid.toggle_display(field,false);
-		// 	})			
-		// } 
-		// else {
-		// 	fields_to_toggle.forEach(function(field) {
-		// 		frappe.meta.get_docfield("Internal Employee Commission Detail", field, cur_frm.doc.name).in_list_view = 1;
-		// 		frm.fields_dict['commission_details'].grid.toggle_display(field,true);
-
-		// 	})	
-		// }
-
-
-		var fields_to_toggle = ["sales_amount", "cogs", "other_cost", "profit"];
-        var show_fields = (frm.doc.calculate_for !== "Sales Person");
-
-        fields_to_toggle.forEach(function(field) {
-            frm.fields_dict.commission_details.grid.toggle_display(field, show_fields);
-            frappe.meta.get_docfield("Internal Employee Commission Detail", field).in_list_view = show_fields;
-        });
-
-
-		
-
-
-
-		let fields_read_only = ["sales_invoice", "item_name","serial_no","customer_name","sales_amount","cogs","other_cost","profit","profit_for_party"];
-                fields_read_only.forEach(function(field) {
-                        frappe.meta.get_docfield("Internal Employee Commission Detail", field, frm.doc.name).read_only = 1;
-                });
+	onload: function (frm) {
+		commission_details_UI(frm)
+	},
+	fetch: function (frm) {
+		// all 4 fileds are required
+		if (frm.doc.from_date == undefined || frm.doc.to_date == undefined || frm.doc.calculate_for == undefined || frm.doc.party == undefined) {
+			frappe.msgprint(__("Please ensure From Date, Calculate For, To Date and Party has values."));
+			return;
+		}
 		frm.call({
+			method: "get_commission_details",
 			doc: frm.doc,
-			method: "get_commission_details",	
-		})
-	} 
-
+			callback: function (r) {
+				frm.refresh_field("commission_details");
+				frm.refresh_field("total_commission");
+				commission_details_UI(frm)
+			}
+		});
+	}
 });
+
+function commission_details_UI(frm) {
+	// hide-unhide + show in list view + set column width
+	let sales_partner_fields = ["sales_amount", "cogs", "other_cost", "profit"];
+	let sales_person_fields = ["item_code", "customer_name", "sales_invoice", "profit_for_party"];
+	if (frm.doc.calculate_for == "Sales Partner") {
+		sales_person_fields.forEach(function (field) {
+			// frappe.meta.get_docfield("Internal Employee Commission Detail", field, cur_frm.doc.name).columns = 1;
+			// cur_frm.set_df_property(field, 'columns', 1, frm.doc.name, 'commission_details')
+		})
+		sales_partner_fields.forEach(function (field) {
+			frappe.meta.get_docfield("Internal Employee Commission Detail", field, cur_frm.doc.name).hidden = 0;
+			cur_frm.set_df_property(field, 'hidden', 0, cur_frm.doc.name, 'commission_details')
+			frappe.meta.get_docfield("Internal Employee Commission Detail", field, cur_frm.doc.name).in_list_view = 1;
+			cur_frm.set_df_property(field, 'in_list_view', 1, cur_frm.doc.name, 'commission_details')
+			// frappe.meta.get_docfield("Internal Employee Commission Detail", field, cur_frm.doc.name).columns = 1;
+			// cur_frm.set_df_property(field, 'columns', 1, cur_frm.doc.name, 'commission_details')
+		})
+
+		cur_frm.refresh_field('commission_details')
+	} else if (frm.doc.calculate_for == "Sales Person") {
+		sales_partner_fields.forEach(function (field) {
+			frappe.meta.get_docfield("Internal Employee Commission Detail", field, cur_frm.doc.name).hidden = 1;
+			cur_frm.set_df_property(field, 'hidden', 1, frm.doc.name, 'commission_details')
+			frappe.meta.get_docfield("Internal Employee Commission Detail", field, cur_frm.doc.name).in_list_view = 0;
+			cur_frm.set_df_property(field, 'in_list_view', 0, frm.doc.name, 'commission_details')
+			// frappe.meta.get_docfield("Internal Employee Commission Detail", field, cur_frm.doc.name).columns = 1;
+			// cur_frm.set_df_property(field, 'columns', 1, frm.doc.name, 'commission_details')
+			cur_frm.set_df_property('sales_amount', 'in_list_view', 1, cur_frm.doc.name, 'commission_details')
+		})
+		sales_person_fields.forEach(function (field) {
+			// frappe.meta.get_docfield("Internal Employee Commission Detail", field, cur_frm.doc.name).columns = 2;
+			// cur_frm.set_df_property(field, 'columns', 2, cur_frm.doc.name, 'commission_details')
+		})
+		cur_frm.refresh_field('commission_details')
+	}
+}

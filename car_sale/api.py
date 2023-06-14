@@ -768,13 +768,21 @@ def calculate_sales_person_total_commission(self,method):
 		if self.sales_person:
 			commission_per_car=self.commission_per_car
 			sales_person_total_commission=0
+			total_qty_of_serialized_item=0
 			for item in self.items:
 				is_stock_item=frappe.db.get_value("Item", item.item_code, "is_stock_item")
 				is_sales_item=frappe.db.get_value("Item", item.item_code, "is_sales_item")
 				has_serial_no=frappe.db.get_value("Item", item.item_code, "has_serial_no")
 				if is_stock_item==1 and is_sales_item==1 and has_serial_no==1:
+					if item.qty>1:
+						frappe.throw(_("{0} is a serialized item and hence it should have 1 qty per row").format(item.item_code))
+					total_qty_of_serialized_item=total_qty_of_serialized_item+item.qty
 					sales_person_total_commission+=item.qty*commission_per_car
 			self.sales_person_total_commission=sales_person_total_commission
+			if self.sales_person_extra_comission_cf>0:
+				self.sales_person_total_commission=self.sales_person_total_commission+self.sales_person_extra_comission_cf
+			if self.sales_person_total_commission>0 and total_qty_of_serialized_item>0:
+				self.sales_person_total_commission_per_car_cf=self.sales_person_total_commission/total_qty_of_serialized_item
 
 @frappe.whitelist()
 def unreserve_serial_no_from_so_on_cancel(self,method):

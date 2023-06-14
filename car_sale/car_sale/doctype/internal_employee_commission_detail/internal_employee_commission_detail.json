@@ -5,8 +5,8 @@
  "engine": "InnoDB",
  "field_order": [
   "sales_invoice",
+  "item_code",
   "item_name",
-  "sales_person",
   "serial_no",
   "customer_name",
   "sales_amount",
@@ -22,74 +22,86 @@
    "fieldname": "sales_invoice",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Sales Invoice"
+   "label": "Sales Invoice",
+   "read_only": 1
   },
   {
    "columns": 1,
    "fieldname": "item_name",
    "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Item Name"
+   "label": "Item Name",
+   "read_only": 1
   },
   {
    "columns": 1,
    "fieldname": "serial_no",
-   "fieldtype": "Small Text",
+   "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Serial No"
+   "label": "Serial No",
+   "read_only": 1
   },
   {
-   "columns": 2,
+   "columns": 1,
    "fieldname": "customer_name",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Customer Name"
+   "label": "Customer Name",
+   "read_only": 1
   },
   {
    "columns": 1,
    "fieldname": "sales_amount",
    "fieldtype": "Currency",
-   "label": "Sales Amount"
+   "label": "Sales Amount",
+   "read_only": 1
   },
   {
    "columns": 1,
    "fieldname": "cogs",
    "fieldtype": "Currency",
-   "label": "COGS"
+   "label": "COGS",
+   "read_only": 1
   },
   {
    "columns": 1,
    "fieldname": "other_cost",
    "fieldtype": "Currency",
-   "label": "Other Cost"
+   "label": "Other Cost",
+   "read_only": 1
   },
   {
    "columns": 1,
    "fieldname": "profit",
    "fieldtype": "Currency",
-   "label": "Profit"
+   "label": "Profit",
+   "read_only": 1
   },
   {
-   "columns": 1,
+   "columns": 2,
    "fieldname": "profit_for_party",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Profit For Party"
-  },
-  {
-   "fieldname": "sales_person",
-   "fieldtype": "Data",
-   "label": "Sales Person"
+   "label": "Profit For Party",
+   "read_only": 1
   },
   {
    "fieldname": "si_items_hex_name",
    "fieldtype": "Data",
    "label": "Sales invoice item name",
    "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item Code",
+   "options": "Item",
+   "read_only": 1
   }
  ],
  "istable": 1,
- "modified": "2023-06-13 08:31:28.625122",
+ "modified": "2023-06-14 11:48:59.216857",
  "modified_by": "Administrator",
  "module": "Car Sale",
  "name": "Internal Employee Commission Detail",
