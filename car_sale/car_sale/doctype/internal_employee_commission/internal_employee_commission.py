@@ -28,7 +28,7 @@ class InternalEmployeeCommission(Document):
 				AND si.docstatus=1
 				AND sii.name NOT IN(SELECT iecd.si_items_hex_name
         		FROM `tabInternal Employee Commission` iec
-        		INNER JOIN `tabInternal Employee Commission Detail` iecd ON iec.name = iecd.parent
+        		INNER JOIN `tabIEC Sales Person Detail` iecd ON iec.name = iecd.parent
         		WHERE iec.party = %(sales_person)s
           		AND iec.docstatus=1)
 			"""
@@ -70,7 +70,7 @@ class InternalEmployeeCommission(Document):
 				AND si.docstatus=1
 				AND sii.name NOT IN(SELECT iecd.si_items_hex_name
         		FROM `tabInternal Employee Commission` iec
-        		INNER JOIN `tabInternal Employee Commission Detail` iecd ON iec.name = iecd.parent
+        		INNER JOIN `tabIEC Sales Partner Detail` iecd ON iec.name = iecd.parent
         		WHERE iec.party = %(sales_partner)s
           		AND iec.docstatus=1)
 			  	group by sii.serial_no
