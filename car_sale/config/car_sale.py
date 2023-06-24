@@ -45,7 +45,13 @@ def get_data():
                 {
                     "type": "doctype",
                     "name": "Company",
-                },                      
+                },
+                {
+                    "type": "report",
+                    "name": "Sales Commission Calculation Report",
+                    "is_query_report": True,
+                    "doctype": "Internal Employee Commission",
+                },                        
                                                      
             ],
         },              
