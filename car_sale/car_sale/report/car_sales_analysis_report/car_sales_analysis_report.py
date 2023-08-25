@@ -84,6 +84,7 @@ def get_data(filters=None):
             select name 
             from `tabSales Invoice` x
             where x.individual_car_entry_reference = tsn.individual_car_entry_reference
+            and x.docstatus=1
         )
         else tsn.delivery_document_no 
         end sales_invoice , 
@@ -184,6 +185,7 @@ left outer join `tabSales Invoice` tsi on
         ),
         filters,
         as_dict=True,
+        debug=1
     )
 
     # for d in data:
