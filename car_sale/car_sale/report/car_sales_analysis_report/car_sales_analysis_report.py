@@ -39,6 +39,7 @@ Insurance Expense,insurance_expense,Currency,,110
 Transfer Cost,transfer_cost,Currency,,110
 Maintenance Cost,maintenance_cost,Currency,,110
 Other Expense,other_expense,Currency,,110
+Partner Profit Expense,profit_for_party,Currency,,110
 Total Expense,total_expense,Currency,,110
 Net Profit,net_profit,Currency,,120
 Percentage,net_percentage,Percent,,100,1
@@ -122,7 +123,8 @@ def get_data(filters=None):
 	exp.transfer_cost ,
 	exp.maintenance_cost ,
 	exp.other_expense ,
-	IFNULL(COALESCE(exp.plate_no_cost,0) + COALESCE(exp.insurance_expense,0) +	COALESCE(exp.transfer_cost,0) +COALESCE(exp.maintenance_cost,0) + COALESCE(exp.other_expense,0),0) as total_expense,
+    ispd.profit_for_party,
+	IFNULL(COALESCE(exp.plate_no_cost,0) + COALESCE(exp.insurance_expense,0) +	COALESCE(exp.transfer_cost,0) +COALESCE(exp.maintenance_cost,0) + COALESCE(ispd.profit_for_party,0) + COALESCE(exp.other_expense,0),0) as total_expense,
 		(COALESCE((SELECT sales_amount),0)-(IFNULL((SELECT cost_amount),0)+COALESCE((SELECT total_expense),0))) as net_profit,
 		(COALESCE((SELECT net_profit),0)/(SELECT sales_amount))*100 as net_percentage    
 	from `tabSerial No` tsn 
@@ -178,6 +180,13 @@ left outer join `tabSales Invoice` tsi on
         ) t
         group by serial_no	
 	) exp on exp.serial_no = tsn.name 
+    left outer join `tabIEC Sales Person Detail`  ispd on
+    ispd.item_code = tsn.item_code
+    and ispd.serial_no = tsn.name
+    and ispd.docstatus=1
+    left outer join  `tabInternal Employee Commission` iec on 
+    iec.name=ispd.parent
+    and iec.company= %(company)s
         {conditions}
     order by tsi.posting_date
     """.format(
