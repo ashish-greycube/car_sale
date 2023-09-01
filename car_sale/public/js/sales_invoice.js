@@ -1,6 +1,21 @@
 {% include "car_sale/public/js/car_search.js" %}
 
+// {% include 'erpnext/selling/sales_common.js' %};
+
+// frappe.provide("erpnext.accounts");
+// erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.extend({
+// 	car_sales_partner_cf: function() {
+//         console.log('33')
+// 		this.apply_pricing_rule();
+// 	}
+// })
+// $.extend(cur_frm.cscript, new erpnext.accounts.SalesInvoiceController({frm: cur_frm}));
+
 frappe.ui.form.on('Sales Invoice', {
+	setup: function(frm) {
+		frm.add_fetch("car_sales_partner_cf", "commission_rate", "car_sales_partner_commission_rate_cf");
+	},    
+  
     onload: function (frm) {
         $('[data-fieldname="customer_name_in_arabic"]').hide()
         //get customer of non bank type

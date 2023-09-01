@@ -26,6 +26,7 @@ class InternalEmployeeCommission(Document):
 				AND si.posting_date >= %(from_date)s
                 AND si.posting_date <= %(to_date)s
 				AND si.docstatus=1
+				AND sii.serial_no is NOT NULL
 				AND sii.name NOT IN(SELECT iecd.si_items_hex_name
         		FROM `tabInternal Employee Commission` iec
         		INNER JOIN `tabIEC Sales Person Detail` iecd ON iec.name = iecd.parent
@@ -54,24 +55,24 @@ class InternalEmployeeCommission(Document):
 				frappe.msgprint("No records found")	
 
 		elif(self.calculate_for == "Sales Partner"):
-			values = {'from_date':self.from_date,'to_date':self.to_date,'sales_partner': self.party}
+			values = {'from_date':self.from_date,'to_date':self.to_date,'car_sales_partner_cf': self.party}
 			self.clear_table('iec_sales_partner_commission_details')
 			self.total_commission = total_commission
 
 			query = """
-				SELECT si.name, si.customer_name, si.sales_person, si.commission_rate,sii.item_code, sii.item_name, sii.rate, sii.serial_no, sn.purchase_rate, SUM(ee.amount) AS other_cost,si.company	
+				SELECT si.name, si.customer_name, si.car_sales_partner_cf, si.car_sales_partner_commission_rate_cf,sii.item_code, sii.item_name, sii.rate, sii.serial_no, sn.purchase_rate, SUM(ee.amount) AS other_cost,si.company	
 				FROM `tabSales Invoice` si
 				INNER JOIN `tabSales Invoice Item` sii ON si.name = sii.parent
 				INNER JOIN `tabSerial No` sn ON sn.name = sii.serial_no
 				LEFT JOIN `tabExpenses Entry Detail` ee ON ee.serial_no = sii.serial_no and ee.docstatus=1
-				WHERE si.sales_partner = %(sales_partner)s
+				WHERE si.car_sales_partner_cf = %(car_sales_partner_cf)s
 				AND si.posting_date >= %(from_date)s
                 AND si.posting_date <= %(to_date)s
 				AND si.docstatus=1
 				AND sii.name NOT IN(SELECT iecd.si_items_hex_name
         		FROM `tabInternal Employee Commission` iec
         		INNER JOIN `tabIEC Sales Partner Detail` iecd ON iec.name = iecd.parent
-        		WHERE iec.party = %(sales_partner)s
+        		WHERE iec.party = %(car_sales_partner_cf)s
           		AND iec.docstatus=1)
 			  	group by sii.serial_no
 				
@@ -82,7 +83,7 @@ class InternalEmployeeCommission(Document):
 				self.company=result[0].company
 				for row in result:
 						profit_computed = (row.rate or 0) - (row.purchase_rate or 0) - (row.other_cost or 0)
-						profit_for_party_sales_partner = ((row.commission_rate)*(profit_computed))/100
+						profit_for_party_sales_partner = ((row.car_sales_partner_commission_rate_cf)*(profit_computed))/100
 						self.append('iec_sales_partner_commission_details', {
 							'sales_invoice': row.name,
 							'item_code': row.item_code,

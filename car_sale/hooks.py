@@ -171,19 +171,19 @@ scheduler_events = {
 		"car_sale.api.auto_close_lead_on_end_date"
 	]
 }
-fixtures = [
-	{
-		"dt":'Property Setter',
-		"filters":[
-			["doc_type", "in", ["Sales Invoice"]],
-			["field_name", "in", ["naming_series"]],
-		]
-	},	
-  	# {
-  	# "dt": "Custom Field", 
-  	# "filters": [["name", "in", ["Customer-id_no_cf","Customer-phone_no_cf"]]]
-	# }
-	]
+# fixtures = [
+# 	{
+# 		"dt":'Property Setter',
+# 		"filters":[
+# 			["doc_type", "in", ["Sales Invoice"]],
+# 			["field_name", "in", ["naming_series"]],
+# 		]
+# 	},	
+#   	# {
+#   	# "dt": "Custom Field", 
+#   	# "filters": [["name", "in", ["Customer-id_no_cf","Customer-phone_no_cf"]]]
+# 	# }
+# 	]
 # Testing
 # -------
 

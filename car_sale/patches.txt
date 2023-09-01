@@ -1,1 +1,4 @@
 car_sale.patches.sales_comission_calculation_fields
+car_sale.patches.create_si_sales_partner_cf_fields
+car_sale.patches.copy_si_sales_partner_values_to_sales_partner_cf
+car_sale.patches.remove_si_commission_amount
