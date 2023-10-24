@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import (cstr, validate_email_add, cint,flt, comma_and, has_gravatar, now, getdate, nowdate)
+from frappe.utils import (cstr, validate_email_address, cint,flt, comma_and, has_gravatar, now, getdate, nowdate)
 from frappe.model.mapper import get_mapped_doc
 import frappe, json
 from erpnext.controllers.selling_controller import SellingController
