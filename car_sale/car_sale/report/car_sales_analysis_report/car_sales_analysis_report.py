@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 from distutils.log import debug
 import frappe
 import erpnext
+from frappe.utils import flt
 
 
 def csv_to_columns(csv_str):
@@ -205,6 +206,21 @@ left outer join `tabSales Invoice` tsi on
         as_dict=True,
         debug=1
     )
+
+    for d in data:
+        d["total_expense"] = (
+            flt(d.plate_no_cost)
+            + flt(d.insurance_expense)
+            + flt(d.transfer_cost)
+            + flt(d.maintenance_cost)
+            + flt(d.profit_for_party_a)
+            + flt(d.profit_for_party_b)
+            + flt(d.other_expense)
+        )
+        d["net_profit"] = (
+            flt(d.sales_amount) - (flt(d.cost_amount) + flt(d.total_expense))
+        )
+        d["net_percentage"] = (flt(d["net_profit"]) / flt(d["sales_amount"]))*100
 
     # for d in data:
     #     d["net_profit"] = (d.get("total_expense", 0) or 0) + (d.get("cost_amount") or 0)
