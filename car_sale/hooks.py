@@ -140,6 +140,7 @@ doc_events = {
 		"on_cancel":"car_sale.api.custom_logic_on_cancel_of_purchase_order"
 	},	
 	"Stock Entry":{
+        "validate":"car_sale.api.copy_color_model_to_serial_no",
 		"before_submit":"car_sale.api.preserve_last_purchase_document_values",
 	}
 }

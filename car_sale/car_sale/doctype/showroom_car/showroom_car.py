@@ -11,6 +11,21 @@ from frappe import _
 
 
 class ShowroomCar(Document):
+	def validate(self):
+		if self.showroom_car_item and len(self.showroom_car_item)>1:
+			frappe.throw(_("Only single (i.e. 1) item entry is allowed. You have entered {0} rows.".format(
+							len(self.showroom_car_item))))			
+		if self.showroom_car_item and self.showroom_car_item[0] and self.showroom_car_item[0].qty!=1:
+			frappe.throw(_("Row {0}: {1} has {2} qty. It should be 1.".format(
+							self.showroom_car_item[0].idx, self.showroom_car_item[0].item_code, self.showroom_car_item[0].qty)))
+		if self.showroom_car_item and self.showroom_car_item[0] and not (self.showroom_car_item[0].serial_no):
+			frappe.throw(_("Row {0}: {1} Serial numbers required for Item {2}. You have provided None.".format(
+				self.showroom_car_item[0].idx, self.showroom_car_item[0].qty, self.showroom_car_item[0].item_code)))		
+		if self.showroom_car_item and self.showroom_car_item[0] and self.showroom_car_item[0].serial_no:
+			si_serial_nos = get_serial_nos(self.showroom_car_item[0].serial_no)
+			if len(si_serial_nos)>1:
+				frappe.throw(_("Row {0}: {1} has {2} serial nos. It should be 1.".format(
+								self.showroom_car_item[0].idx, self.showroom_car_item[0].item_code, si_serial_nos)))				
 
 
 	def on_submit(self):

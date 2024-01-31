@@ -1902,3 +1902,20 @@ def delink_custom_card_entry_from_po(self,method):
 def call_unreserve_serial_no_from_so_on_cancel(so_name):
 	self=frappe.get_doc('Sales Order',so_name)
 	unreserve_serial_no_from_so_on_cancel(self,method='Cancel')					
+
+@frappe.whitelist()
+def copy_color_model_to_serial_no(self,method):
+	if self.stock_entry_type=='Material Receipt':
+		for item in self.items:
+			# check for empty serial no
+			if  item.serial_no:
+				serial_nos = item.serial_no
+				si_serial_nos = get_serial_nos(serial_nos)
+				for serial_no in si_serial_nos:
+					if item.car_color_cf:
+						frappe.db.set_value('Serial No', serial_no, 'car_color_cf', item.car_color_cf)
+						frappe.msgprint(_("Serial No {0} is updated with {1} color.").format(serial_no,item.car_color_cf), alert=1)
+					if item.car_model_cf:
+						frappe.db.set_value('Serial No', serial_no, 'car_model_cf', item.car_model_cf)
+						frappe.msgprint(_("Serial No {0} is updated with {1} model.").format(serial_no,item.car_model_cf), alert=1)
+						
