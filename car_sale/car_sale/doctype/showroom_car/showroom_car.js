@@ -3,6 +3,23 @@
 
 frappe.ui.form.on('Showroom Car', {
 	refresh: function (frm) {
+        if (!frm.doc.is_new && frm.doc.showroom_car_status=='As Showroom') {
+            frm.add_custom_button(__('Status->Return'), function () {
+                frappe.db.set_value('Showroom Car', cur_frm.doc.name, 'showroom_car_status', 'Returned')
+                .then(r => {
+                    cur_frm.reload_doc()
+                    frappe.db.set_value('Serial No', cur_frm.doc.showroom_car_item[0].serial_no, 'reservation_status', 'Showroom Car-Returned')
+                    .then(r => {
+                        let doc = r.message;
+                        console.log(doc);
+                        frappe.msgprint({
+                            indicator: 'green',
+                            message: __('Serial No {0} reservation status is updated to {1}.', [cur_frm.doc.showroom_car_item[0].serial_no,'Showroom Car-Returned'])
+                        });                        
+                    })                    
+                })            
+            });
+        }
 		if (frm.doc.docstatus == 1) {
 			frm.add_custom_button(__('Make Purchase Receipt'), function () {
 				let serial_no_list = get_tree_options(frm.doc.showroom_car_item)

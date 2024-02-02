@@ -26,6 +26,7 @@ class InternalEmployeeCommission(Document):
 				AND si.posting_date >= %(from_date)s
                 AND si.posting_date <= %(to_date)s
 				AND si.docstatus=1
+				AND si.individual_car_entry_reference is NULL
 				AND sii.serial_no is NOT NULL
 				AND sii.name NOT IN(SELECT iecd.si_items_hex_name
         		FROM `tabInternal Employee Commission` iec
@@ -51,6 +52,43 @@ class InternalEmployeeCommission(Document):
 					})
 					total_commission += profit_for_party_sales_person
 				self.total_commission = total_commission
+
+			#  individual car entry
+			query2 = """
+				SELECT si.name, si.customer_name, si.sales_person_total_commission_per_car_cf, si.sales_person, sii.item_code, sii.item_name, si.individual_car_entry_serial_no_cf, sii.name AS sii_name,si.company,
+				si.individual_car_entry_reference
+				FROM `tabSales Invoice` si
+				INNER JOIN `tabSales Invoice Item` sii ON si.name = sii.parent
+				WHERE si.sales_person = %(sales_person)s
+				AND si.posting_date >= %(from_date)s
+                AND si.posting_date <= %(to_date)s
+				AND si.docstatus=1
+				AND si.individual_car_entry_reference is NOT NULL
+				AND sii.name NOT IN(SELECT iecd.si_items_hex_name
+        		FROM `tabInternal Employee Commission` iec
+        		INNER JOIN `tabIEC Sales Person Detail` iecd ON iec.name = iecd.parent
+        		WHERE iec.party = %(sales_person)s
+          		AND iec.docstatus=1)
+			"""
+
+			result2 = frappe.db.sql(query2, values=values, as_dict=True,debug=1)
+			if result2 and len(result2)>0:
+				self.company=result2[0].company
+				for row in result2:
+					profit_for_party_sales_person = row.sales_person_total_commission_per_car_cf
+					self.append('iec_sales_person_commission_details', {
+						'sales_invoice': row.name,
+						'item_code': row.item_code,
+						'item_name': row.item_name,
+						'serial_no': row.individual_car_entry_serial_no_cf,
+						'customer_name': row.customer_name,
+						'profit_for_party':profit_for_party_sales_person,
+						'si_items_hex_name':row.sii_name,
+						'sales_person':row.sales_person
+					})
+					total_commission += profit_for_party_sales_person
+				self.total_commission = self.total_commission + total_commission
+
 			else:
 				frappe.msgprint("No records found")	
 
@@ -60,7 +98,7 @@ class InternalEmployeeCommission(Document):
 			self.total_commission = total_commission
 
 			query = """
-				SELECT si.name, si.customer_name, si.car_sales_partner_cf, si.car_sales_partner_commission_rate_cf,sii.item_code, sii.item_name, sii.rate, sii.serial_no, sn.purchase_rate, SUM(ee.amount) AS other_cost,si.company	
+				SELECT si.name, si.customer_name, si.car_sales_partner_cf, si.car_sales_partner_commission_rate_cf,sii.item_code, sii.item_name, sii.net_rate, sii.serial_no, sn.purchase_rate,SUM(IFNULL(ee.amount,0)) AS other_cost,si.company	
 				FROM `tabSales Invoice` si
 				INNER JOIN `tabSales Invoice Item` sii ON si.name = sii.parent
 				INNER JOIN `tabSerial No` sn ON sn.name = sii.serial_no
@@ -69,6 +107,7 @@ class InternalEmployeeCommission(Document):
 				AND si.posting_date >= %(from_date)s
                 AND si.posting_date <= %(to_date)s
 				AND si.docstatus=1
+				AND si.individual_car_entry_reference is NULL
 				AND sii.name NOT IN(SELECT iecd.si_items_hex_name
         		FROM `tabInternal Employee Commission` iec
         		INNER JOIN `tabIEC Sales Partner Detail` iecd ON iec.name = iecd.parent
@@ -82,7 +121,7 @@ class InternalEmployeeCommission(Document):
 			if result and len(result)>0:
 				self.company=result[0].company
 				for row in result:
-						profit_computed = (row.rate or 0) - (row.purchase_rate or 0) - (row.other_cost or 0)
+						profit_computed = (row.net_rate or 0) - (row.purchase_rate or 0) - (row.other_cost or 0)
 						profit_for_party_sales_partner = ((row.car_sales_partner_commission_rate_cf)*(profit_computed))/100
 						self.append('iec_sales_partner_commission_details', {
 							'sales_invoice': row.name,
@@ -90,7 +129,7 @@ class InternalEmployeeCommission(Document):
 							'item_name': row.item_name,
 							'serial_no': row.serial_no,
 							'customer_name': row.customer_name,
-							'sales_amount':row.rate,
+							'sales_amount':row.net_rate,
 							'cogs':row.purchase_rate,
 							'profit':profit_computed,
 							'profit_for_party':profit_for_party_sales_partner,
@@ -99,6 +138,52 @@ class InternalEmployeeCommission(Document):
 						})
 						total_commission += profit_for_party_sales_partner
 				self.total_commission = total_commission
+
+			# individual car stock entry
+			query2 = """
+				SELECT si.name, si.customer_name, si.car_sales_partner_cf, si.car_sales_partner_commission_rate_cf,sii.item_code, sii.item_name, sii.net_rate, si.individual_car_entry_serial_no_cf, 
+				sn.purchase_rate, (SUM(IFNULL(ee.amount,0) )+SUM(IFNULL(iced.amount,0))) AS other_cost,si.company,si.individual_car_entry_reference
+				FROM `tabSales Invoice` si
+				INNER JOIN `tabSales Invoice Item` sii ON si.name = sii.parent
+				INNER JOIN `tabSerial No` sn ON sn.name = si.individual_car_entry_serial_no_cf
+				INNER JOIN `tabIndividual Car Expense Detail` iced ON si.individual_car_entry_reference = iced.parent
+				LEFT JOIN `tabExpenses Entry Detail` ee ON ee.serial_no = si.individual_car_entry_serial_no_cf and ee.docstatus=1
+				WHERE si.car_sales_partner_cf = %(car_sales_partner_cf)s
+				AND si.posting_date >= %(from_date)s
+                AND si.posting_date <= %(to_date)s
+				AND si.docstatus=1
+				AND si.individual_car_entry_reference is NOT NULL
+				AND sii.name NOT IN(SELECT iecd.si_items_hex_name
+        		FROM `tabInternal Employee Commission` iec
+        		INNER JOIN `tabIEC Sales Partner Detail` iecd ON iec.name = iecd.parent
+        		WHERE iec.party = %(car_sales_partner_cf)s
+          		AND iec.docstatus=1)
+			  	group by si.individual_car_entry_serial_no_cf
+				
+			"""
+			result2 = frappe.db.sql(query2, values=values, as_dict=True,debug=1)
+
+			if result2 and len(result2)>0:
+				# self.company=result2[0].company
+				for row in result2:
+						profit_computed = (row.net_rate or 0) - (row.purchase_rate or 0) - (row.other_cost or 0)
+						profit_for_party_sales_partner = ((row.car_sales_partner_commission_rate_cf)*(profit_computed))/100
+						self.append('iec_sales_partner_commission_details', {
+							'sales_invoice': row.name,
+							'item_code': row.item_code,
+							'item_name': row.item_name,
+							'serial_no': row.individual_car_entry_serial_no_cf,
+							'customer_name': row.customer_name,
+							'sales_amount':row.net_rate,
+							'cogs':row.purchase_rate,
+							'profit':profit_computed,
+							'profit_for_party':profit_for_party_sales_partner,
+							'other_cost':row.other_cost,
+							'sales_person':row.sales_person,				
+						})
+						total_commission += profit_for_party_sales_partner
+				self.total_commission = self.total_commission + total_commission				
+				
 			else:
 				frappe.msgprint("No records found")
 

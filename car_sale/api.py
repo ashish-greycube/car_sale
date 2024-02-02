@@ -769,20 +769,25 @@ def calculate_sales_person_total_commission(self,method):
 			commission_per_car=self.commission_per_car
 			sales_person_total_commission=0
 			total_qty_of_serialized_item=0
-			for item in self.items:
-				is_stock_item=frappe.db.get_value("Item", item.item_code, "is_stock_item")
-				is_sales_item=frappe.db.get_value("Item", item.item_code, "is_sales_item")
-				has_serial_no=frappe.db.get_value("Item", item.item_code, "has_serial_no")
-				if is_stock_item==1 and is_sales_item==1 and has_serial_no==1:
-					if item.qty>1:
-						frappe.throw(_("{0} is a serialized item and hence it should have 1 qty per row").format(item.item_code))
-					total_qty_of_serialized_item=total_qty_of_serialized_item+item.qty
-					sales_person_total_commission+=item.qty*commission_per_car
+			if not self.individual_car_entry_serial_no_cf:
+				for item in self.items:
+					is_stock_item=frappe.db.get_value("Item", item.item_code, "is_stock_item")
+					is_sales_item=frappe.db.get_value("Item", item.item_code, "is_sales_item")
+					has_serial_no=frappe.db.get_value("Item", item.item_code, "has_serial_no")
+					if is_stock_item==1 and is_sales_item==1 and has_serial_no==1:
+						if item.qty>1:
+							frappe.throw(_("{0} is a serialized item and hence it should have 1 qty per row").format(item.item_code))
+						total_qty_of_serialized_item=total_qty_of_serialized_item+item.qty
+						sales_person_total_commission+=item.qty*commission_per_car
+			elif self.individual_car_entry_serial_no_cf:
+				sales_person_total_commission+=1*commission_per_car
 			self.sales_person_total_commission=sales_person_total_commission
 			if self.sales_person_extra_comission_cf and self.sales_person_extra_comission_cf>0:
 				self.sales_person_total_commission=self.sales_person_total_commission+self.sales_person_extra_comission_cf
 			if self.sales_person_total_commission and self.sales_person_total_commission>0 and total_qty_of_serialized_item>0:
 				self.sales_person_total_commission_per_car_cf=self.sales_person_total_commission/total_qty_of_serialized_item
+			elif self.individual_car_entry_serial_no_cf:
+				self.sales_person_total_commission_per_car_cf=self.sales_person_total_commission/1
 
 @frappe.whitelist()
 def unreserve_serial_no_from_so_on_cancel(self,method):
@@ -1391,6 +1396,11 @@ def update_serial_no_status_from_purchase_receipt(self,method):
 							sno_item_code=frappe.db.get_value("Serial No", serial_no, "item_code")
 							if (cstr(sno_item_code) != cstr(item.item_code)):
 								frappe.throw(_("{0} serial number is not valid for {1} item code").format(serial_no,item.item_code))
+							# on cancel of purchase receipt, set showroom car status to 'As Showroom'
+							showroom_doc_name=frappe.db.get_list('Showroom Car Item',filters={'serial_no': serial_no }, fields=['parent'])
+							if showroom_doc_name and len(showroom_doc_name)>0:
+								frappe.db.set_value('Showroom Car', showroom_doc_name[0].parent, 'showroom_car_status', 'As Showroom')
+								frappe.msgprint(_("Showroom Car {0} is updated with status 'As Showroom' due to Serial No {1}.").format(showroom_doc_name[0].parent,serial_no), alert=1)
 							#check if there is delivery_document_no against serial no
 							delivery_document_no = frappe.db.get_value("Serial No", serial_no, "delivery_document_no")
 							if delivery_document_no and self.name != delivery_document_no:
@@ -1429,6 +1439,13 @@ def update_serial_no_status_from_purchase_receipt(self,method):
 							sno_item_code=frappe.db.get_value("Serial No", serial_no, "item_code")
 							if (cstr(sno_item_code) != cstr(item.item_code)):
 								frappe.throw(_("{0} serial number is not valid for {1} item code").format(serial_no,item.item_code))
+							
+							# on submit of purchase receipt, set showroom car status to 'Purchased'
+							showroom_doc_name=frappe.db.get_list('Showroom Car Item',filters={'serial_no': serial_no }, fields=['parent'])
+							if showroom_doc_name and len(showroom_doc_name)>0:
+								frappe.db.set_value('Showroom Car', showroom_doc_name[0].parent, 'showroom_car_status', 'Purchased')
+								frappe.msgprint(_("Showroom Car {0} is updated with status 'Purchased' due to Serial No {1}.").format(showroom_doc_name[0].parent,serial_no), alert=1)
+
 							#check if there is delivery_document_no against serial no
 							delivery_document_no = frappe.db.get_value("Serial No", serial_no, "delivery_document_no")
 							if delivery_document_no and self.name != delivery_document_no:
@@ -1912,10 +1929,11 @@ def copy_color_model_to_serial_no(self,method):
 				serial_nos = item.serial_no
 				si_serial_nos = get_serial_nos(serial_nos)
 				for serial_no in si_serial_nos:
-					if item.car_color_cf:
-						frappe.db.set_value('Serial No', serial_no, 'car_color_cf', item.car_color_cf)
-						frappe.msgprint(_("Serial No {0} is updated with {1} color.").format(serial_no,item.car_color_cf), alert=1)
-					if item.car_model_cf:
-						frappe.db.set_value('Serial No', serial_no, 'car_model_cf', item.car_model_cf)
-						frappe.msgprint(_("Serial No {0} is updated with {1} model.").format(serial_no,item.car_model_cf), alert=1)
+					if serial_no and frappe.db.exists('Serial No', serial_no) :
+						if item.car_color_cf:
+							frappe.db.set_value('Serial No', serial_no, 'car_color_cf', item.car_color_cf)
+							frappe.msgprint(_("Serial No {0} is updated with {1} color.").format(serial_no,item.car_color_cf), alert=1)
+						if item.car_model_cf:
+							frappe.db.set_value('Serial No', serial_no, 'car_model_cf', item.car_model_cf)
+							frappe.msgprint(_("Serial No {0} is updated with {1} model.").format(serial_no,item.car_model_cf), alert=1)
 						

@@ -108,7 +108,7 @@ def get_data(filters=None):
 	CASE
 		WHEN tsn.individual_car_entry_reference is not null THEN (
 		select
-			icse.receive_rate + COALESCE(sum(iced.amount),0)
+			icse.receive_rate 
 		from
 			`tabIndividual Car Stock Entry` icse
 		left outer join `tabIndividual Car Expense Detail` iced on
@@ -206,6 +206,25 @@ left outer join `tabSales Invoice` tsi on
         as_dict=True,
         debug=1
     )
+    expense_accounts={
+        frappe.db.get_value('Company', filters["company"], 'car_plate_no_cost_account_cf'):'plate_no_cost',
+        frappe.db.get_value('Company', filters["company"], 'car_insurance_expense_account_cf'):'insurance_expense',
+        frappe.db.get_value('Company', filters["company"], 'car_transfer_cost_account_cf'):'transfer_cost',
+        frappe.db.get_value('Company', filters["company"], 'car_maintenance_cost_account_cf'):'maintenance_cost',
+        frappe.db.get_value('Company', filters["company"], 'car_other_expense_account_cf'):'other_expense'
+
+    }
+
+    for d in data:
+        if d['individual_car_entry_reference']:
+            individual_car_entry_expenses=frappe.db.get_list('Individual Car Expense Detail',filters={'parent':  d['individual_car_entry_reference'] }, 
+                                                             fields=['expense_account', 'amount','name','parent'])
+            if individual_car_entry_expenses and len(individual_car_entry_expenses)>0:
+                for individual_expenses in individual_car_entry_expenses:
+                    expense_account_type=expense_accounts.get(individual_expenses.get('expense_account'))
+                    d[expense_account_type]=(d[expense_account_type] or 0 )+individual_expenses.get('amount')
+            d['customer_name']=frappe.db.get_value('Individual Car Stock Entry', d['individual_car_entry_reference'], 'customer_buyer')
+            d['sales_date']=frappe.db.get_value('Individual Car Stock Entry', d['individual_car_entry_reference'], 'selling_or_return_date')
 
     for d in data:
         d["total_expense"] = (
@@ -221,13 +240,5 @@ left outer join `tabSales Invoice` tsi on
             flt(d.sales_amount) - (flt(d.cost_amount) + flt(d.total_expense))
         )
         d["net_percentage"] = (flt(d["net_profit"]) / flt(d["sales_amount"]))*100
-
-    # for d in data:
-    #     d["net_profit"] = (d.get("total_expense", 0) or 0) + (d.get("cost_amount") or 0)
-    #     d["percentage"] = (
-    #         (d.get("net_profit") or 0) * 100 / d.get("sales_amount")
-    #         if d.get("sales_amount")
-    #         else 0
-    #     )
 
     return data

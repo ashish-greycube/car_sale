@@ -157,6 +157,18 @@ def after_migrate():
             "name": "Sales Invoice-individual_car_entry_reference",
             "options": "Individual Car Stock Entry",
         },
+        {
+            "doctype": "Custom Field",
+            "dt": "Sales Invoice",
+            "fieldname": "individual_car_entry_serial_no_cf",
+            "fieldtype": "Data",
+            "insert_after": "individual_car_entry_reference",
+            "label": "Individual Car Entry Serial No",
+            "name": "Sales Invoice-individual_car_entry_serial_no_cf",
+            'fetch_from': 'individual_car_entry_reference.serial_no_data',
+            "translatable":0,
+            'allow_on_submit': 1
+        },        
     ]
 
     try:
@@ -165,11 +177,22 @@ def after_migrate():
                 frappe.get_doc(d).insert()
 
         add_car_sales_report_custom_fields()
+        update_serial_no_reservation_status_options()
+        update_si_individual_car_entry_serial_no_cf()
 
     except Exception as e:
         print("Failed to create custom fields for car_sale")
         frappe.log_error(e, title="Car Sale Custom Field Creation Failed")
         raise e
+def update_si_individual_car_entry_serial_no_cf():
+    print('update_si_individual_car_entry_serial_no_cf')
+    frappe.db.sql("""update `tabSales Invoice` si set si.individual_car_entry_serial_no_cf=(select serial_no_data from `tabIndividual Car Stock Entry` where name=si.individual_car_entry_reference ) 
+                  where si.individual_car_entry_reference is not null""")
+
+def update_serial_no_reservation_status_options():
+    print('updating  reservation_status options for serial no..')
+    serial_no_options = "\nReserved\nAvailable\nAvailable Individual\nSold Out\nSold Individual\nShowroom Car\nReturned\nReturned Individual\nAvailable-Qty\nAvailable-Card\nShowroom Car-Returned"
+    frappe.db.sql("update `tabCustom Field` set options=%s where name='Serial No-reservation_status'", serial_no_options)      
 
 def add_car_sales_report_custom_fields():
     print("Creating custom fields for Car Sales Analysis Report")

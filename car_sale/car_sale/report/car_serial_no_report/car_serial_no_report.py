@@ -91,7 +91,8 @@ left outer join `tabSales Order` tso on
     # provide warehouse for showroom cars
     for row in data:
         if row.reservation_status=='Showroom Car':
-            showroom_warehouse=frappe.db.get_list('Showroom Car Item', filters=[['serial_no', '=', row.name]], fields=['warehouse'])
+            # showroom_warehouse=frappe.db.get_list('Showroom Car Item', filters=[['serial_no', '=', row.name]], fields=['warehouse'])
+            showroom_warehouse=frappe.db.get_list('Showroom Car Item',filters={'serial_no':  row.name }, fields=['warehouse'])
             if showroom_warehouse and len(showroom_warehouse)>0:
                 row['warehouse']=showroom_warehouse[0].warehouse
     return data

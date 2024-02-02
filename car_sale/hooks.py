@@ -141,6 +141,7 @@ doc_events = {
 	},	
 	"Stock Entry":{
         "validate":"car_sale.api.copy_color_model_to_serial_no",
+        "on_submit":"car_sale.api.copy_color_model_to_serial_no",
 		"before_submit":"car_sale.api.preserve_last_purchase_document_values",
 	}
 }
