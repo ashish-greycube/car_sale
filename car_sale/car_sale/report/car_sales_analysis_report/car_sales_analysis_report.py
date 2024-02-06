@@ -239,6 +239,10 @@ left outer join `tabSales Invoice` tsi on
         d["net_profit"] = (
             flt(d.sales_amount) - (flt(d.cost_amount) + flt(d.total_expense))
         )
-        d["net_percentage"] = (flt(d["net_profit"]) / flt(d["sales_amount"]))*100
+        if d["sales_amount"] and d["sales_amount"]!=0:
+            d["net_percentage"] = (flt(d["net_profit"]) / flt(d["sales_amount"]))*100
+        else:
+            # to pass division by zero error
+            pass
 
     return data

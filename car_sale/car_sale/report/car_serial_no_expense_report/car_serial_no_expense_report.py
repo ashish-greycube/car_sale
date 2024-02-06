@@ -196,10 +196,17 @@ left outer join (
                 d['supplier']=shc.supplier
                 d['purchase_date']=shc.transaction_date
                 d['purchase_invoice']=showroom_rate[0].parent
-
+                d['total_cost']= d['cost_amount']+d['total_expense']
         elif  d['reservation_status'] in ['Reserved','Available','Sold Out','Returned']:
             # PI
-            pass
+            if not d['purchase_invoice']:
+                serial_dict = frappe.db.get_value('Serial No', d.get('serial_no'), ['purchase_document_type', 'purchase_document_no'], as_dict=1)
+                if serial_dict and serial_dict.purchase_document_type=='Purchase Receipt':
+                    pr_dict=frappe.db.get_value('Purchase Receipt',serial_dict.get('purchase_document_no'), ['supplier', 'posting_date'], as_dict=1)
+                    if pr_dict:
+                        d['supplier']=pr_dict.get('supplier')
+                        d['purchase_invoice']=serial_dict.get('purchase_document_no')
+                        d['purchase_date']=pr_dict.get('posting_date')
         
         if d['individual_car_entry_reference']:
             individual_car_entry_expenses=frappe.db.get_list('Individual Car Expense Detail',filters={'parent':  d['individual_car_entry_reference'] }, fields=['expense_account', 'amount','name','parent'])
