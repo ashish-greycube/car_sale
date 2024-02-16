@@ -223,7 +223,8 @@ left outer join `tabSales Invoice` tsi on
                 for individual_expenses in individual_car_entry_expenses:
                     if individual_expenses.get('expense_account'):
                         expense_account_type=expense_accounts.get(individual_expenses.get('expense_account'))
-                        d[expense_account_type]=(d[expense_account_type] or 0 )+individual_expenses.get('amount')
+                        if individual_expenses.get('amount'):
+                            d[expense_account_type]=(d[expense_account_type] or 0 )+individual_expenses.get('amount')
             d['customer_name']=frappe.db.get_value('Individual Car Stock Entry', d['individual_car_entry_reference'], 'customer_buyer')
             d['sales_date']=frappe.db.get_value('Individual Car Stock Entry', d['individual_car_entry_reference'], 'selling_or_return_date')
         # user to link expense from purchase invoice by tagging Serial No in Item Line for that expense line
