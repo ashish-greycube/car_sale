@@ -213,10 +213,27 @@ left outer join (
             if individual_car_entry_expenses and len(individual_car_entry_expenses)>0:
                 delta_individual_expense=0
                 for individual_expenses in individual_car_entry_expenses:
-                    expense_account_type=expense_accounts.get(individual_expenses.get('expense_account'))
-                    d[expense_account_type]=(d[expense_account_type] or 0 )+individual_expenses.get('amount')
-                    delta_individual_expense=delta_individual_expense+individual_expenses.get('amount')
+                    if individual_expenses.get('expense_account'):
+                        expense_account_type=expense_accounts.get(individual_expenses.get('expense_account'))
+                        d[expense_account_type]=(d[expense_account_type] or 0 )+individual_expenses.get('amount')
+                        delta_individual_expense=delta_individual_expense+individual_expenses.get('amount')
                 d['total_expense']=d['total_expense']+delta_individual_expense
                 d['total_cost']=d['total_cost']+delta_individual_expense
+
+        # user to link expense from purchase invoice by tagging Serial No in Item Line for that expense line
+        if d['serial_no']:
+            pi_expense_amount = frappe.db.sql(
+                """select tpii.amount,tpii.expense_account  FROM `tabPurchase Invoice Item` tpii 
+                    inner join `tabPurchase Invoice` tpi 
+                    on tpi.name=tpii.parent 
+                    WHERE tpii.serial_no = tpi.car_serial_no_to_book_expense_cf 
+                    and tpi.car_serial_no_to_book_expense_cf =%s """,(d['serial_no']),as_dict=True,debug=1)     
+            if pi_expense_amount and len(pi_expense_amount)>0:
+                expense_account_type=expense_accounts.get(pi_expense_amount[0].expense_account)
+                if expense_account_type:
+                    print('-44'*100)
+                    print(d[expense_account_type],d['serial_no'])
+                    d[expense_account_type]=(d[expense_account_type] or 0 )+pi_expense_amount[0].amount       
+                    print(d[expense_account_type])         
 
     return data

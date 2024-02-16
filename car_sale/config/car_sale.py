@@ -101,82 +101,120 @@ def get_data():
             "items": [
                 {
                     "type": "report",
-                    "name": "Car Available Stock Inquiry",
+                    "name": "Total Car Report",
                     "is_query_report": True,
                     "doctype": "Serial No",
-                },
-                {
-                    "type": "report",
-                    "name": "Car Available Stock Serial No Wise",
-                    "is_query_report": True,
-                    "doctype": "Serial No",
-                },
-                {
-                    "type": "report",
-                    "name": "Car Comprehensive",
-                    "is_query_report": True,
-                    "doctype": "Serial No",
-                },
-                {
-                    "type": "report",
-                    "name": "Car Sales Report",
-                    "is_query_report": True,
-                    "doctype": "Serial No",
-                },
-                {
-                    "type": "report",
-                    "name": "Car Sales Analysis",
-                    "is_query_report": True,
-                    "doctype": "Serial No",
-                },
-                {
-                    "type": "report",
-                    "name": "Car Serial No",
-                    "is_query_report": True,
-                    "doctype": "Serial No",
-                },
-                {
-                    "type": "report",
-                    "name": "Car Serial No for Sales",
-                    "is_query_report": True,
-                    "doctype": "Serial No",
-                },
-                {
-                    "type": "report",
-                    "name": "Car Serial No Expense Report",
-                    "is_query_report": True,
-                    "doctype": "Serial No",
-                },                
-                {
-                    "type": "report",
-                    "name": "Sales Inquiry Analysis",
-                    "is_query_report": True,
-                    "doctype": "Lead",
-                },
-                {
-                    "type": "report",
-                    "name": "Stock Balance with Balance Serial No",
-                    "is_query_report": True,
-                    "doctype": "Stock Ledger Entry",
-                },
-                {
-                    "type": "report",
-                    "name": "Car Sales Analysis Report",
-                    "is_query_report": True,
-                    "doctype": "Serial No",
-                },      
+                },     
                 {
                     "type": "report",
                     "name": "Car Serial No Report",
                     "is_query_report": True,
                     "doctype": "Serial No",
+                },      
+                {
+                    "type": "report",
+                    "name": "Car Sales Analysis Report",
+                    "is_query_report": True,
+                    "doctype": "Serial No",
                 }, 
                 {
                     "type": "report",
-                    "name": "Total Car Report",
+                    "name": "Stock Balance with Balance Serial No",
+                    "is_query_report": True,
+                    "doctype": "Stock Ledger Entry",
+                }, 
+                {
+                    "type": "report",
+                    "name": "Car Serial No Expense Report",
                     "is_query_report": True,
                     "doctype": "Serial No",
-                },                                            
+                }                                           
             ],
         },
     ]
+
+
+# earlier all reports
+        # {
+        #     "label": _("Standard Reports"),
+        #     "items": [
+        #         {
+        #             "type": "report",
+        #             "name": "Car Available Stock Inquiry",
+        #             "is_query_report": True,
+        #             "doctype": "Serial No",
+        #         },
+        #         {
+        #             "type": "report",
+        #             "name": "Car Available Stock Serial No Wise",
+        #             "is_query_report": True,
+        #             "doctype": "Serial No",
+        #         },
+        #         {
+        #             "type": "report",
+        #             "name": "Car Comprehensive",
+        #             "is_query_report": True,
+        #             "doctype": "Serial No",
+        #         },
+        #         {
+        #             "type": "report",
+        #             "name": "Car Sales Report",
+        #             "is_query_report": True,
+        #             "doctype": "Serial No",
+        #         },
+        #         {
+        #             "type": "report",
+        #             "name": "Car Sales Analysis",
+        #             "is_query_report": True,
+        #             "doctype": "Serial No",
+        #         },
+        #         {
+        #             "type": "report",
+        #             "name": "Car Serial No",
+        #             "is_query_report": True,
+        #             "doctype": "Serial No",
+        #         },
+        #         {
+        #             "type": "report",
+        #             "name": "Car Serial No for Sales",
+        #             "is_query_report": True,
+        #             "doctype": "Serial No",
+        #         },
+        #         {
+        #             "type": "report",
+        #             "name": "Car Serial No Expense Report",
+        #             "is_query_report": True,
+        #             "doctype": "Serial No",
+        #         },                
+        #         {
+        #             "type": "report",
+        #             "name": "Sales Inquiry Analysis",
+        #             "is_query_report": True,
+        #             "doctype": "Lead",
+        #         },
+        #         {
+        #             "type": "report",
+        #             "name": "Stock Balance with Balance Serial No",
+        #             "is_query_report": True,
+        #             "doctype": "Stock Ledger Entry",
+        #         },
+        #         {
+        #             "type": "report",
+        #             "name": "Car Sales Analysis Report",
+        #             "is_query_report": True,
+        #             "doctype": "Serial No",
+        #         },      
+        #         {
+        #             "type": "report",
+        #             "name": "Car Serial No Report",
+        #             "is_query_report": True,
+        #             "doctype": "Serial No",
+        #         }, 
+        #         {
+        #             "type": "report",
+        #             "name": "Total Car Report",
+        #             "is_query_report": True,
+        #             "doctype": "Serial No",
+        #         },                                            
+        #     ],
+        # },

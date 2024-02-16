@@ -221,10 +221,23 @@ left outer join `tabSales Invoice` tsi on
                                                              fields=['expense_account', 'amount','name','parent'])
             if individual_car_entry_expenses and len(individual_car_entry_expenses)>0:
                 for individual_expenses in individual_car_entry_expenses:
-                    expense_account_type=expense_accounts.get(individual_expenses.get('expense_account'))
-                    d[expense_account_type]=(d[expense_account_type] or 0 )+individual_expenses.get('amount')
+                    if individual_expenses.get('expense_account'):
+                        expense_account_type=expense_accounts.get(individual_expenses.get('expense_account'))
+                        d[expense_account_type]=(d[expense_account_type] or 0 )+individual_expenses.get('amount')
             d['customer_name']=frappe.db.get_value('Individual Car Stock Entry', d['individual_car_entry_reference'], 'customer_buyer')
             d['sales_date']=frappe.db.get_value('Individual Car Stock Entry', d['individual_car_entry_reference'], 'selling_or_return_date')
+        # user to link expense from purchase invoice by tagging Serial No in Item Line for that expense line
+        if d['serial_no']:
+            pi_expense_amount = frappe.db.sql(
+                """select tpii.amount,tpii.expense_account  FROM `tabPurchase Invoice Item` tpii 
+                    inner join `tabPurchase Invoice` tpi 
+                    on tpi.name=tpii.parent 
+                    WHERE tpii.serial_no = tpi.car_serial_no_to_book_expense_cf 
+                    and tpi.car_serial_no_to_book_expense_cf =%s """,(d['serial_no']),as_dict=True,debug=1)     
+            if pi_expense_amount and len(pi_expense_amount)>0:
+                expense_account_type=expense_accounts.get(pi_expense_amount[0].expense_account)
+                if expense_account_type:
+                    d[expense_account_type]=(d[expense_account_type] or 0 )+pi_expense_amount[0].amount
 
     for d in data:
         d["total_expense"] = (
