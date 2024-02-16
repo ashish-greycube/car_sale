@@ -215,7 +215,7 @@ left outer join (
                 for individual_expenses in individual_car_entry_expenses:
                     if individual_expenses.get('expense_account'):
                         expense_account_type=expense_accounts.get(individual_expenses.get('expense_account'))
-                        if individual_expenses.get('amount') and (individual_expenses.get('amount')!=None) and d[expense_account_type]:
+                        if individual_expenses.get('amount') and (individual_expenses.get('amount')!=None) and d.get('expense_account_type') and (d.get('expense_account_type')!=None):
                             d[expense_account_type]=(d[expense_account_type] or 0 )+individual_expenses.get('amount')
                             delta_individual_expense=delta_individual_expense+individual_expenses.get('amount')
                 d['total_expense']=d['total_expense']+delta_individual_expense
