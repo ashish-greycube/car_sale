@@ -233,8 +233,7 @@ left outer join `tabSales Invoice` tsi on
                 """select tpii.amount,tpii.expense_account  FROM `tabPurchase Invoice Item` tpii 
                     inner join `tabPurchase Invoice` tpi 
                     on tpi.name=tpii.parent 
-                    WHERE tpii.serial_no = tpi.car_serial_no_to_book_expense_cf 
-                    and tpi.car_serial_no_to_book_expense_cf =%s """,(d['serial_no']),as_dict=True,debug=1)     
+                    WHERE tpii.car_serial_no_to_book_expense_cf =%s """,(d['serial_no']),as_dict=True,debug=1)     
             if pi_expense_amount and len(pi_expense_amount)>0:
                 expense_account_type=expense_accounts.get(pi_expense_amount[0].expense_account)
                 if expense_account_type:
