@@ -229,11 +229,14 @@ left outer join (
                     on tpi.name=tpii.parent 
                     WHERE tpii.car_serial_no_to_book_expense_cf =%s """,(d['serial_no']),as_dict=True,debug=1)     
             if pi_expense_amount and len(pi_expense_amount)>0:
-                expense_account_type=expense_accounts.get(pi_expense_amount[0].expense_account)
-                if expense_account_type:
-                    print('-44'*100)
-                    print(d[expense_account_type],d['serial_no'])
-                    d[expense_account_type]=(d[expense_account_type] or 0 )+pi_expense_amount[0].amount       
-                    print(d[expense_account_type])         
+                for pi_exp_item in pi_expense_amount:
+                    expense_account_type=expense_accounts.get(pi_exp_item.expense_account)
+                    if expense_account_type:
+                        print('-44'*100)
+                        print(d[expense_account_type],d['serial_no'])
+                        d[expense_account_type]=(d[expense_account_type] or 0 )+pi_exp_item.amount       
+                        print(d[expense_account_type])   
+                        d['total_expense']=d['total_expense']+pi_exp_item.amount
+                        d['total_cost']=d['total_cost']+pi_exp_item.amount                          
 
     return data

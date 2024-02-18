@@ -235,9 +235,10 @@ left outer join `tabSales Invoice` tsi on
                     on tpi.name=tpii.parent 
                     WHERE tpii.car_serial_no_to_book_expense_cf =%s """,(d['serial_no']),as_dict=True,debug=1)     
             if pi_expense_amount and len(pi_expense_amount)>0:
-                expense_account_type=expense_accounts.get(pi_expense_amount[0].expense_account)
-                if expense_account_type:
-                    d[expense_account_type]=(d[expense_account_type] or 0 )+pi_expense_amount[0].amount
+                for pi_exp_item in pi_expense_amount:
+                    expense_account_type=expense_accounts.get(pi_exp_item.expense_account)
+                    if expense_account_type:
+                        d[expense_account_type]=(d[expense_account_type] or 0 )+pi_exp_item.amount
 
     for d in data:
         d["total_expense"] = (
